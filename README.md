@@ -59,3 +59,46 @@ If you discover a security vulnerability within Laravel, please send an e-mail t
 ## License
 
 The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+
+## 🚀 Get Started
+
+Copy the `.env` file
+
+```shell
+cp .env.example .env
+```
+
+Install vendor
+
+```shell
+docker run --rm \
+    -u "$(id -u):$(id -g)" \
+    -v "$(pwd):/app" \
+    -w /app \
+    composer:latest \
+    install --ignore-platform-reqs
+```
+
+Run the container
+
+```shell
+sail up -d
+```
+
+Generate `APP_KEY`
+
+```shell
+sail artisan key:generate
+```
+
+Run the Migrations
+
+```shell
+sail artisan migrate
+```
+
+Load the style (in this project using `bun` as a package manager)
+
+```shell
+sail bun dev
+```
