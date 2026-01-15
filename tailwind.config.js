@@ -13,6 +13,7 @@ export default {
         extend: {
             fontFamily: {
                 sans: ['Figtree', ...defaultTheme.fontFamily.sans],
+                thai: ['Noto Sans Thai', 'sans-serif'],
             },
         },
     },
