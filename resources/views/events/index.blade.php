@@ -41,46 +41,75 @@
                     </tr>
                 </thead>
                 <tbody class="bg-white">
-                    {{-- TODO: Check if events not empty --}}
-                    {{-- TODO: Iterate through the events --}}
-                    <tr class="border border-slate-300">
-                        <td class="px-6 py-3 text-left">รอบพิเศษปีใหม่</td>
-                        <td class="px-6 py-3 text-left">2568</td>
-                        <td class="px-6 py-3 text-left">2</td>
-                        <td class="px-6 py-3 text-center">เปิดการรับสมัคร</td>
-                        <td class="px-6 py-3 text-center">
-                            <x-dropdown align="right" width="48">
-                                <x-slot name="trigger">
-                                    <button>
-                                        <x-icon name="ellipsis" />
-                                    </button>
-                                </x-slot>
-                                <x-slot name="content">
-                                    <x-dropdown-link :href="route('profile.edit')" class="flex flex-row gap-x-2 justify-start items-center">
-                                        <x-icon name="eye" size="20" />
-                                        {{ __('ดูรายละเอียด') }}
-                                    </x-dropdown-link>
-                                    <x-dropdown-link :href="route('profile.edit')" class="flex flex-row gap-x-2 justify-start items-center">
-                                        <x-icon name="square-pen" size="20" />
-                                        {{ __('แก้ไขข้อมูล') }}
-                                    </x-dropdown-link>
-                                    <x-dropdown-link :href="route('profile.edit')" class="flex flex-row gap-x-2 justify-start items-center hover:bg-red-200 hover:text-red-700">
-                                        <x-icon name="trash-2" size="20" />
-                                        {{ __('ลบข้อมูล') }}
-                                    </x-dropdown-link>
-                                </x-slot>
-                            </x-dropdown>
-                        </td>
-                    </tr>
+                    @forelse($events as $event)
+                        {{-- TODO: Check if events not empty --}}
+                        {{-- TODO: Iterate through the events --}}
+                        <tr class="border border-slate-300">
+                            <td class="px-6 py-3 text-left">{{ $event->name }}</td>
+                            <td class="px-6 py-3 text-left">{{ $event->academic_year }}</td>
+                            <td class="px-6 py-3 text-left">{{ $event->semester }}</td>
+                            <td class="px-6 py-3 text-center">{{ $event->status === "OPENED" ? "เปิดการรับสมัคร" : "ปิดการรับสมัคร" }}</td>
+                            <td class="px-6 py-3 text-center">
+                                <x-dropdown align="right" width="48">
+                                    <x-slot name="trigger">
+                                        <button>
+                                            <x-icon name="ellipsis" />
+                                        </button>
+                                    </x-slot>
+                                    <x-slot name="content">
+                                        <x-dropdown-link :href="route('profile.edit')" class="flex flex-row gap-x-2 justify-start items-center">
+                                            <x-icon name="eye" size="20" />
+                                            {{ __('ดูรายละเอียด') }}
+                                        </x-dropdown-link>
+                                        <x-dropdown-link :href="route('profile.edit')" class="flex flex-row gap-x-2 justify-start items-center">
+                                            <x-icon name="square-pen" size="20" />
+                                            {{ __('แก้ไขข้อมูล') }}
+                                        </x-dropdown-link>
+                                        <x-dropdown-link :href="route('profile.edit')" class="flex flex-row gap-x-2 justify-start items-center hover:bg-red-200 hover:text-red-700">
+                                            <x-icon name="trash-2" size="20" />
+                                            {{ __('ลบข้อมูล') }}
+                                        </x-dropdown-link>
+                                    </x-slot>
+                                </x-dropdown>
+                            </td>
+                        </tr>
+                    @empty
+                        <tr class="border border-slate-300">
+                            <td colspan="5" class="px-6 py-10 text-center text-slate-500">
+                                ไม่พบข้อมูลรอบการให้รางวัล
+                            </td>
+                        </tr>
+                    @endforelse
                 </tbody>
             </table>
             <div class="w-full flex flex-row justify-between items-center">
                 <p>
-                    หน้าที่ 1 จาก 8
+                    หน้าที่ {{$events->currentPage()}} จาก {{$events->lastPage()}}
                 </p>
                 <div class="flex flex-row gap-x-5">
-                    <button class="w-[120px] py-1.5 bg-[#99C3B2] font-semibold text-white text-[20px] rounded-md">ย้อนกลับ</button>
-                    <button class="w-[120px] py-1.5 bg-[#99C3B2] font-semibold text-white text-[20px] rounded-md">ถัดไป</button>
+                    {{-- Back Button --}}
+                    @if ($events->onFirstPage())
+                        <button disabled class="w-[120px] py-1.5 bg-gray-300 cursor-not-allowed font-semibold text-white text-[20px] rounded-md">
+                            ย้อนกลับ
+                        </button>
+                    @else
+                        <a href="{{ $events->previousPageUrl() }}"
+                           class="w-[120px] py-1.5 bg-[#99C3B2] text-center font-semibold text-white text-[20px] rounded-md hover:bg-[#7ea696]">
+                            ย้อนกลับ
+                        </a>
+                    @endif
+
+                    {{-- Next Button --}}
+                    @if ($events->hasMorePages())
+                        <a href="{{ $events->nextPageUrl() }}"
+                           class="w-[120px] py-1.5 bg-[#99C3B2] text-center font-semibold text-white text-[20px] rounded-md hover:bg-[#7ea696]">
+                            ถัดไป
+                        </a>
+                    @else
+                        <button disabled class="w-[120px] py-1.5 bg-gray-300 cursor-not-allowed font-semibold text-white text-[20px] rounded-md">
+                            ถัดไป
+                        </button>
+                    @endif
                 </div>
             </div>
         </div>
