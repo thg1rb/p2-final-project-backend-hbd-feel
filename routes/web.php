@@ -1,12 +1,11 @@
 <?php
 
 use App\Http\Controllers\EventController;
+use App\Http\Controllers\MainDashboardController;
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
 
-Route::get('/', function () {
-    return view('main.dashboard');
-})->name('main.dashboard');
+Route::get('/', [MainDashboardController::class, 'index'])->name('main.dashboard');
 
 Route::get('/dashboard', function () {
     return view('dashboard');
