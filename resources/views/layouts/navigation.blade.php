@@ -1,8 +1,8 @@
-<nav x-data="{ open: false }" class="bg-white border-b border-gray-100">
+<nav x-data="{ open: false }" class="bg-white border-b border-gray-100 p-3 shadow-md">
     <!-- Primary Navigation Menu -->
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="mx-auto px-4 sm:px-6 lg:px-8">
         <div class="flex justify-between h-16 items-center">
-            <div class="flex">
+            <div class="flex gap-3">
                 <!-- Logo -->
                 {{-- <div class="shrink-0 flex items-center">
                     <a href="{{ route('dashboard') }}">
@@ -10,7 +10,7 @@
                     </a>
                 </div> --}}
 
-                <div class="bg-[#02a96b] rounded-xl p-3">
+                <div class=" bg-primary rounded-xl p-3 flex justify-center items-center">
                     <x-icon name="badge" size="24" class="stroke-white"></x-icon>
                 </div>
 
@@ -21,13 +21,18 @@
                     </x-nav-link>
                 </div> --}}
 
-                <div class="font-thai">
-                    <p>นิสิตดีเด่น</p>
+                <div class="font-thai flex flex-col gap-1">
+                    <p class=" font-bold">นิสิตดีเด่น</p>
+                    <p class="text-sm">มหาวิทยาลัยเกษตรศาสตร์</p>
                 </div>
             </div>
 
             <!-- Settings Dropdown -->
             <div class="hidden sm:flex sm:items-center sm:ms-6">
+                <div class="flex gap-3 justify-center items-center">
+                    <p class="bg-[#2e3336] p-3 rounded-full text-white text-sm">ผู้ดูแลระบบ</p>
+                    <p class="">นาย กอไก่ สมโชคชัย</p>
+                </div>
                 <x-dropdown align="right" width="48">
                     <x-slot name="trigger">
                         <button
