@@ -5,7 +5,7 @@ use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
     return view('main.dashboard');
-});
+})->name('main.dashboard');
 
 Route::get('/dashboard', function () {
     return view('dashboard');
@@ -17,8 +17,8 @@ Route::middleware('auth')->group(function () {
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
 
-Route::get('/main', function () {
-    return view('main.dashboard');
-});
+Route::get('/report', function () {
+    return view('report.award-report');
+})->name('report.award-report');
 
 require __DIR__ . '/auth.php';

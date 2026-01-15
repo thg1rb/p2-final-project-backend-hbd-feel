@@ -70,7 +70,7 @@
                     </div>
                     <x-icon name='arrow-right' class="stroke-gray-400 group-hover:stroke-primary"></x-icon>
                 </button>
-                <button
+                <a href="{{ route('report.award-report') }}"
                     class="group bg-white rounded-lg p-8 cursor-pointer flex flex-1 border shadow-sm hover:border-primary hover:shadow-lg transition-all">
                     <div class="flex-1 flex flex-col items-start gap-4">
                         <div class=" bg-[#e8f5ef] p-5 rounded-xl flex justify-center items-center w-fit">
@@ -86,7 +86,7 @@
                         </div>
                     </div>
                     <x-icon name='arrow-right' class="stroke-gray-400 group-hover:stroke-primary"></x-icon>
-                </button>
+                </a>
             </div>
         </div>
         <div>
