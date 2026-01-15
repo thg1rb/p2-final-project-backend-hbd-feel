@@ -14,7 +14,7 @@ Route::get('/dashboard', function () {
 
 Route::get('/events',
     [EventController::class, 'index']
-)->middleware(['auth', 'verified'])->name('index');
+)->middleware(['auth', 'verified'])->name('events.index');
 
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');

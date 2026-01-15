@@ -16,20 +16,24 @@
 
         {{-- Table --}}
         <div class="w-full p-5 flex flex-col gap-y-6 bg-white shadow-sm rounded-lg">
-            <div class="w-full flex flex-row gap-x-2.5">
+            <form action="{{ route('events.index') }}" method="GET" class="w-full flex flex-row gap-x-2.5">
                 <div class="relative flex-1">
                     <x-icon name="search" class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
-                    <input placeholder="ค้นหารอบการให้รางวัล"
-                           class="w-full rounded-md border-slate-300 pl-10 placeholder:font-light placeholder:text-slate-400">
+                    <input
+                        name="search"
+                        placeholder="ค้นหารอบการให้รางวัล"
+                        value="{{ request('search') }}"
+                        class="w-full rounded-md border-slate-300 pl-10 placeholder:font-light placeholder:text-slate-400"
+                    >
                 </div>
                 <select class="px-10 py-1.5 flex-2 border-slate-300 font-semibold text-[20px] rounded-md">
                     <option value="1">ทดสอบ 1</option>
                     <option value="2">ทดสอบ 2</option>
                 </select>
-                <button class="px-10 py-1.5 flex-2 bg-[#99C3B2] font-semibold text-white text-[20px] rounded-md">
+                <button type="submit" class="px-10 py-1.5 flex-2 bg-[#99C3B2] font-semibold text-white text-[20px] rounded-md">
                     ค้นหา
                 </button>
-            </div>
+            </form>
             <table class="w-full">
                 <thead class="bg-gray-50">
                     <tr class="border border-slate-300">
