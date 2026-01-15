@@ -16,10 +16,17 @@
     </head>
     <body class="font-sans text-gray-900 antialiased">
         <div class="min-h-screen flex flex-col sm:justify-center items-center pt-6 sm:pt-0 bg-gray-100">
-            <div>
-                <a href="/">
-                    <x-application-logo class="w-20 h-20 fill-current text-gray-500" />
-                </a>
+{{--            <div>--}}
+{{--                <a href="/">--}}
+{{--                    <x-application-logo class="w-20 h-20 fill-current text-gray-500" />--}}
+{{--                </a>--}}
+{{--            </div>--}}
+            <div class="bg-[#02a96b] rounded-xl p-3 m-2">
+                <x-icon name="badge" size="48" class="stroke-white"></x-icon>
+            </div>
+            <div class="m-2 flex flex-col justify-center items-center">
+                <p class="text-[36px] text-[#2A6D46]">ระบบนิสิตดีเด่น</p>
+                <p>เข้าสู่ระบบเพื่อสมัครหรือพิจารณานิสิตดีเด่น</p>
             </div>
 
             <div class="w-full sm:max-w-md mt-6 px-6 py-4 bg-white shadow-md overflow-hidden sm:rounded-lg">

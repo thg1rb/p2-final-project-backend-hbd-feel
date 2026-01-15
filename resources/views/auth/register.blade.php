@@ -46,14 +46,16 @@
             <x-input-error :messages="$errors->get('password_confirmation')" class="mt-2" />
         </div>
 
+        <div class="my-5 flex w-full items-center justify-center">
+            <x-primary-button class="w-full mx-3 justify-center bg-[#2A6D46] hover:bg-[#2A6D46] hover:scale-110">
+                {{ __('สมัครสมาชิก') }}
+            </x-primary-button>
+        </div>
         <div class="flex items-center justify-end mt-4">
             <a class="underline text-sm text-gray-600 hover:text-gray-900 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500" href="{{ route('login') }}">
-                {{ __('Already registered?') }}
+                {{ __('มีรหัสอยู่แล้ว?') }}
             </a>
 
-            <x-primary-button class="ms-4">
-                {{ __('Register') }}
-            </x-primary-button>
         </div>
     </form>
 </x-guest-layout>
