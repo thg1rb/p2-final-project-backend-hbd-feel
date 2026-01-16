@@ -4,6 +4,6 @@ namespace App\Enums;
 
 enum Status: string
 {
-    case OPEN = "OPENED";
-    case CLOSE = "CLOSED";
+    case OPENED = "OPENED";
+    case CLOSED = "CLOSED";
 }
