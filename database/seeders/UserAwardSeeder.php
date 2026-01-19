@@ -18,6 +18,10 @@ class UserAwardSeeder extends Seeder
         $awards = Award::all();
 
         foreach ($users as $user) {
+            if ($user->role === "ADMIN") {
+                continue;
+            }
+
             $user->awards()->attach(
                 $awards->random(1)->pluck('id')->toArray(),
                 // [
