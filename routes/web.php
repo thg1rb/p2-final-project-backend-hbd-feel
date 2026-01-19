@@ -1,18 +1,19 @@
 <?php
 
+use App\Http\Controllers\AwardReportController;
 use App\Http\Controllers\EventController;
+use App\Http\Controllers\MainDashboardController;
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
 
-Route::get('/', function () {
-    return view('main.dashboard');
-})->name('main.dashboard');
+Route::get('/', [MainDashboardController::class, 'index'])->name('main.dashboard');
 
 Route::get('/dashboard', function () {
     return view('dashboard');
 })->middleware(['auth', 'verified'])->name('dashboard');
 
-Route::get('/events',
+Route::get(
+    '/events',
     [EventController::class, 'index']
 )->middleware(['auth', 'verified'])->name('events.index');
 
@@ -22,8 +23,6 @@ Route::middleware('auth')->group(function () {
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
 
-Route::get('/report', function () {
-    return view('report.award-report');
-})->name('report.award-report');
+Route::get('/report', [AwardReportController::class, 'index'])->name('report.award-report');
 
 require __DIR__ . '/auth.php';
