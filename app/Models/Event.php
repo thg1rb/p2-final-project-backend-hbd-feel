@@ -15,9 +15,16 @@ class Event extends Model
         "academic_year",
     ];
 
-    protected function casts() : array {
+    protected function casts(): array
+    {
         return [
             'status' => Status::class,
         ];
+    }
+
+    public function awards()
+    {
+        return $this->belongsToMany(Award::class, 'event_award')
+            ->withTimestamps();
     }
 }

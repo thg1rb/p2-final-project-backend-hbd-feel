@@ -46,4 +46,10 @@ class User extends Authenticatable
             'password' => 'hashed',
         ];
     }
+
+    public function awards()
+    {
+        return $this->belongsToMany(Award::class, 'user_award')
+            ->withTimestamps();
+    }
 }
