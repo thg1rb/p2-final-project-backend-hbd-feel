@@ -26,12 +26,19 @@ class EventController extends Controller
             $query->where('status', $request->status);
         }
 
-        // Sorting Logic (3-Click Cycle: ASC -> DSC -> RESET)
+        // Sorting Logic (Multiple Sort)
+        $sorts = $request->input('sorts', []);
         $allowedSorts = ['academic_year', 'semester', 'name'];
-        if ($request->filled(['sort_by', 'sort_direction']) && in_array($request->sort_by, $allowedSorts)) {
-            $query->orderBy($request->sort_by, $request->sort_direction);
+        if (is_array($sorts) && !empty($sorts)) {
+            foreach ($sorts as $column => $direction) {
+                // Validate column and direction
+                if (in_array($column, $allowedSorts) && in_array(strtolower($direction), ['asc', 'desc'])) {
+                    $query->orderBy($column, $direction);
+                }
+            }
         } else {
-            $query->latest('id'); // Default sort
+            // Default sort if nothing is selected
+            $query->latest('id');
         }
 
         $events = $query->paginate(5)->withQueryString();
