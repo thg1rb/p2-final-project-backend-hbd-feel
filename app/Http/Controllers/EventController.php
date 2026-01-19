@@ -14,9 +14,22 @@ class EventController extends Controller
     {
         $query = Event::query();
 
-        // Search by name of event (if exist)
-        if ($request->has('search') && $request->search != '') {
-            $query = $query->where('name', 'like', '%' . $request->search . '%');
+        // Search (Input) Filter
+        if ($request->filled('search')) {
+            $query->where('name', 'like', '%' . $request->search . '%');
+        }
+
+        // Status (Selection) Filter
+        if ($request->filled('status')) {
+            $query->where('status', $request->status);
+        }
+
+        // Sorting Logic (3-Click Cycle: ASC -> DSC -> RESET)
+        $allowedSorts = ['academic_year', 'semester', 'name'];
+        if ($request->filled(['sort_by', 'sort_direction']) && in_array($request->sort_by, $allowedSorts)) {
+            $query->orderBy($request->sort_by, $request->sort_direction);
+        } else {
+            $query->latest('id'); // Default sort
         }
 
         $events = $query->paginate(5)->withQueryString();
