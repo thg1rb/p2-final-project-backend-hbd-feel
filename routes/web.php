@@ -4,6 +4,7 @@ use App\Http\Controllers\AwardReportController;
 use App\Http\Controllers\EventController;
 use App\Http\Controllers\MainDashboardController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', [MainDashboardController::class, 'index'])->name('main.dashboard');
@@ -28,5 +29,15 @@ Route::middleware('auth')->group(function () {
 });
 
 Route::get('/report', [AwardReportController::class, 'index'])->name('report.award-report');
+
+Route::get('/users', [
+    UserController::class, 'index'
+])->name('users.index');
+
+Route::get('/users/create', [
+    UserController::class, 'create'
+])->name('users.create');
+
+Route::resource('users', UserController::class);
 
 require __DIR__ . '/auth.php';

@@ -37,7 +37,10 @@
             <p class="font-bold mb-4 text-xl">เมนูหลัก</p>
             <div class="flex gap-4">
                 <button
-                    class="group bg-white rounded-lg p-8 cursor-pointer flex flex-1 border shadow-sm hover:border-primary hover:shadow-lg transition-all">
+                    class="group bg-white rounded-lg p-8 cursor-pointer flex flex-1 border shadow-sm hover:border-primary hover:shadow-lg transition-all"
+                    type="button"
+                    onclick="window.location.href='{{route('users.index')}}'"
+                >
                     <div class="flex-1 flex flex-col items-start gap-4">
                         <div class=" bg-[#e8f5ef] p-5 rounded-xl flex justify-center items-center w-fit">
                             <x-icon name='book' class="stroke-primary"></x-icon>
