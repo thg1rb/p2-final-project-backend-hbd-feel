@@ -50,11 +50,12 @@
                 <h1 class="font-bold text-[32px]">จัดการรอบการให้รางวัล</h1>
                 <p class="font-light text-[16px]">เพิ่ม แก้ไข หรือลบข้อมูลรอบการให้รางวัลในระบบ</p>
             </div>
-            <button
+            <a
+                href="{{ route('events.create') }}"
                 class="px-[10px] py-[6px] flex flex-row justify-center items-center gap-x-[10px] bg-primary text-white rounded-md transition-all hover:scale-105">
                 <x-icon name="plus" size="30"/>
                 <p class="font-semibold text-[20px]">เพิ่มรอบการให้รางวัล</p>
-            </button>
+            </a>
         </div>
 
         {{-- Table --}}
