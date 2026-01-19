@@ -20,9 +20,10 @@ class DatabaseSeeder extends Seeder
             'name' => 'admin',
             'email' => 'admin@admin.com',
             'password' => bcrypt('1234567890'),
+            'role' => 'ADMIN'
         ]);
 
-        User::factory(10)->create();
+        User::factory(50)->create();
 
         $this->call([EventSeeder::class, AwardSeeder::class, UserAwardSeeder::class, EventAwardSeeder::class]);
     }
