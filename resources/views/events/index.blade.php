@@ -79,7 +79,7 @@
                     ค้นหา
                 </button>
             </form>
-            <div class="rounded-xl border border-gray-300 overflow-hidden bg-white">
+            <div class="rounded-xl border border-gray-300 bg-white">
                 <table class="w-full">
                     <thead class="divide-y border-b bg-gray-100">
                         <tr class="divide-x">
@@ -135,15 +135,15 @@
                                             </button>
                                         </x-slot>
                                         <x-slot name="content">
-                                            <x-dropdown-link :href="route('profile.edit')" class="flex flex-row gap-x-2 justify-start items-center">
+                                            <x-dropdown-link :href="route('events.show', $event)" class="flex flex-row gap-x-2 justify-start items-center">
                                                 <x-icon name="eye" size="20" />
                                                 {{ __('ดูรายละเอียด') }}
                                             </x-dropdown-link>
-                                            <x-dropdown-link :href="route('profile.edit')" class="flex flex-row gap-x-2 justify-start items-center">
+                                            <x-dropdown-link :href="route('events.edit', $event)" class="flex flex-row gap-x-2 justify-start items-center">
                                                 <x-icon name="square-pen" size="20" />
                                                 {{ __('แก้ไขข้อมูล') }}
                                             </x-dropdown-link>
-                                            <x-dropdown-link :href="route('profile.edit')" class="flex flex-row gap-x-2 justify-start items-center hover:bg-red-200 hover:text-red-700">
+                                            <x-dropdown-link :href="route('events.edit', $event)" class="flex flex-row gap-x-2 justify-start items-center hover:bg-red-200 hover:text-red-700">
                                                 <x-icon name="trash-2" size="20" />
                                                 {{ __('ลบข้อมูล') }}
                                             </x-dropdown-link>

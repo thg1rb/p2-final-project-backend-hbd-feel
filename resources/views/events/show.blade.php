@@ -4,8 +4,8 @@
             <x-icon name="arrow-left"></x-icon>
             <p>ย้อนกลับ</p>
         </a>
-        <h1 class="font-bold text-[32px] text-center">เพิ่มรอบการให้รางวัล</h1>
-        @php $viewMode = 'create'; @endphp
+        <h1 class="font-bold text-[32px] text-center">รายละเอียดรอบการให้รางวัล</h1>
+        @php $viewMode = 'show'; @endphp
         @include('events.partials.event-information', ['event' => $event])
     </div>
 </x-app-layout>
