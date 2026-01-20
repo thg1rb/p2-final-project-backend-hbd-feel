@@ -29,7 +29,7 @@
                     @forelse($awards as $award)
                         <tr class="divide-x">
                             <td class="px-6 py-3 text-center">{{ $award->name }}</td>
-                            <td class="px-6 py-3 text-center">{{ $award->reward }}</td>
+                            <td class="px-6 py-3 text-center">{{ NumberFormatter::create(app()->getLocale(), NumberFormatter::DECIMAL)->format($award->reward) }}</td>
                         </tr>
                         @empty
                             <tr class="divide-x">

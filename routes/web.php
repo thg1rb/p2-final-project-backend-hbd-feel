@@ -30,6 +30,7 @@ Route::middleware('auth')->group(function () {
 Route::middleware('auth')->group(function () {
    Route::get('/awards', [AwardController::class, 'index'])->name('awards.index');
    Route::get('/awards/create', [AwardController::class, 'create'])->name('awards.create');
+   Route::post('/awards', [AwardController::class, 'store'])->name('awards.store');
 });
 
 Route::get('/auth/google/redirect', [SocialAuthController::class, 'redirectToProvider'])
