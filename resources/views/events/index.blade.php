@@ -77,7 +77,7 @@
             <form action="{{ route('events.index') }}" method="GET" class="w-full flex flex-row gap-x-2.5">
                 <div class="relative flex-1">
                     <x-icon name="search" class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
-                    <input name="search" placeholder="ค้นหารอบการให้รางวัล" value="{{ request('search') }}"
+                    <input name="search" placeholder="ค้นหารอบการให้รางวัลจากปีการศึกษา" value="{{ request('search') }}"
                         class="w-full rounded-md border-slate-300 pl-10 placeholder:font-light placeholder:text-slate-400">
                 </div>
                 <select name="status"
@@ -167,18 +167,13 @@
                                                 <x-icon name="square-pen" size="20" />
                                                 {{ __('แก้ไขข้อมูล') }}
                                             </x-dropdown-link>
-                                            <x-dropdown-link :href="route('events.edit', $event)"
-                                                class="flex flex-row gap-x-2 justify-start items-center hover:bg-red-200 hover:text-red-700">
-                                                <x-icon name="trash-2" size="20" />
-                                                {{ __('ลบข้อมูล') }}
-                                            </x-dropdown-link>
                                         </x-slot>
                                     </x-dropdown>
                                 </td>
                             </tr>
                         @empty
                             <tr class="divide-x">
-                                <td colspan="5" class="px-6 py-32 text-center text-slate-500">
+                                <td colspan="6" class="px-6 py-32 text-center text-slate-500">
                                     ไม่พบข้อมูลรอบการให้รางวัล
                                 </td>
                             </tr>

@@ -16,7 +16,7 @@ class UserController extends Controller
      */
     public function index(Request $request)
     {
-        Gate::authorize('view', 'users');
+        Gate::authorize('viewAny', User::class);
          $users = User::query()
              ->when($request->role, function($query, $role) {
                  return $query->where('role', $role);
