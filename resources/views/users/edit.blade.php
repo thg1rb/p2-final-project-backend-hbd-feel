@@ -1,13 +1,9 @@
 <x-app-layout>
-    <div class="max-w-4xl mx-auto py-10 px-4 sm:px-6 lg:px-8">
-
-        <div class="mb-6">
-            <a href="{{ route('users.index') }}" class="flex items-center text-gray-500 hover:text-gray-700 transition">
-                <svg class="w-5 h-5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
-                กลับหน้ารายชื่อ
+    <div class="p-10">
+            <a class="flex gap-2 mb-10" href="{{ route('users.index') }}">
+                <x-icon name="arrow-left"></x-icon>
+                <p>กลับหน้ารายชื่อ</p>
             </a>
-        </div>
-
         <div class="bg-white shadow-xl rounded-2xl overflow-hidden border border-gray-100">
 
             <div class="h-32 bg-gradient-to-r from-gray-700 to-gray-900 relative"></div>
@@ -123,7 +119,6 @@
                     </button>
                 </form>
             </div>
-
         </div>
     </div>
 </x-app-layout>
