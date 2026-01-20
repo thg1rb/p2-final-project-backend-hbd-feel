@@ -89,7 +89,6 @@
                 <table class="w-full">
                     <thead class="divide-y border-b bg-gray-100">
                         <tr class="divide-x">
-                            <th class="px-6 py-3 text-left">รอบการให้รางวัล</th>
                             <th class="px-6 py-3 text-center cursor-pointer hover:bg-gray-200 transition">
                                 <a href="{{ getSortUrl('academic_year') }}" class="flex flex-row gap-x-2 justify-center items-center w-full h-full">
                                     ปีการศึกษา
@@ -102,18 +101,29 @@
                                     {!! getSortingIcon('semester') !!}
                                 </a>
                             </th>
+                            <th class="px-6 py-3 text-center cursor-pointer hover:bg-gray-200 transition">
+                                <a href="{{ getSortUrl('start_date') }}" class="flex flex-row gap-x-2 justify-center items-center w-full h-full">
+                                    วันที่เริ่มต้น
+                                    {!! getSortingIcon('start_date') !!}
+                                </a>
+                            </th>
+                            <th class="px-6 py-3 text-center cursor-pointer hover:bg-gray-200 transition">
+                                <a href="{{ getSortUrl('end_date') }}" class="flex flex-row gap-x-2 justify-center items-center w-full h-full">
+                                    วันที่สิ้นสุด
+                                    {!! getSortingIcon('end_date') !!}
+                                </a>
+                            </th>
                             <th class="px-6 py-3 text-center">สถานะ</th>
                             <th class="px-6 py-3 text-center">ดำเนินการ</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y">
                         @forelse($events as $event)
-                            {{-- TODO: Check if events not empty --}}
-                            {{-- TODO: Iterate through the events --}}
                             <tr class="divide-x">
-                                <td class="px-6 py-3 text-left">{{ $event->name }}</td>
                                 <td class="px-6 py-3 text-center">{{ $event->academic_year }}</td>
                                 <td class="px-6 py-3 text-center">{{ $event->semester }}</td>
+                                <td class="px-6 py-3 text-center">{{ \Carbon\Carbon::parse($event->start_date)->addYears(543)->locale('th')->translatedFormat('j F Y') }}</td>
+                                <td class="px-6 py-3 text-center">{{ \Carbon\Carbon::parse($event->end_date)->addYears(543)->locale('th')->translatedFormat('j F Y') }}</td>
                                 <td class="px-6 py-3 flex justify-center text-center">
                                     @if($event->status === \App\Enums\Status::OPENED)
                                         <p class="w-fit px-2 py-1 bg-green-200 text-green-700 rounded-md">

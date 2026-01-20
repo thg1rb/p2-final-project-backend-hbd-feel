@@ -3,6 +3,8 @@
 namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Contracts\Validation\Validator;
+use Illuminate\Http\Exceptions\HttpResponseException;
 
 class EventRequest extends FormRequest
 {
@@ -21,13 +23,60 @@ class EventRequest extends FormRequest
      */
     public function rules(): array
     {
+        $event = $this->route('event');
+        $eventId = $event instanceof \App\Models\Event ? $event->id : $event;
+
         return [
-            'name' => 'required|string|max:255',
-            'status' => 'required|string|in:' . implode(',', array_map(fn($case) => $case->value, \App\Enums\Status::cases())),
-            'academic_year' => 'required|integer|min:2500|max:2700',
             'semester' => 'required|integer|in:1,2',
             'start_date' => 'required|date|after:today',
             'end_date' => 'required|date|after:start_date',
+            'status' => [
+                'required',
+                'string',
+                'in:' . implode(',', array_map(fn($case) => $case->value, \App\Enums\Status::cases())),
+                function ($attribute, $value, $fail) use ($eventId) {
+                    // Check if trying to set status to OPENED
+                    if ($value === \App\Enums\Status::OPENED->value) {
+                        // Check if there's already an OPENED event (exclude current event when editing)
+                        $hasOpenedEvent = \App\Models\Event::where('status', \App\Enums\Status::OPENED->value)
+                            ->when($eventId, function ($query) use ($eventId) {
+                                return $query->where('id', '!=', $eventId);
+                            })
+                            ->exists();
+
+                        if ($hasOpenedEvent) {
+                            $fail('ไม่สามารถเปิดรอบการให้รางวัลได้ เนื่องจากมีรอบที่เปิดอยู่แล้ว');
+                        }
+                    }
+                },
+            ],
+            'academic_year' => [
+                'required',
+                'integer',
+                'min:2500',
+                'max:2700',
+                function ($attribute, $value, $fail) use ($event, $eventId) {
+                    $semester = $this->input('semester');
+
+                    // Skip validation if updating and academic_year + semester are unchanged
+                    if ($event instanceof \App\Models\Event) {
+                        if ($event->academic_year == $value && $event->semester == $semester) {
+                            return;
+                        }
+                    }
+
+                    $exists = \App\Models\Event::where('academic_year', $value)
+                        ->where('semester', $semester)
+                        ->when($eventId, function ($query) use ($eventId) {
+                            return $query->where('id', '!=', $eventId);
+                        })
+                        ->exists();
+
+                    if ($exists) {
+                        $fail('ปีการศึกษาและภาคเรียนนี้มีอยู่ในระบบแล้ว');
+                    }
+                },
+            ],
         ];
     }
 
@@ -39,9 +88,6 @@ class EventRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'name.required' => 'กรุณาระบุชื่อรอบการให้รางวัล',
-            'name.string' => 'ชื่อรอบการให้รางวัลต้องเป็นข้อความ',
-            'name.max' => 'ชื่อรอบการให้รางวัลต้องไม่เกิน 255 ตัวอักษร',
             'status.required' => 'กรุณาระบุสถานะ',
             'status.in' => 'สถานะต้องเป็นเปิดรอบการให้รางวัลหรือปิดรอบการให้รางวัลเท่านั้น',
             'academic_year.required' => 'กรุณาระบุปีการศึกษา',

@@ -28,7 +28,7 @@ class EventController extends Controller
 
         // Sorting Logic (Multiple Sort)
         $sorts = $request->input('sorts', []);
-        $allowedSorts = ['academic_year', 'semester', 'name'];
+        $allowedSorts = ['academic_year', 'semester', 'start_date', 'end_date'];
         if (is_array($sorts) && !empty($sorts)) {
             foreach ($sorts as $column => $direction) {
                 // Validate column and direction

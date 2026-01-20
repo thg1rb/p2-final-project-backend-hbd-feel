@@ -16,20 +16,7 @@
         @endif
 
         <div class="grid grid-cols-1 md:grid-cols-2 gap-12">
-            <div class="flex flex-col">
-                <label for="name">ชื่อรอบการให้รางวัล <span class="text-red-500">*</span></label>
-                <input
-                    name="name"
-                    type="text"
-                    value="{{ old('name', $event?->name) }}"
-                    {{ $readonly ? 'readonly' : '' }}
-                    class="border-gray-300 focus:border-primary focus:ring-primary rounded-md shadow-sm {{ $readonly ? 'bg-gray-100 cursor-not-allowed' : '' }}"
-                    required
-                >
-                @error('name') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
-            </div>
-
-            <div class="flex flex-col">
+            <div class="flex flex-col col-span-2">
                 <label for="status">สถานะ <span class="text-red-500">*</span></label>
                 <select
                     name="status"
@@ -110,8 +97,9 @@
             <div class="flex flex-col">
                 <label for="start_date">วันที่เริ่มต้น <span class="text-red-500">*</span></label>
                 <input
+                    id="start_date"
                     name="start_date"
-                    type="date"
+                    type="text"
                     value="{{ old('start_date', $event?->start_date?->format('Y-m-d')) }}"
                     {{ $readonly ? 'readonly' : '' }}
                     class="border-gray-300 focus:border-primary focus:ring-primary rounded-md shadow-sm {{ $readonly ? 'bg-gray-100 cursor-not-allowed' : '' }}"
@@ -123,8 +111,9 @@
             <div class="flex flex-col">
                 <label for="end_date">วันที่สิ้นสุด <span class="text-red-500">*</span></label>
                 <input
+                    id="end_date"
                     name="end_date"
-                    type="date"
+                    type="text"
                     value="{{ old('end_date', $event?->end_date?->format('Y-m-d')) }}"
                     {{ $readonly ? 'readonly' : '' }}
                     class="border-gray-300 focus:border-primary focus:ring-primary rounded-md shadow-sm {{ $readonly ? 'bg-gray-100 cursor-not-allowed' : '' }}"
@@ -141,3 +130,67 @@
         @endif
     </form>
 </section>
+
+@if(!$readonly)
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/th.js"></script>
+    <script>
+        const flatpickrConfig = {
+            locale: "th",
+            dateFormat: "Y-m-d", // Saves as AD (e.g., 2024-01-01)
+            altInput: true,
+            altFormat: "d F Y",
+            minDate: "today",
+
+            onReady: function(selectedDates, dateStr, instance) {
+                updateInputField(instance);
+                drawBuddhistYear(instance);
+            },
+
+            onOpen: function(selectedDates, dateStr, instance) {
+                drawBuddhistYear(instance);
+            },
+
+            onMonthChange: function(selectedDates, dateStr, instance) {
+                drawBuddhistYear(instance);
+            },
+
+            onYearChange: function(selectedDates, dateStr, instance) {
+                drawBuddhistYear(instance);
+            },
+
+            onChange: function(selectedDates, dateStr, instance) {
+                updateInputField(instance);
+            }
+        };
+
+        // --- Helper Functions ---
+
+        // Logic to update the "Alt Input" (The text box user sees)
+        function updateInputField(instance) {
+            if (instance.selectedDates.length > 0) {
+                const date = instance.selectedDates[0];
+                const beYear = date.getFullYear() + 543;
+                const formatted = instance.formatDate(date, "d F");
+                instance.altInput.value = `${formatted} ${beYear}`;
+            }
+        }
+
+        // Logic to update the Calendar Popup Header (The box inside the calendar)
+        function drawBuddhistYear(instance) {
+            setTimeout(() => {
+                if (instance.currentYearElement) {
+                    // Calculate BE Year
+                    const beYear = instance.currentYear + 543;
+                    // Force the input value to show BE
+                    instance.currentYearElement.value = beYear;
+                }
+            }, 10);
+        }
+
+        // Initialize both date pickers
+        flatpickr("#start_date", flatpickrConfig);
+        flatpickr("#end_date", flatpickrConfig);
+    </script>
+@endif

@@ -13,13 +13,14 @@ return new class extends Migration
     {
         Schema::create('events', function (Blueprint $table) {
             $table->id();
-            $table->string('name');
             $table->integer('academic_year');
             $table->integer('semester');
             $table->string('status');
             $table->date('start_date');
             $table->date('end_date');
             $table->timestamps();
+
+            $table->unique(['academic_year', 'semester']);
         });
     }
 
