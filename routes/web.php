@@ -6,8 +6,9 @@ use App\Http\Controllers\MainDashboardController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\Auth\SocialAuthController;
 
-Route::get('/', [MainDashboardController::class, 'index'])->name('main.dashboard');
+Route::get('/', [MainDashboardController::class, 'index'])->middleware('auth')->name('main.dashboard');
 
 Route::get('/dashboard', function () {
     return view('dashboard');
@@ -27,6 +28,12 @@ Route::middleware('auth')->group(function () {
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
+
+Route::get('/auth/google/redirect', [SocialAuthController::class, 'redirectToProvider'])
+    ->name('google.redirect');
+
+Route::get('/auth/google/callback', [SocialAuthController::class, 'handleProviderCallback'])
+    ->name('google.callback');
 
 Route::get('/report', [AwardReportController::class, 'index'])->name('report.award-report');
 
