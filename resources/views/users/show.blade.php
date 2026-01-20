@@ -1,12 +1,9 @@
 <x-app-layout>
-    <div class="max-w-4xl mx-auto py-10 px-4 sm:px-6 lg:px-8">
-
-        <div class="mb-6">
-            <a href="{{ route('users.index') }}" class="flex items-center text-gray-500 hover:text-gray-700 transition">
-                กลับหน้ารายชื่อ
-            </a>
-        </div>
-
+    <div class="p-10">
+        <a class="flex gap-2 mb-10" href="{{ route('users.index') }}">
+            <x-icon name="arrow-left"></x-icon>
+            <p>กลับหน้ารายชื่อ</p>
+        </a>
         <div class="bg-white shadow-xl rounded-2xl overflow-hidden border border-gray-100">
             <div class="h-32 bg-gradient-to-r from-gray-700 to-gray-900 relative"></div>
             <div class="px-6 pb-8 relative mt-3">
