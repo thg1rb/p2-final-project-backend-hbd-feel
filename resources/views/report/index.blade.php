@@ -11,8 +11,11 @@
             </div>
             <div class="bg-white p-8 border rounded-xl flex flex-col gap-8">
                 <form action="{{ route('report.award-report') }}">
-                    <p class="mb-3">เลือกปีการศึกษาและภาคการศึกษา</p>
+                    <p class="mb-3">เลือกปีการศึกษาและภาคการศึกษาหรือคัดกรองตามชื่อนิสิตหรือคัดกรองตามหมวดหมู่รางวัล
+                    </p>
                     <div class="flex gap-5">
+                        <input type="text" name="search" placeholder="ค้นหาด้วยชื่อของนิสิต"
+                            class="border border-gray-300  rounded-xl w-full cursor-pointer focus:outline-primary focus:border-gray-300 focus:ring-offset-0 focus:ring-0 flex-1">
                         <select name="year" id=""
                             class="border border-gray-300  rounded-xl w-full cursor-pointer focus:outline-primary focus:border-gray-300 focus:ring-offset-0 focus:ring-0 flex-1">
                             <option value="">ทั้งหมด</option>
@@ -29,6 +32,13 @@
                                 <option value={{ $semester }} @selected($targetSemester == $semester)>
                                     {{ $semester }}</option>
                             @endforeach
+                        </select>
+                        <select name="type" id=""
+                            class="border border-gray-300  rounded-xl w-full cursor-pointer focus:outline-primary focus:border-gray-300 focus:ring-offset-0 focus:ring-0 flex-1">
+                            <option value="">ทั้งหมด</option>
+                            <option value="Extracurricular Activities">ด้านกิจกรรมเสริมหลักสูตร</option>
+                            <option value="Creativity & Innovation">ด้านความคิดสร้างสรรค์และนวัตกรรม</option>
+                            <option value="Good Conduct">ด้านความประพฤติดี</option>
                         </select>
                         <button type="submit"
                             class="bg-primary rounded-xl text-white p-3 hover:scale-95 active:scale-90 transition-all">คัดกรอง</button>
@@ -60,12 +70,11 @@
                     </div>
                 @endif
                 <div class="flex justify-between">
-                    <div class="bg-primary rounded-xl p-3 text-white hover:scale-95 active:scale-90 transition-all">
-                        <a
-                            href="{{ route('report.award-report', array_merge(request()->query(), ['export' => 'csv'])) }}">
+                    <a href="{{ route('report.award-report', array_merge(request()->query(), ['export' => 'csv'])) }}">
+                        <div class="bg-primary rounded-xl p-3 text-white hover:scale-95 active:scale-90 transition-all">
                             นำข้อมูลออกเป็นไฟล์ CSV
-                        </a>
-                    </div>
+                        </div>
+                    </a>
                     <div class="flex gap-4 items-center">
                         @if ($users->onFirstPage())
                             <x-icon name="arrow-head-left" class="stroke-gray-300"></x-icon>
