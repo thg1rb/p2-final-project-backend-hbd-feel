@@ -1,6 +1,6 @@
 <x-app-layout>
     <div class="p-10">
-        <a class="flex gap-2 mb-10" href="{{ route('main.dashboard') }}">
+        <a class="flex gap-2 mb-10" href="{{ route('main') }}">
             <x-icon name="arrow-left"></x-icon>
             <p>กลับหน้าหลัก</p>
         </a>
@@ -46,7 +46,7 @@
                             <tbody class="divide-y">
                                 @foreach ($users as $user)
                                     <tr class="divide-x">
-                                        <td class=" p-4">{{ $user->name }} </td>
+                                        <td class=" p-4">{{ $user->firstName . ' ' . $user->lastName }} </td>
                                         <td class=" p-4">{{ $user->awards->first()->name }}</td>
                                     </tr>
                                 @endforeach
@@ -59,7 +59,13 @@
                         <p class=" text-gray-400">ไม่พบข้อมูลที่คุณคัดกรอง</p>
                     </div>
                 @endif
-                <div class="flex justify-end">
+                <div class="flex justify-between">
+                    <div class="bg-primary rounded-xl p-3 text-white hover:scale-95 active:scale-90 transition-all">
+                        <a
+                            href="{{ route('report.award-report', array_merge(request()->query(), ['export' => 'csv'])) }}">
+                            นำข้อมูลออกเป็นไฟล์ CSV
+                        </a>
+                    </div>
                     <div class="flex gap-4 items-center">
                         @if ($users->onFirstPage())
                             <x-icon name="arrow-head-left" class="stroke-gray-300"></x-icon>
@@ -68,7 +74,7 @@
                                 <x-icon name="arrow-head-left"></x-icon>
                             </a>
                         @endif
-                        <p class="border rounded-xl py-2 px-5">1</p>
+                        <p class="border rounded-xl py-2 px-5">{{ $users->currentPage() }}</p>
                         @if ($users->hasMorePages())
                             <a href="{{ $users->nextPageUrl() }}">
                                 <x-icon name="arrow-head-right"></x-icon>

@@ -2,19 +2,25 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
+use App\Models\Award;
+use App\Models\Event;
+use App\Models\User;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\Log;
 
 class MainDashboardController extends Controller
 {
     public  function index()
     {
-        $data = [
-            'all-user' => 20,
-            'round' => '2569/1',
-            'request' => 100,
-        ];
-        return view("main.dashboard", [
-            'data' => $data
-        ]);
+        Gate::authorize('viewAny', Award::class);
+        $totalUser = User::where('role', '!=', 'admin')->count();
+        $currentEvent = Event::where('status', 'OPENED')->first();
+        $currentAwardTotal = DB::table('event_award')
+            ->join('events', 'event_award.event_id', '=', 'events.id')
+            ->where('events.semester', $currentEvent->semester)
+            ->where('events.academic_year', $currentEvent->academic_year)
+            ->count();
+        return view("main.dashboard", compact('totalUser', 'currentEvent', 'currentAwardTotal'));
     }
 }

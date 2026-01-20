@@ -18,8 +18,8 @@ class UserSeeder extends Seeder
             User::factory()->create([
                 'firstName' => $role->value,       // ชื่อตาม Role (เช่น ADMIN)
                 'lastName' => 'Account',
-                'username' => strtolower($role->value),
-                'email' => strtolower($role->value) . '@example.com',
+                'username' => fake()->userName(),
+                'email' => fake()->userName() . '@example.com',
                 'password' => 'password',
                 'role' => $role,
             ]);

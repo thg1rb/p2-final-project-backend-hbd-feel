@@ -8,7 +8,7 @@
             <div class="flex justify-between items-center bg-white rounded-xl p-5 shadow-sm flex-1">
                 <div class="flex flex-col gap-2">
                     <p>ผู้ใช้ทั้งหมด</p>
-                    <p class="text-2xl font-bold">10</p>
+                    <p class="text-2xl font-bold">{{ $totalUser }}</p>
                 </div>
                 <div class="bg-primary p-3 rounded-xl">
                     <x-icon name='user' class="stroke-white"></x-icon>
@@ -17,7 +17,12 @@
             <div class="flex justify-between items-center bg-white rounded-xl p-5 shadow-sm flex-1">
                 <div class="flex flex-col gap-2">
                     <p>รอบรับสมัครที่เปิด</p>
-                    <p class="text-2xl font-bold">2568/1</p>
+                    @if ($currentEvent === null)
+                        <p class="text-2xl font-bold">ไม่มีรอบรับสมัครที่เปิดอยู่</p>
+                    @else
+                        <p class="text-2xl font-bold">{{ $currentEvent->academic_year . '/' . $currentEvent->semester }}
+                        </p>
+                    @endif
                 </div>
                 <div class="bg-primary p-3 rounded-xl">
                     <x-icon name='calendar' class="stroke-white"></x-icon>
@@ -25,8 +30,8 @@
             </div>
             <div class="flex justify-between items-center bg-white rounded-xl p-5 shadow-sm flex-1">
                 <div class="flex flex-col gap-2">
-                    <p>คำขอทั้งหมด</p>
-                    <p class="text-2xl font-bold">100</p>
+                    <p>รางวัลที่อนุมัติในรอบรับสมัครที่เปิด</p>
+                    <p class="text-2xl font-bold">{{ $currentAwardTotal }}</p>
                 </div>
                 <div class="bg-primary p-3 rounded-xl">
                     <x-icon name='book' class="stroke-white"></x-icon>
