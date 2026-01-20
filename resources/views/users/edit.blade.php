@@ -55,7 +55,7 @@
                             </h3>
 
                             <div>
-                                <label for="username" class="block text-sm font-medium text-gray-700">ชื่อผู้ใช่</label>
+                                <label for="username" class="block text-sm font-medium text-gray-700">ชื่อผู้ใช้</label>
                                 <input type="text" name="username" id="username"
                                        value="{{ old('username', $user->username) }}" required
                                        class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
