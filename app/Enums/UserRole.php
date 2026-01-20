@@ -1,0 +1,31 @@
+<?php
+
+namespace App\Enums;
+
+enum UserRole : string
+{
+    case NISIT = 'NISIT';
+    case DEPT_HEAD = 'DEPT_HEAD';
+    case ASSO_DEAN = 'ASSO_DEAN';
+    case DEAN = 'DEAN';
+    case NISIT_DEV = 'NISIT_DEV';
+    case BOARD = 'BOARD';
+    case BOARD_HEAD = 'BOARD_HEAD';
+    case CHANCELLOR = 'CHANCELLOR';
+    case ADMIN = 'ADMIN';
+
+    public static function label(self $role): string
+    {
+        return match ($role) {
+            self::NISIT => 'นิสิต',
+            self::DEPT_HEAD => 'หัวหน้าภาค',
+            self::ASSO_DEAN => 'รองคณบดี',
+            self::DEAN => 'คณบดี',
+            self::NISIT_DEV => 'นิสิตนักพัฒนา',
+            self::BOARD => 'กรรมการ',
+            self::BOARD_HEAD => 'ประธานกรรมการ',
+            self::CHANCELLOR => 'อธิการบดี',
+            self::ADMIN => 'ผู้ดูแลระบบ',
+        };
+    }
+}
