@@ -37,8 +37,9 @@ class EventController extends Controller
                 }
             }
         } else {
-            // Default sort if nothing is selected
-            $query->latest('id');
+            // Default sort by academic_year and semester in order.
+            $query->orderBy('academic_year', 'desc')
+                ->orderBy('semester', 'desc');
         }
 
         $events = $query->paginate(5)->withQueryString();
