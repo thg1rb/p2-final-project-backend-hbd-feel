@@ -9,6 +9,15 @@
             เข้าสู่ระบบ
 
         </div>
+
+        <div class="my-5 ">
+            <a href="{{ route('google.redirect') }}"
+               class="w-full flex justify-center items-center mt-4 px-4 py-2 border rounded-2xl hover:scale-105 transition-transform duration-300 ease-in-out">
+                <img src="{{asset('images/google.png')}}" class="mx-2 size-4">
+
+                Continue with Google
+            </a>
+        </div>
         <!-- Email Address -->
         <div>
             <x-input-label for="credential" :value="__('Username or Email')" />
@@ -44,12 +53,19 @@
             </x-primary-button>
         </div>
 
-        <div class="flex items-center justify-end mt-4">
+        <div class="flex items-center justify-end mt-4 gap-5">
+        <a class="underline text-sm text-gray-600 hover:text-gray-900 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500" href="{{ route('register') }}">
+            สมัครสมาชิก
+        </a>
         @if (Route::has('password.request'))
                 <a class="underline text-sm text-gray-600 hover:text-gray-900 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500" href="{{ route('password.request') }}">
                     ลืมรหัสผ่าน?
                 </a>
-            @endif
+        @endif
+
+        </div>
+
+
 
         </div>
     </form>
