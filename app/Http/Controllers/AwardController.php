@@ -37,4 +37,33 @@ class AwardController extends Controller
         $award->save();
         return redirect()->route('awards.index');
     }
+
+    public function edit(Award $award) {
+        return view('awards.edit', ['award' => $award]);
+    }
+
+    public function update(Request $request, Award $award) {
+        $changes = $request->validate([
+            'name' => ['required', 'string', 'max:255', 'min:3'],
+            'reward' => ['required', 'numeric', 'min:0', 'max:1000000', 'regex:/^\d+(\.\d{1,2})?$/'],
+        ],
+            [
+                'name.required' => "โปรดกรอกชื่อหมวดรางวัล",
+                'name.min' => "โปรดใส่ชื่อหมวดรางวัลอย่างน้อย 3 ตัวอักษร",
+                'reward.required' => "โปรดกรอกจำนวนรางวัล (บาท)",
+                'reward.min' => 'จำนวนเงินรางวัลต้องไม่เป็นเลขติดลบ',
+                'reward' => 'โปรดกรอกจำนวนเงินรางวัลให้ถูกต้อง'
+            ]
+        );
+
+        $award->update($changes);
+        return redirect()->route('awards.index')->with('success');
+    }
+
+    public function destroy(Award $award) {
+        $award->delete();
+        return redirect()->route('awards.index');
+    }
+
+
 }

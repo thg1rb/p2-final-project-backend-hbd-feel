@@ -23,6 +23,7 @@
                     <tr class="divide-x">
                         <th class="px-6 py-3 text-center cursor-pointer hover:bg-gray-200 transition">หมวดรางวัล</th>
                         <th class="px-6 py-3 text-center cursor-pointer hover:bg-gray-200 transition">รางวัล</th>
+                        <th class="px-2 py-3 text-center cursor-pointer hover:bg-gray-200 transition">ดำเนินการ</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y">
@@ -30,6 +31,19 @@
                         <tr class="divide-x">
                             <td class="px-6 py-3 text-center">{{ $award->name }}</td>
                             <td class="px-6 py-3 text-center">{{ NumberFormatter::create(app()->getLocale(), NumberFormatter::DECIMAL)->format($award->reward) }}</td>
+                            <td class="px-2 py-3 text-center flex items-center justify-center gap-2">
+                                <a href="{{ route('awards.edit', $award) }}" class="text-blue-600 hover:underline">
+                                   แก้ไข
+                                </a>
+                                 |
+                                <form action="{{ route('awards.destroy', $award) }}" method="POST" onsubmit="return confirm('คุณแน่ใจหรือไม่ที่จะลบหมวดรางวัลนี้?');">
+                                    @csrf
+                                    @method('DELETE')
+                                    <button type="submit" class="in-line text-red-600 hover:underline">
+                                        ลบ
+                                    </button>
+                                </form>
+                            </td>
                         </tr>
                         @empty
                             <tr class="divide-x">
