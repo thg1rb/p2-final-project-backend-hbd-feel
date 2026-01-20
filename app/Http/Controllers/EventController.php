@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Requests\EventRequest;
 use App\Models\Event;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Redirect;
 
 class EventController extends Controller
@@ -14,11 +15,12 @@ class EventController extends Controller
      */
     public function index(Request $request)
     {
+        Gate::authorize('view-any', Event::class);
         $query = Event::query();
 
         // Search (Input) Filter
         if ($request->filled('search')) {
-            $query->where('name', 'like', '%' . $request->search . '%');
+            $query->where('academic_year', 'like', '%' . $request->search . '%');
         }
 
         // Status (Selection) Filter
@@ -52,6 +54,7 @@ class EventController extends Controller
      */
     public function create()
     {
+        Gate::authorize('create', Event::class);
         return view('events.create', [
             'event' => new Event(),
         ]);
@@ -72,6 +75,7 @@ class EventController extends Controller
      */
     public function show(Event $event)
     {
+        Gate::authorize('view', $event);
         return view('events.show', [
             'event' => $event,
         ]);
@@ -82,6 +86,7 @@ class EventController extends Controller
      */
     public function edit(Event $event)
     {
+        Gate::authorize('update', $event);
         return view('events.edit', [
             'event' => $event,
         ]);
