@@ -67,8 +67,10 @@
         }
 
         // Initialize both date pickers
-        flatpickr("#start_date", flatpickrConfig);
-        flatpickr("#end_date", flatpickrConfig);
+        document.addEventListener('DOMContentLoaded', function() {
+            flatpickr("#start_date", flatpickrConfig);
+            flatpickr("#end_date", flatpickrConfig);
+        });
     </script>
 @endif
 
@@ -80,7 +82,7 @@
         @endif
 
         <div class="grid grid-cols-1 md:grid-cols-2 gap-12">
-            <div class="flex flex-col col-span-2">
+            <div class="flex flex-col md:col-span-2">
                 <label for="status">สถานะ <span class="text-red-500">*</span></label>
                 <select
                     name="status"
