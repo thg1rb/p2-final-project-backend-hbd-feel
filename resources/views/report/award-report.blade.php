@@ -46,7 +46,7 @@
                             <tbody class="divide-y">
                                 @foreach ($users as $user)
                                     <tr class="divide-x">
-                                        <td class=" p-4">{{ $user->name }} </td>
+                                        <td class=" p-4">{{ $user->firstName . ' ' . $user->lastName }} </td>
                                         <td class=" p-4">{{ $user->awards->first()->name }}</td>
                                     </tr>
                                 @endforeach

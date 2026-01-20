@@ -76,14 +76,15 @@ class AwardReportController extends Controller
         $callback = function () use ($users) {
             $file = fopen('php://output', 'w');
 
-            fputcsv($file, ['ชื่อนักเรียน', 'รายละเอียดรางวัล']);
+            fputcsv($file, ['ชื่อนักเรียน', 'สกุลนักเรียน', 'รายละเอียดรางวัล']);
 
             foreach ($users as $user) {
 
                 $awardNames = $user->awards->pluck('name')->join(', ');
 
                 fputcsv($file, [
-                    $user->name,
+                    $user->firstName,
+                    $user->lastName,
                     $awardNames
                 ]);
             }
