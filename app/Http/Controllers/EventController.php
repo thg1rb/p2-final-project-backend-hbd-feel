@@ -28,7 +28,7 @@ class EventController extends Controller
 
         // Sorting Logic (Multiple Sort)
         $sorts = $request->input('sorts', []);
-        $allowedSorts = ['academic_year', 'semester', 'name'];
+        $allowedSorts = ['academic_year', 'semester', 'start_date', 'end_date'];
         if (is_array($sorts) && !empty($sorts)) {
             foreach ($sorts as $column => $direction) {
                 // Validate column and direction
@@ -37,8 +37,9 @@ class EventController extends Controller
                 }
             }
         } else {
-            // Default sort if nothing is selected
-            $query->latest('id');
+            // Default sort by academic_year and semester in order.
+            $query->orderBy('academic_year', 'desc')
+                ->orderBy('semester', 'desc');
         }
 
         $events = $query->paginate(5)->withQueryString();

@@ -91,10 +91,16 @@ Generate `APP_KEY`
 sail artisan key:generate
 ```
 
-Run the Migrations
+Run the migrations and seeders
 
 ```shell
-sail artisan migrate
+sail artisan migrate:fresh --seed
+```
+
+Install dependencies
+
+```shell
+sail bun install
 ```
 
 Load the style (in this project using `bun` as a package manager)
