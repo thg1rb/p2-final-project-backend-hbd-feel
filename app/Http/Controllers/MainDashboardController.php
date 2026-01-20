@@ -16,11 +16,16 @@ class MainDashboardController extends Controller
         Gate::authorize('viewAny', Award::class);
         $totalUser = User::where('role', '!=', 'admin')->count();
         $currentEvent = Event::where('status', 'OPENED')->first();
-        $currentAwardTotal = DB::table('event_award')
-            ->join('events', 'event_award.event_id', '=', 'events.id')
-            ->where('events.semester', $currentEvent->semester)
-            ->where('events.academic_year', $currentEvent->academic_year)
-            ->count();
+
+        if ($currentEvent == null) {
+            $currentAwardTotal = 0;
+        } else {
+            $currentAwardTotal = DB::table('event_award')
+                ->join('events', 'event_award.event_id', '=', 'events.id')
+                ->where('events.semester', $currentEvent->semester)
+                ->where('events.academic_year', $currentEvent->academic_year)
+                ->count();
+        }
         return view("main.index", compact('totalUser', 'currentEvent', 'currentAwardTotal'));
     }
 }
