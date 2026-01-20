@@ -12,10 +12,23 @@
         </div>
         <div class="flex justify-end items-end">
             <a href="{{ route('awards.create') }}"
-               class="w-1/7 px-[10px] py-[6px] flex flex-row justify-center items-center gap-x-[10px] bg-primary text-white rounded-md transition-all hover:scale-105">
+               class="w-1/7 px-[10px] py-[6px] flex flex-row justify-center items-center gap-x-[10px] bg-[#226e64] text-white rounded-md transition-all hover:scale-105">
                 <x-icon name="plus" size="30" />
-                <p class="font-semibold text-[20px]">เพิ่มหมวดรางวัล</p>
+                <p class="font-semibold text-[18px]">เพิ่มหมวดรางวัล</p>
             </a>
+        </div>
+        <div class="flex my-5 justify-center items-center">
+            <form action="{{ route('awards.index') }}" method="GET" class="w-2/4 flex flex-row gap-x-2.5">
+                <div class="relative flex-1">
+                    <x-icon name="search" class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+                    <input name="search" placeholder="ค้นหาชื่อหมวดรางวัล" value="{{ request('search') }}"
+                           class="w-full rounded-md border-slate-300 pl-10 placeholder:font-light placeholder:text-slate-400">
+                </div>
+                <button type="submit"
+                        class="px-10 py-1.5 flex-2 bg-[#226e64] w-1/6 font-semibold text-white text-[16px] rounded-md">
+                    ค้นหา
+                </button>
+            </form>
         </div>
         <div class="w-full p-5 flex flex-col gap-y-6 bg-white shadow-sm rounded-xl">
             <table>

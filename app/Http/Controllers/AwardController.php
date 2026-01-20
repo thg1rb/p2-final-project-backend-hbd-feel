@@ -7,8 +7,12 @@ use Illuminate\Http\Request;
 
 class AwardController extends Controller
 {
-    public function index() {
-        $awards = Award::paginate(5);
+    public function index(Request $request) {
+        $query = Award::query();
+        if ($request->filled('search')) {
+            $query->where('name', 'like', '%' . $request->search . '%');
+        }
+        $awards = $query->paginate(5)->withQueryString();
         return view('awards.index', ['awards' => $awards]);
     }
 
