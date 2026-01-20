@@ -1,39 +1,45 @@
 @php
-    function getNextSort($column) {
-        if (request('sort_by') !== $column) return 'asc';
-        if (request('sort_direction') === 'asc') return 'desc';
-        if (request('sort_direction') === 'desc') return 'default';
-        return 'asc';
+    function getSortUrl($column) {
+        $sorts = request()->input('sorts', []);
+
+        // Determine current state of this specific column
+        $currentDirection = $sorts[$column] ?? null;
+
+        // Cycle: ASC -> DESC -> REMOVE
+        $nextDirection = match($currentDirection) {
+            'asc' => 'desc',
+            'desc' => null,
+            default => 'asc',
+        };
+
+        // Update the sorts array
+        if ($nextDirection) {
+            $sorts[$column] = $nextDirection;
+        } else {
+            unset($sorts[$column]);
+        }
+
+        return request()->fullUrlWithQuery(['sorts' => $sorts]);
     }
 
     function getSortingIcon($column) {
-        $currentSort = request('sort_by');
-        $currentDir = request('sort_direction');
+        $sorts = request()->input('sorts', []);
+        $direction = $sorts[$column] ?? null;
 
-        // Check if the current column matches the requested sort_by
-        if ($currentSort !== $column) {
-            return '';
+        if (!$direction) return '';
+
+        // Calculate priority (1, 2, 3...) based on order in the array
+        $priority = array_search($column, array_keys($sorts)) + 1;
+        $badge = count($sorts) > 1 ? "<span class='text-[10px] ml-1 bg-gray-200 text-gray-700 px-1 rounded'>{$priority}</span>" : '';
+
+        $icon = '';
+        if ($direction === 'asc') {
+            $icon = '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-caret-down-fill" viewBox="0 0 16 16"><path d="M7.247 11.14 2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z"/></svg>';
+        } else {
+            $icon = '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-caret-up-fill" viewBox="0 0 16 16"><path d="m7.247 4.86-4.796 5.481c-.566.647-.106 1.659.753 1.659h9.592a1 1 0 0 0 .753-1.659l-4.796-5.48a1 1 0 0 0-1.506 0z"/></svg>';
         }
 
-        // Return the ASC icon
-        if ($currentDir === 'asc') {
-            return '
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-caret-down-fill" viewBox="0 0 16 16">
-                  <path d="M7.247 11.14 2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z"/>
-                </svg>
-            ';
-        }
-
-        // Return the DESC icon
-        if ($currentDir === 'desc') {
-            return '
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-caret-up-fill" viewBox="0 0 16 16">
-                  <path d="m7.247 4.86-4.796 5.481c-.566.647-.106 1.659.753 1.659h9.592a1 1 0 0 0 .753-1.659l-4.796-5.48a1 1 0 0 0-1.506 0z"/>
-                </svg>
-            ';
-        }
-
-        return '';
+        return "<div class='flex items-center'>{$icon}{$badge}</div>";
     }
 @endphp
 
@@ -50,11 +56,12 @@
                 <h1 class="font-bold text-[32px]">จัดการรอบการให้รางวัล</h1>
                 <p class="font-light text-[16px]">เพิ่ม แก้ไข หรือลบข้อมูลรอบการให้รางวัลในระบบ</p>
             </div>
-            <button
+            <a
+                href="{{ route('events.create') }}"
                 class="px-[10px] py-[6px] flex flex-row justify-center items-center gap-x-[10px] bg-primary text-white rounded-md transition-all hover:scale-105">
                 <x-icon name="plus" size="30"/>
                 <p class="font-semibold text-[20px]">เพิ่มรอบการให้รางวัล</p>
-            </button>
+            </a>
         </div>
 
         {{-- Table --}}
@@ -78,27 +85,19 @@
                     ค้นหา
                 </button>
             </form>
-            <div class="rounded-xl border border-gray-300 overflow-hidden bg-white">
+            <div class="rounded-xl border border-gray-300 bg-white">
                 <table class="w-full">
                     <thead class="divide-y border-b bg-gray-100">
                         <tr class="divide-x">
                             <th class="px-6 py-3 text-left">รอบการให้รางวัล</th>
-                            <th class="px-6 py-3 text-center">
-                                @php $nextSort = getNextSort('academic_year'); @endphp
-                                <a href="{{ $nextSort === 'default'
-                                    ? request()->fullUrlWithQuery(['sort_by' => null, 'sort_direction' => null])
-                                    : request()->fullUrlWithQuery(['sort_by' => 'academic_year', 'sort_direction' => $nextSort])
-                                }}" class="flex flex-row gap-x-2 justify-center items-center">
+                            <th class="px-6 py-3 text-center cursor-pointer hover:bg-gray-200 transition">
+                                <a href="{{ getSortUrl('academic_year') }}" class="flex flex-row gap-x-2 justify-center items-center w-full h-full">
                                     ปีการศึกษา
                                     {!! getSortingIcon('academic_year') !!}
                                 </a>
                             </th>
-                            <th class="px-6 py-3 text-center">
-                                @php $nextSort = getNextSort('semester'); @endphp
-                                <a href="{{ $nextSort === 'default'
-                                    ? request()->fullUrlWithQuery(['sort_by' => null, 'sort_direction' => null])
-                                    : request()->fullUrlWithQuery(['sort_by' => 'semester', 'sort_direction' => $nextSort])
-                                }}" class="flex flex-row gap-x-2 justify-center items-center">
+                            <th class="px-6 py-3 text-center cursor-pointer hover:bg-gray-200 transition">
+                                <a href="{{ getSortUrl('semester') }}" class="flex flex-row gap-x-2 justify-center items-center w-full h-full">
                                     ภาคเรียน
                                     {!! getSortingIcon('semester') !!}
                                 </a>
@@ -134,15 +133,15 @@
                                             </button>
                                         </x-slot>
                                         <x-slot name="content">
-                                            <x-dropdown-link :href="route('profile.edit')" class="flex flex-row gap-x-2 justify-start items-center">
+                                            <x-dropdown-link :href="route('events.show', $event)" class="flex flex-row gap-x-2 justify-start items-center">
                                                 <x-icon name="eye" size="20" />
                                                 {{ __('ดูรายละเอียด') }}
                                             </x-dropdown-link>
-                                            <x-dropdown-link :href="route('profile.edit')" class="flex flex-row gap-x-2 justify-start items-center">
+                                            <x-dropdown-link :href="route('events.edit', $event)" class="flex flex-row gap-x-2 justify-start items-center">
                                                 <x-icon name="square-pen" size="20" />
                                                 {{ __('แก้ไขข้อมูล') }}
                                             </x-dropdown-link>
-                                            <x-dropdown-link :href="route('profile.edit')" class="flex flex-row gap-x-2 justify-start items-center hover:bg-red-200 hover:text-red-700">
+                                            <x-dropdown-link :href="route('events.edit', $event)" class="flex flex-row gap-x-2 justify-start items-center hover:bg-red-200 hover:text-red-700">
                                                 <x-icon name="trash-2" size="20" />
                                                 {{ __('ลบข้อมูล') }}
                                             </x-dropdown-link>

@@ -2,8 +2,10 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\EventRequest;
 use App\Models\Event;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Redirect;
 
 class EventController extends Controller
 {
@@ -24,12 +26,19 @@ class EventController extends Controller
             $query->where('status', $request->status);
         }
 
-        // Sorting Logic (3-Click Cycle: ASC -> DSC -> RESET)
+        // Sorting Logic (Multiple Sort)
+        $sorts = $request->input('sorts', []);
         $allowedSorts = ['academic_year', 'semester', 'name'];
-        if ($request->filled(['sort_by', 'sort_direction']) && in_array($request->sort_by, $allowedSorts)) {
-            $query->orderBy($request->sort_by, $request->sort_direction);
+        if (is_array($sorts) && !empty($sorts)) {
+            foreach ($sorts as $column => $direction) {
+                // Validate column and direction
+                if (in_array($column, $allowedSorts) && in_array(strtolower($direction), ['asc', 'desc'])) {
+                    $query->orderBy($column, $direction);
+                }
+            }
         } else {
-            $query->latest('id'); // Default sort
+            // Default sort if nothing is selected
+            $query->latest('id');
         }
 
         $events = $query->paginate(5)->withQueryString();
@@ -42,39 +51,49 @@ class EventController extends Controller
      */
     public function create()
     {
-        //
+        return view('events.create', [
+            'event' => new Event(),
+        ]);
     }
 
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
+    public function store(EventRequest $request)
     {
-        //
+        Event::create($request->validated());
+
+        return Redirect::route('events.index');
     }
 
     /**
      * Display the specified resource.
      */
-    public function show(string $id)
+    public function show(Event $event)
     {
-        //
+        return view('events.show', [
+            'event' => $event,
+        ]);
     }
 
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(string $id)
+    public function edit(Event $event)
     {
-        //
+        return view('events.edit', [
+            'event' => $event,
+        ]);
     }
 
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, string $id)
+    public function update(EventRequest $request, Event $event)
     {
-        //
+        $event->update($request->validated());
+
+        return Redirect::route('events.index');
     }
 
     /**
