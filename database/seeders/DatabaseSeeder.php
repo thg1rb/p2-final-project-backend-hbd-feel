@@ -16,6 +16,16 @@ class DatabaseSeeder extends Seeder
     public function run(): void
     {
 
+//         User::factory()->create([
+//             'name' => 'admin',
+//             'email' => 'admin@admin.com',
+//             'password' => bcrypt('1234567890'),
+//         ]);
+        $this->call
+        ([
+            EventSeeder::class,
+            UserSeeder::class,
+        ]);
         User::factory()->create([
             'name' => 'admin',
             'email' => 'admin@admin.com',
@@ -25,6 +35,13 @@ class DatabaseSeeder extends Seeder
 
         User::factory(50)->create();
 
-        $this->call([EventSeeder::class, AwardSeeder::class, UserAwardSeeder::class, EventAwardSeeder::class]);
+        $this->call([
+            EventSeeder::class,
+            EventSeeder::class,
+            UserSeeder::class,
+            AwardSeeder::class, 
+            UserAwardSeeder::class, 
+            EventAwardSeeder::class,
+        ]);
     }
 }
