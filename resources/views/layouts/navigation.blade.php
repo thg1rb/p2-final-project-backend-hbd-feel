@@ -31,13 +31,11 @@
             <div class="hidden sm:flex sm:items-center sm:ms-6">
                 <div class="flex gap-3 justify-center items-center">
                     <p class="bg-[#2e3336] p-3 rounded-full text-white text-sm">
-                        @if (Auth::user()->role === 'ADMIN')
+                        @if (Auth::user()->role === App\Enums\UserRole::ADMIN)
                             ผู้ดูแลระบบ
-                        @elseif (Auth::user()->role === 'NISIT')
-                            นิสิต
                         @endif
                     </p>
-                    <p class="">{{ Auth::user()?->name }}</p>
+                    <p class="">{{ Auth::user()?->username }}</p>
                 </div>
                 <x-dropdown align="right" width="48">
                     <x-slot name="trigger">

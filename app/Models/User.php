@@ -59,7 +59,7 @@ class User extends Authenticatable
         return $this->role == UserRole::ADMIN;
     }
 
-    public function isUser():bool
+    public function isUser(): bool
     {
         return $this->role != UserRole::ADMIN;
     }
@@ -68,10 +68,5 @@ class User extends Authenticatable
     {
         return $this->belongsToMany(Award::class, 'user_award')
             ->withTimestamps();
-    }
-
-    public function isAdmin(): bool
-    {
-        return $this->role === 'ADMIN';
     }
 }
