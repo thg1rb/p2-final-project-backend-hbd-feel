@@ -175,7 +175,7 @@
                         ? $event->start_date->locale('th')->translatedFormat('d F') . ' ' . ($event->start_date->year + 543)
                         : old('start_date', $event?->start_date?->format('Y-m-d'))
                     }}"
-                    {{ $readonly ? 'readonly' : '' }}
+                    {{ $readonly ? 'disabled' : '' }}
                     class="border-gray-300 focus:border-primary focus:ring-primary rounded-md shadow-sm {{ $readonly ? 'bg-gray-100 cursor-not-allowed' : '' }}"
                     required
                 >
@@ -193,7 +193,7 @@
                         ? $event->end_date->locale('th')->translatedFormat('d F') . ' ' . ($event->end_date->year + 543)
                         : old('end_date', $event?->end_date?->format('Y-m-d'))
                     }}"
-                    {{ $readonly ? 'readonly' : '' }}
+                    {{ $readonly ? 'disabled' : '' }}
                     class="border-gray-300 focus:border-primary focus:ring-primary rounded-md shadow-sm {{ $readonly ? 'bg-gray-100 cursor-not-allowed' : '' }}"
                     required
                 >

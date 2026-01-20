@@ -28,7 +28,7 @@ class EventRequest extends FormRequest
 
         return [
             'semester' => 'required|integer|in:1,2',
-            'start_date' => 'required|date|after:today',
+            'start_date' => 'required|date|after_or_equal::today',
             'end_date' => 'required|date|after:start_date',
             'status' => [
                 'required',
