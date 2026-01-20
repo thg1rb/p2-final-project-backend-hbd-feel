@@ -8,6 +8,70 @@
         : route('events.update', $event);
 @endphp
 
+@if(!$readonly)
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/th.js"></script>
+    <script>
+        const flatpickrConfig = {
+            locale: "th",
+            dateFormat: "Y-m-d", // Saves as AD (e.g., 2024-01-01)
+            altInput: true,
+            altFormat: "d F Y",
+            minDate: "today",
+
+            onReady: function(selectedDates, dateStr, instance) {
+                updateInputField(instance);
+                drawBuddhistYear(instance);
+            },
+
+            onOpen: function(selectedDates, dateStr, instance) {
+                drawBuddhistYear(instance);
+            },
+
+            onMonthChange: function(selectedDates, dateStr, instance) {
+                drawBuddhistYear(instance);
+            },
+
+            onYearChange: function(selectedDates, dateStr, instance) {
+                drawBuddhistYear(instance);
+            },
+
+            onChange: function(selectedDates, dateStr, instance) {
+                updateInputField(instance);
+            }
+        };
+
+        // --- Helper Functions ---
+
+        // Logic to update the "Alt Input" (The text box user sees)
+        function updateInputField(instance) {
+            if (instance.selectedDates.length > 0) {
+                const date = instance.selectedDates[0];
+                const beYear = date.getFullYear() + 543;
+                const formatted = instance.formatDate(date, "d F");
+                instance.altInput.value = `${formatted} ${beYear}`;
+            }
+        }
+
+        // Logic to update the Calendar Popup Header (The box inside the calendar)
+        function drawBuddhistYear(instance) {
+            setTimeout(() => {
+                if (instance.currentYearElement) {
+                    // Calculate BE Year
+                    const beYear = instance.currentYear + 543;
+                    // Force the input value to show BE
+                    instance.currentYearElement.value = beYear;
+                }
+            }, 10);
+        }
+
+        // Initialize both date pickers
+        flatpickr("#start_date", flatpickrConfig);
+        flatpickr("#end_date", flatpickrConfig);
+    </script>
+@endif
+
 <section>
     <form method="post" action="{{ $formAction }}" class="p-10 flex flex-col gap-y-12 bg-white shadow-sm rounded-lg">
         @csrf
@@ -100,7 +164,11 @@
                     id="start_date"
                     name="start_date"
                     type="text"
-                    value="{{ old('start_date', $event?->start_date?->format('Y-m-d')) }}"
+                    value="{{
+                        $readonly && $event?->start_date
+                        ? $event->start_date->locale('th')->translatedFormat('d F') . ' ' . ($event->start_date->year + 543)
+                        : old('start_date', $event?->start_date?->format('Y-m-d'))
+                    }}"
                     {{ $readonly ? 'readonly' : '' }}
                     class="border-gray-300 focus:border-primary focus:ring-primary rounded-md shadow-sm {{ $readonly ? 'bg-gray-100 cursor-not-allowed' : '' }}"
                     required
@@ -114,7 +182,11 @@
                     id="end_date"
                     name="end_date"
                     type="text"
-                    value="{{ old('end_date', $event?->end_date?->format('Y-m-d')) }}"
+                    value="{{
+                        $readonly && $event?->end_date
+                        ? $event->end_date->locale('th')->translatedFormat('d F') . ' ' . ($event->end_date->year + 543)
+                        : old('end_date', $event?->end_date?->format('Y-m-d'))
+                    }}"
                     {{ $readonly ? 'readonly' : '' }}
                     class="border-gray-300 focus:border-primary focus:ring-primary rounded-md shadow-sm {{ $readonly ? 'bg-gray-100 cursor-not-allowed' : '' }}"
                     required
@@ -130,67 +202,3 @@
         @endif
     </form>
 </section>
-
-@if(!$readonly)
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
-    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
-    <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/th.js"></script>
-    <script>
-        const flatpickrConfig = {
-            locale: "th",
-            dateFormat: "Y-m-d", // Saves as AD (e.g., 2024-01-01)
-            altInput: true,
-            altFormat: "d F Y",
-            minDate: "today",
-
-            onReady: function(selectedDates, dateStr, instance) {
-                updateInputField(instance);
-                drawBuddhistYear(instance);
-            },
-
-            onOpen: function(selectedDates, dateStr, instance) {
-                drawBuddhistYear(instance);
-            },
-
-            onMonthChange: function(selectedDates, dateStr, instance) {
-                drawBuddhistYear(instance);
-            },
-
-            onYearChange: function(selectedDates, dateStr, instance) {
-                drawBuddhistYear(instance);
-            },
-
-            onChange: function(selectedDates, dateStr, instance) {
-                updateInputField(instance);
-            }
-        };
-
-        // --- Helper Functions ---
-
-        // Logic to update the "Alt Input" (The text box user sees)
-        function updateInputField(instance) {
-            if (instance.selectedDates.length > 0) {
-                const date = instance.selectedDates[0];
-                const beYear = date.getFullYear() + 543;
-                const formatted = instance.formatDate(date, "d F");
-                instance.altInput.value = `${formatted} ${beYear}`;
-            }
-        }
-
-        // Logic to update the Calendar Popup Header (The box inside the calendar)
-        function drawBuddhistYear(instance) {
-            setTimeout(() => {
-                if (instance.currentYearElement) {
-                    // Calculate BE Year
-                    const beYear = instance.currentYear + 543;
-                    // Force the input value to show BE
-                    instance.currentYearElement.value = beYear;
-                }
-            }, 10);
-        }
-
-        // Initialize both date pickers
-        flatpickr("#start_date", flatpickrConfig);
-        flatpickr("#end_date", flatpickrConfig);
-    </script>
-@endif
