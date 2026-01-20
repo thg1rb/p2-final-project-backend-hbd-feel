@@ -21,6 +21,6 @@ class MainDashboardController extends Controller
             ->where('events.semester', $currentEvent->semester)
             ->where('events.academic_year', $currentEvent->academic_year)
             ->count();
-        return view("main.dashboard", compact('totalUser', 'currentEvent', 'currentAwardTotal'));
+        return view("main.index", compact('totalUser', 'currentEvent', 'currentAwardTotal'));
     }
 }

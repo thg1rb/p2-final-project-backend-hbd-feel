@@ -16,7 +16,10 @@ class AwardReportController extends Controller
         Gate::authorize('viewAny', Award::class);
         $targetYear = $request->year;
         $targetSemester = $request->semester;
-        $query = User::whereHas('awards.events', function ($q) use ($targetYear, $targetSemester) {
+        $search = $request->search;
+        $awardType = $request->type;
+
+        $query = User::whereHas('awards.events', function ($q) use ($targetYear, $targetSemester, $awardType) {
 
             if ($targetYear != "") {
                 $q->where('academic_year', $targetYear);
@@ -25,8 +28,18 @@ class AwardReportController extends Controller
             if ($targetSemester != "") {
                 $q->where('semester', $targetSemester);
             }
-        })
-            ->with('awards.events');
+
+            if ($awardType != "") {
+                $q->where('name', $awardType);
+            }
+        });
+        if ($search) {
+            $query->where(function ($q) use ($search) {
+                $q->where('firstName', 'LIKE', "%{$search}%")
+                    ->orWhere('lastName', 'LIKE', "%{$search}%");
+            });
+        }
+        $query->with('awards.events');
 
         if ($request->input('export') == 'csv') {
             $usersAll = $query->get();
@@ -58,7 +71,7 @@ class AwardReportController extends Controller
             return $group->sum('users_count');
         });
 
-        return view("report.award-report", compact('users', 'allYears', 'allSemesters', 'targetSemester', 'targetYear', 'awardStats'));
+        return view("report.index", compact('users', 'allYears', 'allSemesters', 'targetSemester', 'targetYear', 'awardStats'));
     }
 
     private function exportCsv($users)
