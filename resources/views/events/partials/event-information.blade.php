@@ -125,7 +125,7 @@
                                     option.selected = true;
                                 }
                                 select.appendChild(option);
-                                currentYear--;
+                                currentYear++;
                             }
                         })();
                     </script>

@@ -33,7 +33,7 @@ class EventFactory extends Factory
         $combination = $this->faker->unique()->randomElement($combinations);
 
         // Only the latest `academic_year` and `semester` (2569/2) should be OPENED
-        $status = ($combination['academic_year'] === 2568 && $combination['semester'] === 1)
+        $status = ($combination['academic_year'] === 2567 && $combination['semester'] === 2)
             ? Status::OPENED
             : Status::CLOSED;
 
