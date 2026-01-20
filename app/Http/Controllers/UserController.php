@@ -16,27 +16,28 @@ class UserController extends Controller
      */
     public function index(Request $request)
     {
-         $users = User::query()
-             ->when($request->role, function($query, $role) {
-                 return $query->where('role', $role);
-             })
-             ->when($request->search, function ($query, $search) {
-                 $query->where(function ($q) use ($search) {
-                     $q->where('firstName', 'like', "%{$search}%")
-                         ->orWhere('lastName', 'like', "%{$search}%")
-                         ->orWhere('email', 'like', "%{$search}%")
-                         ->orWhere('username', 'like', "%{$search}%");
-                 });
-             })
-             ->paginate(15)
-             ->withQueryString();
+        $users = User::query()
+            ->when($request->role, function ($query, $role) {
+                return $query->where('role', $role);
+            })
+            ->when($request->search, function ($query, $search) {
+                $query->where(function ($q) use ($search) {
+                    $q->where('firstName', 'like', "%{$search}%")
+                        ->orWhere('lastName', 'like', "%{$search}%")
+                        ->orWhere('email', 'like', "%{$search}%")
+                        ->orWhere('username', 'like', "%{$search}%");
+                });
+            })
+            ->paginate(15)
+            ->withQueryString();
 
-         return view('users.index',
-             [
+        return view(
+            'users.index',
+            [
                 'users' => $users,
-                 'roles' => UserRole::cases(),
-             ]
-         );
+                'roles' => UserRole::cases(),
+            ]
+        );
     }
 
     /**
@@ -45,10 +46,12 @@ class UserController extends Controller
     public function create()
     {
         Gate::authorize('create', User::class);
-        return view('users.create',
+        return view(
+            'users.create',
             [
                 'roles' => UserRole::cases(),
-            ]);
+            ]
+        );
     }
 
     /**
@@ -62,7 +65,7 @@ class UserController extends Controller
             'lastName' => ['required', 'string', 'max:255'],
             'email' => ['required', 'string', 'email', 'max:255', 'unique:users'],
             'username' => ['required', 'string', 'max:255', 'unique:users'],
-            'password' => ['required', 'string', 'min:8', 'confirmed'],
+            'password' => ['required', 'string', 'min:8'],
             'role' => [Rule::notIn([UserRole::ADMIN->value])],
         ], [
             'firstName.required' => 'กรอกชื่อจริง',
@@ -72,6 +75,7 @@ class UserController extends Controller
             'password.required' => 'กรอกรหัสผ่าน'
         ]);
 
+        $userName = $request->input('username');
         $firstName = $request->input('firstName');
         $lastName = $request->input('lastName');
         $email = $request->input('email');
@@ -83,6 +87,7 @@ class UserController extends Controller
         }
 
         $user = new User();
+        $user->username = $userName;
         $user->firstName = $firstName;
         $user->lastName = $lastName;
         $user->email = $email;
@@ -123,8 +128,8 @@ class UserController extends Controller
         $validated = $request->validate([
             'firstName' => 'required|string|max:50',
             'lastName' => 'required|string|max:50',
-            'email' => 'required|email|unique:users,email,'.$user->id,
-            'username' => 'required|string|unique:users,username,'.$user->id,
+            'email' => 'required|email|unique:users,email,' . $user->id,
+            'username' => 'required|string|unique:users,username,' . $user->id,
             'role' => 'required',
             'password' => 'nullable|min:8|confirmed',
         ]);
