@@ -2,7 +2,7 @@
     <!-- Primary Navigation Menu -->
     <div class="mx-auto px-4 sm:px-6 lg:px-8">
         <div class="flex justify-between h-16 items-center">
-            <div class="flex gap-3">
+            <a class="flex gap-3" href="{{ route('main') }}">
                 <!-- Logo -->
                 {{-- <div class="shrink-0 flex items-center">
                     <a href="{{ route('dashboard') }}">
@@ -25,13 +25,19 @@
                     <p class=" font-bold">นิสิตดีเด่น</p>
                     <p class="text-sm">มหาวิทยาลัยเกษตรศาสตร์</p>
                 </div>
-            </div>
+            </a>
 
             <!-- Settings Dropdown -->
             <div class="hidden sm:flex sm:items-center sm:ms-6">
                 <div class="flex gap-3 justify-center items-center">
-                    <p class="bg-[#2e3336] p-3 rounded-full text-white text-sm">ผู้ดูแลระบบ</p>
-                    <p class="">นาย กอไก่ สมโชคชัย</p>
+                    <p class="bg-[#2e3336] p-3 rounded-full text-white text-sm">
+                        @if (Auth::user()->role === 'ADMIN')
+                            ผู้ดูแลระบบ
+                        @elseif (Auth::user()->role === 'NISIT')
+                            นิสิต
+                        @endif
+                    </p>
+                    <p class="">{{ Auth::user()?->name }}</p>
                 </div>
                 <x-dropdown align="right" width="48">
                     <x-slot name="trigger">
@@ -52,7 +58,7 @@
 
                     <x-slot name="content">
                         <x-dropdown-link :href="route('profile.edit')">
-                            {{ __('Profile') }}
+                            {{ __('โปรไฟล์') }}
                         </x-dropdown-link>
 
                         <!-- Authentication -->
@@ -62,7 +68,7 @@
                             <x-dropdown-link :href="route('logout')"
                                 onclick="event.preventDefault();
                                                 this.closest('form').submit();">
-                                {{ __('Log Out') }}
+                                {{ __('ออกจากระบบ') }}
                             </x-dropdown-link>
                         </form>
                     </x-slot>
@@ -88,7 +94,7 @@
     <!-- Responsive Navigation Menu -->
     <div :class="{ 'block': open, 'hidden': !open }" class="hidden sm:hidden">
         <div class="pt-2 pb-3 space-y-1">
-            <x-responsive-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
+            <x-responsive-nav-link :href="route('main')" :active="request()->routeIs('main')">
                 {{ __('Dashboard') }}
             </x-responsive-nav-link>
         </div>

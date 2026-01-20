@@ -8,11 +8,7 @@ use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Auth\SocialAuthController;
 
-Route::get('/', [MainDashboardController::class, 'index'])->middleware('auth')->name('main.dashboard');
-
-Route::get('/dashboard', function () {
-    return view('dashboard');
-})->middleware(['auth', 'verified'])->name('dashboard');
+Route::get('/', [MainDashboardController::class, 'index'])->middleware(['auth', 'verified'])->name('main');
 
 Route::middleware('auth')->group(function () {
     Route::get('/events', [EventController::class, 'index'])->name('events.index');

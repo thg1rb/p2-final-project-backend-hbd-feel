@@ -69,4 +69,9 @@ class User extends Authenticatable
         return $this->belongsToMany(Award::class, 'user_award')
             ->withTimestamps();
     }
+
+    public function isAdmin(): bool
+    {
+        return $this->role === 'ADMIN';
+    }
 }
