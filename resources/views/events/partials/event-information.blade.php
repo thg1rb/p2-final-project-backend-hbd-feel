@@ -111,21 +111,25 @@
                 @error('academic_year') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
                 @if(!$readonly)
                     <script>
-                        (function() {
-                            const AMOUNT_OF_YEAR = 5;
-                            let currentYear = new Date().getFullYear() + 543;
+                        (function () {
+                            const RANGE = 6;
+                            const currentYear = new Date().getFullYear() + 543;
                             const selectedYear = '{{ old('academic_year', $event?->academic_year) }}';
                             const select = document.getElementById('academic_year');
 
-                            for (let i = 0; i < AMOUNT_OF_YEAR; i++) {
-                                let option = document.createElement('option');
-                                option.value = currentYear;
-                                option.text = currentYear;
-                                if (selectedYear && currentYear == selectedYear) {
+                            const startYear = currentYear + RANGE;
+                            const endYear = currentYear - RANGE;
+
+                            for (let year = startYear; year >= endYear; year--) {
+                                const option = document.createElement('option');
+                                option.value = year;
+                                option.text = year;
+
+                                if (selectedYear && year == selectedYear) {
                                     option.selected = true;
                                 }
+
                                 select.appendChild(option);
-                                currentYear++;
                             }
                         })();
                     </script>
