@@ -34,4 +34,8 @@ class Event extends Model
         return $this->belongsToMany(Award::class, 'event_award')
             ->withTimestamps();
     }
+
+    public function users() {
+        return $this->belongsToMany(User::class, 'event_user')->withTimestamps();
+    }
 }
