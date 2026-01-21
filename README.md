@@ -13,10 +13,6 @@
 
 The Student Affairs Division of Kasetsart University aims to develop the "Nisit Deeden System" to streamline the selection process for the Outstanding Student Award, which grants tuition waivers or certificates to qualified students. In this workflow, students self-nominate in one of three categories—Extra-curricular Activities, Creativity and Innovation, or Good Conduct—by submitting specific supporting documents for a single chosen category per round. The application undergoes a hierarchical approval process starting with the Head of Department, followed by the Associate Dean and the Dean, before reaching the Student Affairs Division for verification, where staff possess the authority to correct award categories if necessary. Subsequently, a committee reviews and votes on the candidates, requiring a majority consensus for approval, after which the process concludes with the Committee Chairman and University President signing off on the final announcement; however, complex specific steps may remain as manual processes depending on development feasibility
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
-
-
-
 
 ## 🚀 Get Started
 
