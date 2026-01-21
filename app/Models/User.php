@@ -69,4 +69,8 @@ class User extends Authenticatable
         return $this->belongsToMany(Award::class, 'user_award')
             ->withTimestamps();
     }
+
+    public function events() {
+        return $this->belongsToMany(Event::class)->withTimestamps();
+    }
 }

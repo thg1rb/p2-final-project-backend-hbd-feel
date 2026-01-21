@@ -40,7 +40,7 @@
         </div>
         <div>
             <p class="font-bold mb-4 text-xl">เมนูหลัก</p>
-            <div class="flex gap-4">
+            <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
                 <button
                     class="group bg-white rounded-lg p-8 cursor-pointer flex flex-1 border shadow-sm hover:border-primary hover:shadow-lg transition-all"
                     type="button"
@@ -73,6 +73,23 @@
                             </p>
                             <p class="text-gray-400 text-sm text-start">
                                 สร้างและจัดการรอบรับสมัคร
+                            </p>
+                        </div>
+                    </div>
+                    <x-icon name='arrow-right' class="stroke-gray-400 group-hover:stroke-primary"></x-icon>
+                </a>
+                <a href="{{ route('awards.index') }}"
+                    class="group bg-white rounded-lg p-8 cursor-pointer flex flex-1 border shadow-sm hover:border-primary hover:shadow-lg transition-all">
+                    <div class="flex-1 flex flex-col items-start gap-4">
+                        <div class=" bg-[#e8f5ef] p-5 rounded-xl flex justify-center items-center w-fit">
+                            <x-icon name='trophy' class="stroke-primary"></x-icon>
+                        </div>
+                        <div class="flex flex-col justify-start gap-1">
+                            <p class="font-bold text-start text-lg">
+                                จัดการรางวัล
+                            </p>
+                            <p class="text-gray-400 text-sm text-start">
+                                จัดการ เพิ่ม แก้ไข ลบ หมวดรางวัลต่าง ๆ
                             </p>
                         </div>
                     </div>

@@ -17,9 +17,18 @@ class AwardSeeder extends Seeder
     {
         Award::factory()->count(3)
             ->state(new Sequence(
-                ['name' => 'Extracurricular Activities'],
-                ['name' => 'Creativity & Innovation'],
-                ['name' => 'Good Conduct'],
+                [
+                    'name' => 'Extracurricular Activities',
+                    'reward' => 5000
+                ],
+                [
+                    'name' => 'Creativity & Innovation',
+                    'reward' => 5000
+                ],
+                [
+                    'name' => 'Good Conduct',
+                    'reward' => 3000
+                ],
             ))
             ->create();
     }

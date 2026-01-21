@@ -21,6 +21,7 @@ class DatabaseSeeder extends Seeder
             AwardSeeder::class,
             UserAwardSeeder::class,
             EventAwardSeeder::class,
+            EventUserSeeder::class,
         ]);
 
         User::factory(50)->create();
