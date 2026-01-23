@@ -14,7 +14,7 @@ class AwardController extends Controller
         if ($request->filled('search')) {
             $query->where('name', 'like', '%' . $request->search . '%');
         }
-        $awards = $query->paginate(5)->withQueryString();
+        $awards = $query->paginate(10)->withQueryString();
         return view('awards.index', ['awards' => $awards]);
     }
 
