@@ -93,8 +93,8 @@
                     ค้นหา
                 </button>
             </form>
-            <div class="rounded-xl border border-gray-300 bg-white">
-                <table class="w-full">
+            <div class="rounded-xl border border-gray-300 bg-white overflow-x-auto">
+                <table class="w-full min-w-max">
                     <thead class="divide-y border-b bg-gray-100">
                         <tr class="divide-x">
                             <th class="px-6 py-3 text-center cursor-pointer hover:bg-gray-200 transition">
