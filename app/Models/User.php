@@ -64,6 +64,15 @@ class User extends Authenticatable
         return $this->role != UserRole::ADMIN;
     }
 
+    public function getRedirectRoute(): string
+    {
+        if ($this->isAdmin()) {
+            return route('main');
+        }
+
+        return route('award-registrations.index');
+    }
+
     public function awards()
     {
         return $this->belongsToMany(Award::class, 'user_award')
