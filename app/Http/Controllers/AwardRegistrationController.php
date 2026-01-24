@@ -20,12 +20,12 @@ class AwardRegistrationController extends Controller
         $baseQuery = AwardRegistration::query();
 
         // ตรวจสอบสิทธิ์
-//        if (auth()->user()->role !== 'admin') {
-//            // ถ้าไม่ใช่ Admin ให้ดึงเฉพาะข้อมูลที่ user_id ตรงกับคนที่ Login อยู่
-//            $query->where('user_id', auth()->id());
-//        }
+        if (auth::check() && auth()->user()->role !== 'admin') {
+            // ถ้าไม่ใช่ Admin ให้ดึงเฉพาะข้อมูลที่ user_id ตรงกับคนที่ Login อยู่
+            $baseQuery->where('user_id', auth()->id());
+        }
+        else $baseQuery->where('user_id', 1);
 
-        $baseQuery->where('user_id', 9);
 
         $allStats = $baseQuery->get(['status']);
 

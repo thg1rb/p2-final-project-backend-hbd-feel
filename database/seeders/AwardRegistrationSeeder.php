@@ -16,7 +16,7 @@ class AwardRegistrationSeeder extends Seeder
      */
     public function run(): void
     {
-        $user = User::find(9);
+        $user = User::find(1);
         $award = Award::find(1);
         $event = Event::find(1);
 
