@@ -1,6 +1,12 @@
 @extends('award-registrations.create')
 
 @section('content')
+    @if(session('upload_success'))
+        <div class="mb-4 rounded-lg bg-emerald-50 border border-emerald-200
+                text-emerald-700 px-4 py-3 text-sm">
+            {{ session('upload_success') }}
+        </div>
+    @endif
     <form method="POST"
           action="{{ route('award-registrations.store') }}?step=2"
           enctype="multipart/form-data">

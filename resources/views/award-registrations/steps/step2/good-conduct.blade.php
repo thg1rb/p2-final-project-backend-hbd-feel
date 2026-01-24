@@ -1,16 +1,16 @@
+
 <div class="space-y-6">
     <div class="space-y-6">
         <div>
-            <input type="hidden" name="action" value="">
             <label class="block text-sm font-medium text-gray-700 mb-1">
-                จำนวนชั่วโมงกิจกรรม
+                ผู้รับรอง
             </label>
             <input
-                type="number"
-                name="activity_hours"
-                value="{{ old('activity_hours', session('award_registration.step2.activity_hours')) }}"
+                type="text"
+                name="approver"
+                value="{{ old('approver', session('award_registration.step2.approver')) }}"
                 class="w-full rounded-lg border-gray-300 focus:border-emerald-500 focus:ring-emerald-500"
-                placeholder="เช่น 100"
+                placeholder="ชื่อของผู้รับรอง"
             >
         </div>
 
@@ -50,5 +50,14 @@
                 >
             </label>
         </div>
+        @if(session('award_registration.step2.documents'))
+            <ul class="mt-2 space-y-1 text-sm text-gray-600">
+                @foreach(session('award_registration.step2.documents') as $doc)
+                    <li class="flex items-center gap-2">
+                        📎 {{ basename($doc) }}
+                    </li>
+                @endforeach
+            </ul>
+        @endif
     </div>
 </div>

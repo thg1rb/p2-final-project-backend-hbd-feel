@@ -43,10 +43,10 @@
                 <input
                     type="radio"
                     name="award_type"
-                    value="good_conduct"
+                    value="good-conduct"
                     class="text-emerald-600"
                     @checked(
-                        old('award_type', session('award_registration.step1.award_type')) === 'good_conduct'
+                        old('award_type', session('award_registration.step1.award_type')) === 'good-conduct'
                     )>
                 <div>
                     <p class="font-medium text-gray-900">ด้านความประพฤติดี</p>
