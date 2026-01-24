@@ -36,6 +36,10 @@ Route::middleware('auth')->group(function () {
    Route::delete('/awards/{award}', [AwardController::class, 'destroy'])->name('awards.destroy');
 });
 
+Route::middleware('auth')->group(function () {
+    Route::get('/award-registrations', [\App\Http\Controllers\AwardRegistrationController::class, 'index']);
+});
+
 Route::get('/auth/google/redirect', [SocialAuthController::class, 'redirectToProvider'])
     ->name('google.redirect');
 
@@ -51,6 +55,8 @@ Route::get('/users', [
 Route::get('/users/create', [
     UserController::class, 'create'
 ])->name('users.create');
+
+Route::get('/award-registrations', [\App\Http\Controllers\AwardRegistrationController::class, 'index']);
 
 Route::resource('users', UserController::class);
 
