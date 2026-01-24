@@ -14,6 +14,9 @@ class AwardRegistration extends Model
     use HasFactory;
 
     protected $fillable = [
+        'user_id',
+        'award_id',
+        'event_id',
         'first_name',
         'last_name',
         'academic_year',

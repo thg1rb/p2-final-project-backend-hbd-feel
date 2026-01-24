@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\AwardRegistration\Step2\ActivityRequest;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use App\Models\ActivityAwardRegistration;
 use App\Models\AwardRegistration;
@@ -15,7 +16,7 @@ class AwardRegistrationController extends Controller
 {
     public function create(Request $request)
     {
-        $step = (int) $request->query('step', 1);
+        $step = (int)$request->query('step', 1);
 
         if (!in_array($step, [1, 2, 3])) {
             abort(404);
@@ -26,7 +27,7 @@ class AwardRegistrationController extends Controller
 
     public function store(Request $request)
     {
-        $step = (int) $request->query('step', 1);
+        $step = (int)$request->query('step', 1);
 
         if (!in_array($step, [1, 2, 3])) {
             abort(404);
@@ -35,7 +36,7 @@ class AwardRegistrationController extends Controller
         match ($step) {
             1 => $this->storeStep1($request),
             2 => $this->storeStep2($request),
-            3 => null,
+            3 => $this->storeFinal()
         };
 
         if ($request->input('action') === 'back') {
@@ -47,7 +48,7 @@ class AwardRegistrationController extends Controller
         }
 
         session()->forget('award_registration');
-        return redirect()->route('award-registrations.index');
+        return redirect()->route('award-registrations');
     }
 
     private function storeStep1(Request $request)
@@ -116,60 +117,98 @@ class AwardRegistrationController extends Controller
                 'documents' => $documents,
             ]
         ]);
+    }
 
-    public function index(Request $request)
-    {
-        // เริ่มต้น Query โดยโหลดความสัมพันธ์ 'awardable' (ลูก) และ 'award' (ข้อมูลรางวัล) มาด้วย
-        $baseQuery = AwardRegistration::query();
+        public function index(Request $request)
+        {
+            // เริ่มต้น Query โดยโหลดความสัมพันธ์ 'awardable' (ลูก) และ 'award' (ข้อมูลรางวัล) มาด้วย
+            $baseQuery = AwardRegistration::query();
 
-        // ตรวจสอบสิทธิ์
-        if (auth::check() && auth()->user()->role !== 'admin') {
-            // ถ้าไม่ใช่ Admin ให้ดึงเฉพาะข้อมูลที่ user_id ตรงกับคนที่ Login อยู่
-            $baseQuery->where('user_id', auth()->id());
+            // ตรวจสอบสิทธิ์
+            if (auth::check() && auth()->user()->role !== 'admin') {
+                // ถ้าไม่ใช่ Admin ให้ดึงเฉพาะข้อมูลที่ user_id ตรงกับคนที่ Login อยู่
+                $baseQuery->where('user_id', auth()->id());
+            } else $baseQuery->where('user_id', 1);
+
+
+            $allStats = $baseQuery->get(['status']);
+
+
+            // ทำ Pagination เพื่อไม่ให้โหลดข้อมูลหนักเกินไป (เช่น หน้าละ 15 รายการ)
+            $registrations = (clone $baseQuery)
+                ->with(['awardable', 'award', 'event'])
+                ->latest()
+                ->paginate(5);
+
+            return view('award-registrations.index', compact('registrations', 'allStats'));
         }
-        else $baseQuery->where('user_id', 1);
 
-
-        $allStats = $baseQuery->get(['status']);
-
-
-        // ทำ Pagination เพื่อไม่ให้โหลดข้อมูลหนักเกินไป (เช่น หน้าละ 15 รายการ)
-        $registrations = (clone $baseQuery)
-            ->with(['awardable', 'award', 'event'])
-            ->latest()
-            ->paginate(5);
-
-        return view('award-registrations.index', compact('registrations', 'allStats'));
-    }
-
-    /**
-     * Display the specified resource.
-     */
-    public function show(AwardRegistration $awardRegistration)
+    private function storeFinal()
     {
-        //
-    }
+        DB::transaction(function () {
 
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(AwardRegistration $awardRegistration)
-    {
-        //
-    }
+            $step1 = session('award_registration.step1');
+            $step2 = session('award_registration.step2');
 
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, AwardRegistration $awardRegistration)
-    {
-        //
-    }
+            $type = $step1['award_type'];
 
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(AwardRegistration $awardRegistration)
-    {
-        //
+            $awardable = match ($type) {
+                'activity' => ActivityAwardRegistration::create([
+                    'activity_hours' => $step2['activity_hours'],
+                ]),
+
+                'good-conduct' => BehaviorAwardRegistration::create([
+                    'approver' => $step2['approver'],
+                ]),
+
+                'innovation' => InnovationAwardRegistration::create([
+                    'award_name' => $step2['award'],
+                ]),
+            };
+
+            AwardRegistration::create([
+                'user_id'        => Auth::id(),
+                'award_id' => 1,
+                'event_id' => 1,
+                'first_name' => Auth::user()->firstName,
+                'last_name' => Auth::user()->lastName,
+                'academic_year' => 2025,
+                'awardable_id'   => $awardable->id,
+                'awardable_type' => get_class($awardable),
+                'status'         => 'pending',
+                'documents'      => $step2['documents'] ?? [],
+            ]);
+        });
     }
+        /**
+         * Display the specified resource.
+         */
+        public function show(AwardRegistration $awardRegistration)
+        {
+            //
+        }
+
+        /**
+         * Show the form for editing the specified resource.
+         */
+        public function edit(AwardRegistration $awardRegistration)
+        {
+            //
+        }
+
+        /**
+         * Update the specified resource in storage.
+         */
+        public function update(Request $request, AwardRegistration $awardRegistration)
+        {
+            //
+        }
+
+        /**
+         * Remove the specified resource from storage.
+         */
+        public function destroy(AwardRegistration $awardRegistration)
+        {
+            //
+        }
+}

@@ -70,7 +70,7 @@ class User extends Authenticatable
             return route('main');
         }
 
-        return route('award-registrations.index');
+        return route('award-registrations');
     }
 
     public function awards()

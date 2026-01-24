@@ -11,7 +11,7 @@
                 </p>
             </div>
             <div class="flex gap-x-3">
-                <a href="{{ route('awards.create') }}" class="flex items-center gap-2 bg-[#226e64] text-white px-5 py-2.5 rounded-xl hover:bg-[#1a564d] transition-all shadow-sm">
+                <a href="{{ route('award-registrations.create') }}" class="flex items-center gap-2 bg-[#226e64] text-white px-5 py-2.5 rounded-xl hover:bg-[#1a564d] transition-all shadow-sm">
                     <x-icon name="plus" size="20" />
                     <span class="font-medium">สมัครนิสิตดีเด่น</span>
                 </a>
