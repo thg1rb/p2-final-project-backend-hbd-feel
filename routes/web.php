@@ -8,6 +8,7 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Auth\SocialAuthController;
+use App\Http\Controllers\AwardRegistrationController;
 
 Route::get('/', [MainDashboardController::class, 'index'])->middleware(['auth', 'verified'])->name('main');
 
@@ -34,6 +35,21 @@ Route::middleware('auth')->group(function () {
    Route::get('/awards/{award}/edit', [AwardController::class, 'edit'])->name('awards.edit');
    Route::put('/awards/{award}', [AwardController::class, 'update'])->name('awards.update');
    Route::delete('/awards/{award}', [AwardController::class, 'destroy'])->name('awards.destroy');
+});
+
+Route::middleware('auth')->group(function () {
+    Route::get('/award-registrations', [\App\Http\Controllers\AwardRegistrationController::class, 'index'])->name('award-registrations');
+
+    Route::get(
+        'award-registrations/create',
+        [AwardRegistrationController::class, 'create']
+    )->name('award-registrations.create');
+
+    Route::post(
+        'award-registrations/store',
+        [AwardRegistrationController::class, 'store']
+    )->name('award-registrations.store');
+
 });
 
 Route::get('/auth/google/redirect', [SocialAuthController::class, 'redirectToProvider'])

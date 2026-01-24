@@ -64,6 +64,15 @@ class User extends Authenticatable
         return $this->role != UserRole::ADMIN;
     }
 
+    public function getRedirectRoute(): string
+    {
+        if ($this->isAdmin()) {
+            return route('main');
+        }
+
+        return route('award-registrations');
+    }
+
     public function awards()
     {
         return $this->belongsToMany(Award::class, 'user_award')
@@ -72,5 +81,9 @@ class User extends Authenticatable
 
     public function events() {
         return $this->belongsToMany(Event::class)->withTimestamps();
+    }
+
+    public function awardRegistrations() {
+        return $this->hasMany(AwardRegistration::class);
     }
 }
