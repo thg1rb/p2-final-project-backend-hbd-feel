@@ -2,6 +2,7 @@
 
 namespace App\Providers;
 
+use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
@@ -20,5 +21,10 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         //
+        Relation::enforceMorphMap([
+            'activity' => \App\Models\ActivityAwardRegistration::class,
+            'innovation' => \App\Models\InnovationAwardRegistration::class,
+            'behavior' => \App\Models\BehaviorAwardRegistration::class,
+        ]);
     }
 }

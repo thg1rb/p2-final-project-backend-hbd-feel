@@ -38,9 +38,7 @@ Route::middleware('auth')->group(function () {
 });
 
 Route::middleware('auth')->group(function () {
-    Route::get('/award-registrations', function () {
-        return view('award-registrations.index');
-    })->name('award-registrations.index');;
+    Route::get('/award-registrations', [\App\Http\Controllers\AwardRegistrationController::class, 'index']);
 
     Route::get(
         'award-registrations/create',
@@ -69,6 +67,8 @@ Route::get('/users', [
 Route::get('/users/create', [
     UserController::class, 'create'
 ])->name('users.create');
+
+Route::get('/award-registrations', [\App\Http\Controllers\AwardRegistrationController::class, 'index']);
 
 Route::resource('users', UserController::class);
 
