@@ -5,9 +5,9 @@
         {{-- Header Section --}}
         <div class="flex justify-between items-start">
             <div>
-{{--                <h1 class="text-3xl font-bold text-gray-800">สวัสดี, {{ auth()->user()->name }}</h1>--}}
+                <h1 class="text-3xl font-bold text-gray-800">สวัสดี, {{ auth()->user()->firstName ." ". auth()->user()->lastName }}</h1>
                 <p class="text-gray-500 mt-1">
-{{--                    รหัสนิสิต: {{ auth()->user()->student_id ?? 'N/A' }} | {{ auth()->user()->department ?? 'คณะของคุณ' }}--}}
+                    รหัสนิสิต: {{ auth()->user()->studentId ?? 'N/A' }} | {{ auth()->user()->department ?? 'คณะ' }}
                 </p>
             </div>
             <div class="flex gap-x-3">
@@ -73,8 +73,7 @@
             </div>
         </div>
 
-        {{-- Active Round Banner (ตัวอย่าง Hardcode หรือดึงจากตาราง Event) --}}
-        @if($currentEvent = $registrations->first()?->event)
+        @if($currentEvent)
             <div class="bg-[#2d6a4f] rounded-2xl p-6 text-white flex justify-between items-center shadow-md">
                 <div class="flex items-center gap-5">
                     <div class="bg-white/20 p-4 rounded-xl">
@@ -82,7 +81,7 @@
                     </div>
                     <div>
                         <h3 class="text-xl font-bold">รอบรับสมัครปัจจุบัน</h3>
-                        <p class="opacity-90">{{ $currentEvent->name ?? 'ภาคเรียนปัจจุบัน' }}</p>
+                        <p class="opacity-90">ภาคเรียน {{ $currentEvent->semester ?? 'ภาคเรียนปัจจุบัน' }}/ {{ $currentEvent->academic_year ?? 'xxx'}}</p>
                     </div>
                 </div>
                 <div class="text-right">

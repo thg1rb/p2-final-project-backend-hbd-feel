@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Enums\UserRole;
 use App\Http\Requests\AwardRegistration\Step2\ActivityRequest;
 use App\Http\Requests\AwardRegistration\Step2\InnovationRequest;
 use Illuminate\Http\Request;
@@ -135,26 +136,26 @@ class AwardRegistrationController extends Controller
 
         public function index(Request $request)
         {
-            // เริ่มต้น Query โดยโหลดความสัมพันธ์ 'awardable' (ลูก) และ 'award' (ข้อมูลรางวัล) มาด้วย
             $baseQuery = AwardRegistration::query();
 
             // ตรวจสอบสิทธิ์
-            if (auth::check() && auth()->user()->role !== 'admin') {
-                // ถ้าไม่ใช่ Admin ให้ดึงเฉพาะข้อมูลที่ user_id ตรงกับคนที่ Login อยู่
+            if (auth::check() && auth()->user()->role == UserRole::NISIT) {
                 $baseQuery->where('user_id', auth()->id());
-            } else $baseQuery->where('user_id', 1);
+            }
 
 
             $allStats = $baseQuery->get(['status']);
 
 
-            // ทำ Pagination เพื่อไม่ให้โหลดข้อมูลหนักเกินไป (เช่น หน้าละ 15 รายการ)
             $registrations = (clone $baseQuery)
                 ->with(['awardable', 'award', 'event'])
                 ->latest()
                 ->paginate(5);
 
-            return view('award-registrations.index', compact('registrations', 'allStats'));
+            $currentEvent = \App\Models\Event::where('status', "OPENED")
+                ->first();
+
+            return view('award-registrations.index', compact('registrations', 'allStats','currentEvent'));
         }
 
     private function storeFinal()
