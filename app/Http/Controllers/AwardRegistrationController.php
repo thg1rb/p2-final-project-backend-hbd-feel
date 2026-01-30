@@ -174,10 +174,12 @@ class AwardRegistrationController extends Controller
                 'last_name' => Auth::user()->lastName,
                 'academic_year' => 2025,
                 'awardable_id'   => $awardable->id,
-                'awardable_type' => get_class($awardable),
+                'awardable_type' => "",
                 'status'         => 'pending',
                 'documents'      => $step2['documents'] ?? [],
             ]);
+            $registration->awardable()->associate($event);
+            $registration->save();
         });
     }
         /**
