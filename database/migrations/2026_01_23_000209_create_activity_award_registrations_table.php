@@ -13,10 +13,18 @@ return new class extends Migration
     {
         Schema::create('activity_award_registrations', function (Blueprint $table) {
             $table->id();
-            $table->integer('activity_hours');
-//            $table->foreignIdFor(\App\Models\AwardRegistration::class)->constrained();
+
+            $table->json('activity_types');
+
+            $table->date('award_date');
+            $table->string('project_name');
+            $table->string('team_name');
+            $table->string('work_name');
+            $table->string('award_name');
+            $table->string('organizer');
             $table->timestamps();
         });
+
     }
 
     /**

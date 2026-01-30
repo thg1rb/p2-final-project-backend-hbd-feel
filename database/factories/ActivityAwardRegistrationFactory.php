@@ -2,22 +2,32 @@
 
 namespace Database\Factories;
 
+use App\Models\ActivityAwardRegistration;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\ActivityAwardRegistration>
+ * @extends Factory<ActivityAwardRegistration>
  */
 class ActivityAwardRegistrationFactory extends Factory
 {
-    /**
-     * Define the model's default state.
-     *
-     * @return array<string, mixed>
-     */
+    protected $model = ActivityAwardRegistration::class;
+
     public function definition(): array
     {
         return [
-            'activity_hours' => $this->faker->numberBetween(1, 20),
+            'activity_types' => [$this->faker->randomElement([
+                'community',
+                'competition',
+                'leadership',
+            ])],
+
+            'award_date' => $this->faker->date(),
+
+            'project_name' => $this->faker->sentence(3),
+            'team_name' => $this->faker->word(),
+            'work_name' => $this->faker->sentence(2),
+            'award_name' => 'รางวัลดีเด่น',
+            'organizer' => 'มหาวิทยาลัยเกษตรศาสตร์',
         ];
     }
 }

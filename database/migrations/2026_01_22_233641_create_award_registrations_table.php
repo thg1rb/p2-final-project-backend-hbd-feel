@@ -22,6 +22,7 @@ return new class extends Migration
             $table->string('first_name');
             $table->string('last_name');
             $table->string('academic_year');
+            $table->json('documents');
 //            $table->string('award_type');
             $table->morphs('awardable');
             $table->timestamps();

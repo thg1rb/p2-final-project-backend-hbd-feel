@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\AwardRegistration\Step2\ActivityRequest;
+use App\Http\Requests\AwardRegistration\Step2\InnovationRequest;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
@@ -34,15 +35,22 @@ class AwardRegistrationController extends Controller
             abort(404);
         }
 
+        if ($request->input('action') === 'back') {
+
+            if ($step === 2) {
+                $this->storeStep2($request); // เก็บ session เฉย ๆ
+            }
+
+            return redirect()->route('award-registrations.create', [
+                'step' => $step - 1
+            ]);
+        }
+
         match ($step) {
             1 => $this->storeStep1($request),
             2 => $this->storeStep2($request),
-            3 => $this->storeFinal()
+            3 => $this->storeFinal(),
         };
-
-        if ($request->input('action') === 'back') {
-            return redirect()->route('award-registrations.create', ['step' => $step - 1]);
-        }
 
         if ($step < 3) {
             return redirect()->route('award-registrations.create', ['step' => $step + 1]);
@@ -84,12 +92,17 @@ class AwardRegistrationController extends Controller
 
         $data = match ($type) {
             'activity' => app(ActivityRequest::class)->validated(),
-            'good-conduct' => $request->validate([
-                'approver' => 'required|string|max:255',
-            ]),
-            'innovation' => $request->validate([
-                'award' => 'required|string|max:255',
-            ]),
+            'good-conduct' => $request->validate(
+                [
+                    'report' => ['required', 'string'],
+                ],
+                [
+                    'report.required' => 'กรุณากรอกรายงาน',
+                    'report.string' => 'รูปแบบรายงานไม่ถูกต้อง',
+                ]
+            ),
+
+            'innovation' => app(InnovationRequest::class)->validated(),
         };
 
         $documents = session('award_registration.step2.documents', []);
@@ -155,15 +168,26 @@ class AwardRegistrationController extends Controller
 
             $awardable = match ($type) {
                 'activity' => ActivityAwardRegistration::create([
-                    'activity_hours' => $step2['activity_hours'],
+                    'activity_types' => $step2['activity_types'],
+                    'award_date' => $step2['award_date'],
+                    'project_name' => $step2['project_name'],
+                    'team_name' => $step2['team_name'],
+                    'work_name' => $step2['work_name'],
+                    'award_name' => $step2['award_name'],
+                    'organizer' => $step2['organizer'],
                 ]),
 
                 'good-conduct' => BehaviorAwardRegistration::create([
-                    'approver' => $step2['approver'],
+                    'report' => $step2['report'],
                 ]),
 
                 'innovation' => InnovationAwardRegistration::create([
-                    'award_name' => $step2['award'],
+                    'award_date' => $step2['award_date'],
+                    'project_name' => $step2['project_name'],
+                    'team_name' => $step2['team_name'],
+                    'work_name' => $step2['work_name'],
+                    'award_name' => $step2['award_name'],
+                    'organizer' => $step2['organizer'],
                 ]),
             };
 

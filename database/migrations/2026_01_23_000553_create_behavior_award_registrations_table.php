@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('behavior_award_registrations', function (Blueprint $table) {
             $table->id();
-            $table->string('approver');
+            $table->string('report');
 //            $table->foreignIdFor(\App\Models\AwardRegistration::class)->constrained();
             $table->timestamps();
         });

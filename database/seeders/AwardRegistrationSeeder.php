@@ -29,6 +29,7 @@ class AwardRegistrationSeeder extends Seeder
                 'awardable_id' => $item->id,
 //                'awardable_type' => \App\Models\ActivityAwardRegistration::class,
                 'awardable_type' => 'activity',
+                'documents' => [],
 //                'award_type' => 'activity',
             ]);
         });
@@ -42,6 +43,7 @@ class AwardRegistrationSeeder extends Seeder
                 'awardable_id' => $item->id,
 //                'awardable_type' => \App\Models\BehaviorAwardRegistration::class,
                 'awardable_type' => 'behavior',
+                'documents' => [],
 //                'award_type' => 'behavior',
             ]);
         });
@@ -55,6 +57,7 @@ class AwardRegistrationSeeder extends Seeder
                 'awardable_id' => $item->id,
 //                'awardable_type' => \App\Models\InnovationAwardRegistration::class,
                 'awardable_type' => 'innovation',
+                'documents' => [],
 //                'award_type' => 'innovation',
             ]);
         });

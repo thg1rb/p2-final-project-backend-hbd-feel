@@ -30,25 +30,14 @@
             </p>
         </div>
 
-        @isset($step2['approver'])
+        @isset($step2['report'])
             <div>
-                <p class="text-sm text-gray-500">ผู้รับรอง</p>
+                <p class="text-sm text-gray-500">รายงาน</p>
                 <p class="text-gray-900">
-                    {{ $step2['approver'] ?: '-' }}
+                    {{ $step2['report'] ?: '-' }}
                 </p>
             </div>
         @endisset
-
-        <p class="text-sm text-gray-500">ไฟล์แนบ</p>
-        @if(session('award_registration.step2.documents'))
-            <ul class="mt-2 space-y-1">
-                @foreach(session('award_registration.step2.documents') as $doc)
-                    <li class="flex items-center gap-2">
-                        {{ basename($doc) }}
-                    </li>
-                @endforeach
-            </ul>
-        @endif
     </div>
 
     <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-8">

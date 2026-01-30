@@ -18,7 +18,7 @@ class BehaviorAwardRegistrationFactory extends Factory
     {
         return [
             //
-            'approver' => $this->faker->firstName(),
+            'report' => $this->faker->firstName(),
         ];
     }
 }

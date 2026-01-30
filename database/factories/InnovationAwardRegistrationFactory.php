@@ -2,6 +2,7 @@
 
 namespace Database\Factories;
 
+use App\Models\InnovationAwardRegistration;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
@@ -9,16 +10,18 @@ use Illuminate\Database\Eloquent\Factories\Factory;
  */
 class InnovationAwardRegistrationFactory extends Factory
 {
-    /**
-     * Define the model's default state.
-     *
-     * @return array<string, mixed>
-     */
+    protected $model = InnovationAwardRegistration::class;
+
     public function definition(): array
     {
         return [
-            //
-            'award_name' => $this->faker->firstName(),
+            'award_date' => $this->faker->date(),
+
+            'project_name' => $this->faker->sentence(3),
+            'team_name' => $this->faker->word(),
+            'work_name' => $this->faker->sentence(2),
+            'award_name' => 'รางวัลดีเด่น',
+            'organizer' => 'มหาวิทยาลัยเกษตรศาสตร์',
         ];
     }
 }

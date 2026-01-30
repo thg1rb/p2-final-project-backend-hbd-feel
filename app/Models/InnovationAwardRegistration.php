@@ -13,9 +13,17 @@ class InnovationAwardRegistration extends Model
     protected $table = 'innovation_award_registrations';
 
     protected $fillable = [
-        'award_name'
+        'award_date',
+        'project_name',
+        'team_name',
+        'work_name',
+        'award_name',
+        'organizer',
     ];
 
+    protected $casts = [
+        'award_date' => 'date',
+    ];
     public function awardRegistration(): MorphOne
     {
         return $this->morphOne(AwardRegistration::class, 'awardable');
