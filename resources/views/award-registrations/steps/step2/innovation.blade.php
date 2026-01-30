@@ -49,14 +49,6 @@
                 >
             </label>
         </div>
-        @if(session('award_registration.step2.documents'))
-            <ul class="mt-2 space-y-1 text-sm text-gray-600">
-                @foreach(session('award_registration.step2.documents') as $doc)
-                    <li class="flex items-center gap-2">
-                        📎 {{ basename($doc) }}
-                    </li>
-                @endforeach
-            </ul>
-        @endif
+        <ul id="file-preview" class="mt-3 text-sm text-gray-600 list-disc list-inside"></ul>
     </div>
 </div>
