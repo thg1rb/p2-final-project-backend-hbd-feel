@@ -11,6 +11,7 @@ use App\Models\AwardRegistration;
 use App\Models\BehaviorAwardRegistration;
 use App\Models\InnovationAwardRegistration;
 use Illuminate\Support\Facades\Auth;
+use App\Enums\AwardRegistrationState;
 
 class AwardRegistrationController extends Controller
 {
@@ -166,7 +167,7 @@ class AwardRegistrationController extends Controller
                 ]),
             };
 
-            AwardRegistration::create([
+            $registration = AwardRegistration::create([
                 'user_id'        => Auth::id(),
                 'award_id' => 1,
                 'event_id' => 1,
@@ -175,10 +176,10 @@ class AwardRegistrationController extends Controller
                 'academic_year' => 2025,
                 'awardable_id'   => $awardable->id,
                 'awardable_type' => "",
-                'status'         => 'pending',
+                'status'         => AwardRegistrationState::SUBMITTED,
                 'documents'      => $step2['documents'] ?? [],
             ]);
-            $registration->awardable()->associate($event);
+            $registration->awardable()->associate($awardable);
             $registration->save();
         });
     }
