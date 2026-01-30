@@ -1,7 +1,7 @@
 <x-app-layout>
     <div class="max-w-5xl mx-auto px-6 pt-12 pb-8">
         <div class="bg-white rounded-xl shadow border border-gray-100 p-8">
-            <a href="#"
+            <a href="{{ route('award-registrations') }}"
                class="text-sm text-gray-500 hover:text-gray-700 flex items-center mb-6">
                 <svg class="w-4 h-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
