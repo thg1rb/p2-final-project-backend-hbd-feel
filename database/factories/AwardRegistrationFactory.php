@@ -17,9 +17,6 @@ class AwardRegistrationFactory extends Factory
      */
     public function definition(): array
     {
-        $innovation = InnovationAwardRegistration::create([
-            'award_name' => 'หุ่นยนต์กู้ภัย',
-        ]);
         return [
             'first_name' => $this->faker->firstName(),
             'last_name'  => $this->faker->lastName(),

@@ -10,10 +10,22 @@ class ActivityAwardRegistration extends Model
 {
     //
     use HasFactory;
+
     protected $table = 'activity_award_registrations';
 
     protected $fillable = [
-        'activity_hours',
+        'activity_types',
+        'award_date',
+        'project_name',
+        'team_name',
+        'work_name',
+        'award_name',
+        'organizer',
+    ];
+
+    protected $casts = [
+        'activity_types' => 'array',
+        'award_date' => 'date',
     ];
 
     public function awardRegistration(): MorphOne

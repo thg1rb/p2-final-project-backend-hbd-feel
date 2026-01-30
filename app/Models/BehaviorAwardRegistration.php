@@ -11,7 +11,7 @@ class BehaviorAwardRegistration extends Model
     use HasFactory;
     protected $table = 'behavior_award_registrations';
     protected $fillable = [
-        'approver',
+        'report',
     ];
 
     public function awardRegistration(): MorphOne

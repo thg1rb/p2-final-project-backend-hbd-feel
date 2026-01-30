@@ -3,19 +3,12 @@
 namespace App\Http\Requests\AwardRegistration\Step2;
 
 use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Validation\Rule;
 
-class ActivityRequest extends FormRequest
+class InnovationRequest extends FormRequest
 {
     public function rules(): array
     {
         return [
-            'activity_types' => ['required', 'array', 'min:1'],
-            'activity_types.*' => [
-                'required',
-                Rule::in(['community', 'competition', 'leadership']),
-            ],
-
             'award_date' => ['required', 'date'],
 
             'project_name' => ['required', 'string', 'max:255'],
@@ -29,11 +22,6 @@ class ActivityRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'activity_types.required' => 'กรุณาเลือกด้านกิจกรรมนอกหลักสูตรอย่างน้อย 1 รายการ',
-            'activity_types.array' => 'รูปแบบด้านกิจกรรมไม่ถูกต้อง',
-            'activity_types.min' => 'กรุณาเลือกด้านกิจกรรมนอกหลักสูตรอย่างน้อย 1 รายการ',
-            'activity_types.*.in' => 'เลือกประเภทกิจกรรมไม่ถูกต้อง',
-
             'award_date.required' => 'กรุณาระบุวันที่ได้รับรางวัล',
             'award_date.date' => 'รูปแบบวันที่ไม่ถูกต้อง',
 

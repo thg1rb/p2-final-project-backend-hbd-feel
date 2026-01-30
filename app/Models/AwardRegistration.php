@@ -24,6 +24,11 @@ class AwardRegistration extends Model
 //        'award_type',
         'awardable_id',     // เพิ่ม
         'awardable_type',   // เพิ่ม
+        'documents',
+    ];
+
+    protected $casts = [
+        'documents' => 'array',
     ];
 
     public function award() : BelongsTo
