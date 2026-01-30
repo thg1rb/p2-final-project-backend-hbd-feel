@@ -50,5 +50,6 @@
                 >
             </label>
         </div>
+        <ul id="file-preview" class="mt-3 text-sm text-gray-600 list-disc list-inside"></ul>
     </div>
 </div>
