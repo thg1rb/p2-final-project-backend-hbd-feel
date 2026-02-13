@@ -11,13 +11,16 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('awards', function (Blueprint $table) {
-            $table->id();
-            $table->string('name');
-            $table->double('reward');
-            $table->json('form_schema');
+        Schema::create('applications', function (Blueprint $table) {
+            $table->uuid('id')->primary();
+            $table->string('student_id');
+            $table->uuid('event_id');
+            $table->uuid('award_id');
+            $table->json('submission_data');
+
+            $table->enum('status', ['SUBMITTED'])->default('SUBMITTED');
+
             $table->timestamps();
-            $table->softDeletes();
         });
     }
 
@@ -26,6 +29,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('awards');
+        Schema::dropIfExists('applications');
     }
 };

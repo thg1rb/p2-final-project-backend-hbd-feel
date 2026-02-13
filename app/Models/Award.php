@@ -14,7 +14,12 @@ class Award extends Model
 
     protected $fillable = [
         'name',
-        'reward'
+        'reward',
+        'form_schema'
+    ];
+
+    protected $casts = [
+        'form_schema' => 'array',
     ];
 
     public function users()
@@ -29,7 +34,7 @@ class Award extends Model
             ->withTimestamps();
     }
 
-    public function awardRegistrations() : HasMany
+    public function awardRegistrations(): HasMany
     {
         return $this->HasMany(AwardRegistration::class);
     }

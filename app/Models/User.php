@@ -22,6 +22,7 @@ class User extends Authenticatable
      */
 
     protected $fillable = [
+        'student_id',
         'firstName',
         'lastName',
         'username',
@@ -79,11 +80,13 @@ class User extends Authenticatable
             ->withTimestamps();
     }
 
-    public function events() {
+    public function events()
+    {
         return $this->belongsToMany(Event::class)->withTimestamps();
     }
 
-    public function awardRegistrations() {
+    public function awardRegistrations()
+    {
         return $this->hasMany(AwardRegistration::class);
     }
 }

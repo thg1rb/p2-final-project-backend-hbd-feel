@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\ApplicationController;
 use App\Http\Controllers\AwardController;
 use App\Http\Controllers\AwardReportController;
 use App\Http\Controllers\EventController;
@@ -29,12 +30,12 @@ Route::middleware('auth')->group(function () {
 });
 
 Route::middleware('auth')->group(function () {
-   Route::get('/awards', [AwardController::class, 'index'])->name('awards.index');
-   Route::get('/awards/create', [AwardController::class, 'create'])->name('awards.create');
-   Route::post('/awards', [AwardController::class, 'store'])->name('awards.store');
-   Route::get('/awards/{award}/edit', [AwardController::class, 'edit'])->name('awards.edit');
-   Route::put('/awards/{award}', [AwardController::class, 'update'])->name('awards.update');
-   Route::delete('/awards/{award}', [AwardController::class, 'destroy'])->name('awards.destroy');
+    Route::get('/awards', [AwardController::class, 'index'])->name('awards.index');
+    Route::get('/awards/create', [AwardController::class, 'create'])->name('awards.create');
+    Route::post('/awards', [AwardController::class, 'store'])->name('awards.store');
+    Route::get('/awards/{award}/edit', [AwardController::class, 'edit'])->name('awards.edit');
+    Route::put('/awards/{award}', [AwardController::class, 'update'])->name('awards.update');
+    Route::delete('/awards/{award}', [AwardController::class, 'destroy'])->name('awards.destroy');
 });
 
 Route::middleware('auth')->group(function () {
@@ -49,7 +50,6 @@ Route::middleware('auth')->group(function () {
         'award-registrations/store',
         [AwardRegistrationController::class, 'store']
     )->name('award-registrations.store');
-
 });
 
 Route::get('/auth/google/redirect', [SocialAuthController::class, 'redirectToProvider'])
@@ -61,11 +61,13 @@ Route::get('/auth/google/callback', [SocialAuthController::class, 'handleProvide
 Route::get('/report', [AwardReportController::class, 'index'])->name('report.award-report');
 
 Route::get('/users', [
-    UserController::class, 'index'
+    UserController::class,
+    'index'
 ])->name('users.index');
 
 Route::get('/users/create', [
-    UserController::class, 'create'
+    UserController::class,
+    'create'
 ])->name('users.create');
 
 Route::resource('users', UserController::class);

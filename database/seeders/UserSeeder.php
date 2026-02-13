@@ -16,6 +16,7 @@ class UserSeeder extends Seeder
     {
         foreach (UserRole::cases() as $role) {
             User::factory()->create([
+                'student_id' => $role === UserRole::NISIT ? fake()->numerify("##########") : null,
                 'firstName' => $role->value,       // ชื่อตาม Role (เช่น ADMIN)
                 'lastName' => 'Account',
                 'username' => fake()->userName(),
