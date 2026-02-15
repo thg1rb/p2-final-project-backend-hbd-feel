@@ -2,9 +2,11 @@
 
 namespace App\Models;
 
+use App\Enums\ApplicationStatus;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Application extends Model
 {
@@ -23,6 +25,7 @@ class Application extends Model
 
     protected $casts = [
         'documents' => 'array',
+        'status' => ApplicationStatus::class
     ];
 
     public function user()
@@ -38,5 +41,10 @@ class Application extends Model
     public function award()
     {
         return $this->belongsTo(Award::class);
+    }
+
+    public function approvals(): HasMany
+    {
+        return $this->hasMany(Approval::class);
     }
 }
