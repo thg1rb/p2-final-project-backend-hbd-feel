@@ -23,6 +23,8 @@ class UserFactory extends Factory
      */
     public function definition(): array
     {
+        $department = \App\Models\Department::inRandomOrder()->first();
+
         return [
             'student_id' => fake()->unique()->numerify("##########"),
             'firstName' => fake()->firstName(),
@@ -33,6 +35,9 @@ class UserFactory extends Factory
             'role' => fake()->randomElement(["NISIT"]),
             'password' => static::$password ??= Hash::make('password'),
             'remember_token' => Str::random(10),
+
+            'faculty_id' => $department ? $department->faculty_id : null,
+            'department_id' => $department ? $department->id : null,
         ];
     }
 

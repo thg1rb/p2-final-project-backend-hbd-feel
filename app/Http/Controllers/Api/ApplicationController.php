@@ -8,14 +8,21 @@ use Illuminate\Http\Request;
 
 class ApplicationController extends Controller
 {
-    public function index()
+    public function getAllApplications()
     {
-        $applications = Application::with(['user', 'event', 'award'])->get();
+        $applications = Application::with(['user', 'event', 'award', 'user.faculty', 'user.department'])->get();
 
         return response()->json([
             'success' => true,
             'message' => 'Applications retreived successfully',
             'data' => $applications
         ]);
+    }
+
+    public function getApplicationById($id)
+    {
+        $applications = Application::with(['user', 'event', 'award', 'user.faculty', 'user.department'])->findOrFail($id);
+
+        return response()->json($applications);
     }
 }

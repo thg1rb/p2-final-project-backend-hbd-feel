@@ -1,34 +1,23 @@
 <?php
 
 use App\Http\Controllers\Api\ApplicationController;
+use App\Http\Controllers\Api\MinioController;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Storage;
 
-Route::get('/applications', [ApplicationController::class, 'index']);
+Route::get('/applications', [ApplicationController::class, 'getAllApplications']);
 
-Route::get('/test-minio', function () {
-    try {
-        $fileName = 'test-' . time() . '.txt';
-        $content = 'Hello from Laravel Sail at ' . now();
-        $status = Storage::disk('s3')->put($fileName, $content);
+Route::get('/application/{id}', [ApplicationController::class, 'getApplicationById']);
 
-        if ($status) {
-            $bucket = config('filesystems.disks.s3.bucket');
-            $endpoint = config('filesystems.disks.s3.endpoint');
-            $url = $endpoint . '/' . $bucket . '/' . $fileName;
+Route::get('/minio/download', [MinioController::class, 'getPreviewUrl']);
 
-            return response()->json([
-                'message' => 'Upload Success!',
-                'file_name' => $fileName,
-                'url' => $url,
-                'bucket' => $bucket
-            ]);
-        }
-        return "Upload failed without error.";
-    } catch (\Exception $e) {
-        return response()->json([
-            'message' => 'Error found!',
-            'error' => $e->getMessage()
-        ], 500);
-    }
+Route::get('/minio/list', function () {
+    $bucket = env('AWS_BUCKET');
+    $files = Storage::disk('s3')->allFiles();
+
+    return response()->json([
+        'bucket' => $bucket,
+        'files' => $files,
+        'count' => count($files)
+    ]);
 });

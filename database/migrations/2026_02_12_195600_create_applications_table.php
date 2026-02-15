@@ -15,8 +15,11 @@ return new class extends Migration
             $table->uuid('id')->primary();
             $table->string('student_id');
             $table->uuid('event_id');
+            $table->string('path');
             $table->uuid('award_id');
-            $table->json('submission_data');
+            $table->json('documents');
+            $table->integer('year');
+            $table->double('grade');
 
             $table->enum('status', ['SUBMITTED'])->default('SUBMITTED');
 

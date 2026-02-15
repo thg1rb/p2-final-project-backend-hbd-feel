@@ -14,12 +14,12 @@ class Award extends Model
 
     protected $fillable = [
         'name',
-        'reward',
-        'form_schema'
+        'form_path',
+        'requirements',
     ];
 
     protected $casts = [
-        'form_schema' => 'array',
+        'requirements' => 'array',
     ];
 
     public function users()

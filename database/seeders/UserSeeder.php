@@ -14,21 +14,37 @@ class UserSeeder extends Seeder
      */
     public function run(): void
     {
+        $faculties = \App\Models\Faculty::all();
+
         foreach (UserRole::cases() as $role) {
+            $faculty = $faculties->random();
+            $department = \App\Models\Department::where('faculty_id', $faculty->id)->get()->random();
+
             User::factory()->create([
                 'student_id' => $role === UserRole::NISIT ? fake()->numerify("##########") : null,
-                'firstName' => $role->value,       // ชื่อตาม Role (เช่น ADMIN)
+                'firstName' => $role->value,
                 'lastName' => 'Account',
                 'username' => fake()->userName(),
                 'email' => fake()->userName() . '@example.com',
                 'password' => 'password',
                 'role' => $role,
+                'faculty_id' => $faculty->id,
+                'department_id' => $department->id,
             ]);
         }
 
-        User::factory()->count(10)->create([
-            'role' => UserRole::NISIT,
-            'password' => 'password',
-        ]);
+        // สำหรับนิสิต 10 คน
+        for ($i = 0; $i < 10; $i++) {
+            $faculty = $faculties->random();
+            $department = \App\Models\Department::where('faculty_id', $faculty->id)->get()->random();
+
+            User::factory()->create([
+                'role' => UserRole::NISIT,
+                'password' => 'password',
+                'faculty_id' => $faculty->id,
+                'department_id' => $department->id,
+                'student_id' => fake()->numerify("##########"),
+            ]);
+        }
     }
 }

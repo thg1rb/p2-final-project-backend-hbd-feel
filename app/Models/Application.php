@@ -14,12 +14,15 @@ class Application extends Model
         'student_id',
         'event_id',
         'award_id',
-        'submission_data',
+        'path',
+        'documents',
         'status',
+        'grade',
+        'year'
     ];
 
     protected $casts = [
-        'submission_data' => 'array',
+        'documents' => 'array',
     ];
 
     public function user()

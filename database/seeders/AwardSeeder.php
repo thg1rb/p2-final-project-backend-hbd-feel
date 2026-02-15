@@ -15,9 +15,13 @@ class AwardSeeder extends Seeder
      */
     public function run(): void
     {
-        Award::factory()
-            ->count(2)
-            ->awardConfigurations()
+        \App\Models\Award::factory()
+            ->count(3)
+            ->state(new \Illuminate\Database\Eloquent\Factories\Sequence(
+                ['name' => 'ด้านกิจกรรมเสริมหลักสูตร'],
+                ['name' => 'ด้านความคิดสร้างสรรค์และนวัตกรรม'],
+                ['name' => 'ด้านความประพฤติดี']
+            ))
             ->create();
     }
 }
