@@ -1,10 +1,13 @@
 <?php
 
 use App\Http\Controllers\Api\ApplicationController;
+use App\Http\Controllers\Api\AwardRegistrationController;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Storage;
 
 Route::get('/applications', [ApplicationController::class, 'index']);
+
+Route::resource('/award-registrations', AwardRegistrationController::class);
 
 Route::get('/test-minio', function () {
     try {
