@@ -60,13 +60,13 @@
         </a>
 
         {{-- Header --}}
-        <div class="flex flex-row justify-between items-center">
+        <div class="flex flex-col md:flex-row gap-y-5 justify-between items-center">
             <div>
                 <h1 class="font-bold text-[32px]">จัดการรอบการให้รางวัล</h1>
-                <p class="font-light text-[16px]">เพิ่ม แก้ไข หรือลบข้อมูลรอบการให้รางวัลในระบบ</p>
+                <p class="font-light text-[16px]">เพิ่ม ลบ หรือแก้ไขข้อมูลรอบการให้รางวัลในระบบ</p>
             </div>
             <a href="{{ route('events.create') }}"
-                class="px-[10px] py-[6px] flex flex-row justify-center items-center gap-x-[10px] bg-primary text-white rounded-md transition-all hover:scale-105">
+                class="px-[10px] py-[6px] w-full md:w-fit flex flex-row justify-center items-center gap-x-[10px] bg-primary text-white rounded-md transition-all hover:scale-105">
                 <x-icon name="plus" size="30" />
                 <p class="font-semibold text-[20px]">เพิ่มรอบการให้รางวัล</p>
             </a>
@@ -74,25 +74,27 @@
 
         {{-- Table --}}
         <div class="w-full p-5 flex flex-col gap-y-6 bg-white shadow-sm rounded-xl">
-            <form action="{{ route('events.index') }}" method="GET" class="w-full flex flex-row gap-x-2.5">
-                <div class="relative flex-1">
-                    <x-icon name="search" class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
-                    <input name="search" placeholder="ค้นหารอบการให้รางวัลจากปีการศึกษา" value="{{ request('search') }}"
-                        class="w-full rounded-md border-slate-300 pl-10 placeholder:font-light placeholder:text-slate-400">
+            <form action="{{ route('events.index') }}" method="GET" class="w-full flex flex-col md:flex-row gap-2.5">
+                <div class="flex-1 flex flex-row gap-x-2.5">
+                    <div class="relative flex-1">
+                        <x-icon name="search" class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+                        <input name="search" placeholder="ค้นหารอบการให้รางวัลจากปีการศึกษา" value="{{ request('search') }}"
+                            class="w-full border-gray-300 focus:border-primary focus:ring-primary rounded-md shadow-sm pl-10 placeholder:font-light placeholder:text-slate-400">
+                    </div>
+                    <select name="status"
+                        class="px-10 py-1.5 flex-2 border-slate-300 font-semibold text-[18px] rounded-md">
+                        <option value="">ทั้งหมด</option>
+                        <option value="OPENED" {{ request('status') === 'OPENED' ? 'selected' : '' }}>เปิดรับสมัคร</option>
+                        <option value="CLOSED" {{ request('status') === 'CLOSED' ? 'selected' : '' }}>ปิดรับสมัคร</option>
+                    </select>
                 </div>
-                <select name="status"
-                    class="px-10 py-1.5 flex-2 border-slate-300 font-semibold text-[18px] rounded-md">
-                    <option value="">ทั้งหมด</option>
-                    <option value="OPENED" {{ request('status') === 'OPENED' ? 'selected' : '' }}>เปิดรับสมัคร</option>
-                    <option value="CLOSED" {{ request('status') === 'CLOSED' ? 'selected' : '' }}>ปิดรับสมัคร</option>
-                </select>
                 <button type="submit"
-                    class="px-10 py-1.5 flex-2 bg-primary font-semibold text-white text-[18px] rounded-md">
+                    class="px-10 py-1.5 bg-primary font-semibold text-white text-[18px] rounded-md">
                     ค้นหา
                 </button>
             </form>
-            <div class="rounded-xl border border-gray-300 bg-white">
-                <table class="w-full">
+            <div class="rounded-xl border border-gray-300 bg-white overflow-x-auto">
+                <table class="w-full min-w-max">
                     <thead class="divide-y border-b bg-gray-100">
                         <tr class="divide-x">
                             <th class="px-6 py-3 text-center cursor-pointer hover:bg-gray-200 transition">

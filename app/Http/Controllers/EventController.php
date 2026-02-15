@@ -44,7 +44,7 @@ class EventController extends Controller
                 ->orderBy('semester', 'desc');
         }
 
-        $events = $query->paginate(5)->withQueryString();
+        $events = $query->paginate(10)->withQueryString();
 
         return view('events.index', compact('events'));
     }

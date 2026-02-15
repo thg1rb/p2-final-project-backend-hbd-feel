@@ -69,10 +69,10 @@
                         </div>
                         <div class="flex flex-col justify-start gap-1">
                             <p class="font-bold text-start text-lg">
-                                จัดการรอบการรับสมัคร
+                                จัดการรอบการให้รางวัล
                             </p>
                             <p class="text-gray-400 text-sm text-start">
-                                สร้างและจัดการรอบรับสมัคร
+                                เพิ่ม ลบ หรือแก้ไขข้อมูลรอบการให้รางวัลในระบบ
                             </p>
                         </div>
                     </div>
@@ -89,7 +89,7 @@
                                 จัดการรางวัล
                             </p>
                             <p class="text-gray-400 text-sm text-start">
-                                จัดการ เพิ่ม แก้ไข ลบ หมวดรางวัลต่าง ๆ
+                                เพิ่ม ลบ หรือแก้ไขข้อมูลหมวดรางวัลในระบบ
                             </p>
                         </div>
                     </div>
@@ -99,7 +99,7 @@
                     class="group bg-white rounded-lg p-8 cursor-pointer flex flex-1 border shadow-sm hover:border-primary hover:shadow-lg transition-all">
                     <div class="flex-1 flex flex-col items-start gap-4">
                         <div class=" bg-[#e8f5ef] p-5 rounded-xl flex justify-center items-center w-fit">
-                            <x-icon name='trophy' class="stroke-primary"></x-icon>
+                            <x-icon name='file-badge' class="stroke-primary"></x-icon>
                         </div>
                         <div class="flex flex-col justify-start gap-1">
                             <p class="font-bold text-start text-lg">
