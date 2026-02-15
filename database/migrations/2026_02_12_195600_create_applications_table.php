@@ -1,5 +1,6 @@
 <?php
 
+use App\Enums\ApplicationStatus;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -21,7 +22,7 @@ return new class extends Migration
             $table->integer('year');
             $table->double('grade');
 
-            $table->enum('status', ['SUBMITTED'])->default('SUBMITTED');
+            $table->enum('status', ApplicationStatus::cases())->default('SUBMITTED');
 
             $table->timestamps();
         });
