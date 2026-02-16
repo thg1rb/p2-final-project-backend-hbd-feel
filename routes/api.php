@@ -13,6 +13,7 @@ Route::post('/approvals', [ApprovalController::class, 'store']);
 
 Route::resource('/award-registrations', AwardRegistrationController::class);
 Route::get('/applications', [ApplicationController::class, 'getAllApplications']);
+Route::get('/applications/count', [ApplicationController::class, 'getApplicationCountByStatus']);
 
 Route::get('/application/{id}', [ApplicationController::class, 'getApplicationById']);
 
