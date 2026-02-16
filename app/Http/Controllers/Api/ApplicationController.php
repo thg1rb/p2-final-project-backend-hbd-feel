@@ -8,15 +8,29 @@ use Illuminate\Http\Request;
 
 class ApplicationController extends Controller
 {
-    public function getAllApplications()
+    public function getAllApplications(Request $request)
     {
-        $applications = Application::with(['user', 'event', 'award', 'user.faculty', 'user.department'])->get();
+        $query = Application::with(['user', 'event', 'award', 'user.faculty', 'user.department']);
 
-        return response()->json([
-            'success' => true,
-            'message' => 'Applications retreived successfully',
-            'data' => $applications
-        ]);
+        if ($request->filled('search')) {
+            $searchTerm = $request->input('search');
+            $query->whereHas('user', function ($q) use ($searchTerm) {
+                $q->where('firstName', 'like', "%{$searchTerm}%")
+                    ->orWhere('lastName', 'like', "%{$searchTerm}%")
+                    ->orWhere('student_id', 'like', "%{$searchTerm}%");
+            });
+        }
+
+        if ($request->filled('status')) {
+            $query->where('status', $request->input('status'));
+        }
+
+        $page = max(1, (int) ($request->input('page') ?? 1));
+        $pageSize = min(100, max(1, (int) ($request->input('page_size') ?? 10)));
+
+        $applications = $query->paginate(perPage: $pageSize, page: $page)->withQueryString();
+
+        return response()->json($applications);
     }
 
     public function getApplicationById($id)
