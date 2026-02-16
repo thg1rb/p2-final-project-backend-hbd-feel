@@ -4,7 +4,9 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\Application;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use JsonException;
 
 class ApplicationController extends Controller
 {
@@ -38,5 +40,13 @@ class ApplicationController extends Controller
         $applications = Application::with(['user', 'event', 'award', 'user.faculty', 'user.department'])->findOrFail($id);
 
         return response()->json($applications);
+    }
+
+    public function getApplicationCountByStatus(Request $request): JsonResponse
+    {  
+        $status = $request->input('status');
+        $count = Application::where('status', $status)->count();
+        
+        return response()->json($count);
     }
 }
