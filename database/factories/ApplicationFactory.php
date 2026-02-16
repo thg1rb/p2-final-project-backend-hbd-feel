@@ -2,6 +2,7 @@
 
 namespace Database\Factories;
 
+use App\Enums\ApplicationStatus;
 use App\Models\Award;
 use App\Models\Event;
 use App\Models\User;
@@ -27,7 +28,7 @@ class ApplicationFactory extends Factory
             'grade' => $this->faker->randomFloat(2, 2, 4),
             'path' => "form_1.pdf",
             'documents' => $submissionData,
-            'status' => 'SUBMITTED',
+            'status' => $this->faker->randomElement(ApplicationStatus::cases()),
             'year' => $this->faker->numberBetween(1, 4)
         ];
     }
