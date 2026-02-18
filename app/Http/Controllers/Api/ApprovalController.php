@@ -21,6 +21,29 @@ class ApprovalController extends Controller
         //
     }
 
+    public function getApprovalRequestByApplicationId($applicationId)
+    {
+
+        $approvals = Approval::with('user:id,firstName,lastName,role')
+            ->where('application_id', $applicationId)
+            ->get();
+
+        if ($approvals->isEmpty()) {
+            return response()->json([], 200);
+        }
+
+        return response()->json($approvals);
+    }
+
+    public function getApprovalRequestByApplicationIdAndUserId($applicationId, $userId)
+    {
+        $approval = Approval::with('user:id,firstName,lastName,role')
+            ->where('application_id', $applicationId)
+            ->where('user_id', $userId)
+            ->first();
+        return response()->json($approval);
+    }
+
     /**
      * Store a newly created resource in storage.
      */
@@ -87,17 +110,17 @@ class ApprovalController extends Controller
 
         return match ([$currentStatus, $userRole]) {
             [ApplicationStatus::SUBMITTED, UserRole::DEPT_HEAD] => $approvalValue === 'APPROVED'
-            ? ApplicationStatus::APPROVED_DEPT_HEAD
-            : ApplicationStatus::REJECTED_DEPT_HEAD,
+                ? ApplicationStatus::APPROVED_DEPT_HEAD
+                : ApplicationStatus::REJECTED_DEPT_HEAD,
             [ApplicationStatus::APPROVED_DEPT_HEAD, UserRole::ASSO_DEAN] => $approvalValue === 'APPROVED'
-            ? ApplicationStatus::APPROVED_ASSO_DEAN
-            : ApplicationStatus::REJECTED_ASSO_DEAN,
+                ? ApplicationStatus::APPROVED_ASSO_DEAN
+                : ApplicationStatus::REJECTED_ASSO_DEAN,
             [ApplicationStatus::APPROVED_ASSO_DEAN, UserRole::DEAN] => $approvalValue === 'APPROVED'
-            ? ApplicationStatus::APPROVED_DEAN
-            : ApplicationStatus::REJECTED_DEAN,
+                ? ApplicationStatus::APPROVED_DEAN
+                : ApplicationStatus::REJECTED_DEAN,
             [ApplicationStatus::APPROVED_DEAN, UserRole::NISIT_DEV] => $approvalValue === 'APPROVED'
-            ? ApplicationStatus::APPROVED_NISIT_DEV
-            : ApplicationStatus::REJECTED_NISIT_DEV,
+                ? ApplicationStatus::APPROVED_NISIT_DEV
+                : ApplicationStatus::REJECTED_NISIT_DEV,
             [ApplicationStatus::APPROVED_NISIT_DEV, UserRole::BOARD] => $this->calculateBoardStatus($currentStatus, $applicationId),
             default => $currentStatus,
         };

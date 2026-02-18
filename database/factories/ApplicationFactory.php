@@ -28,7 +28,7 @@ class ApplicationFactory extends Factory
             'grade' => $this->faker->randomFloat(2, 2, 4),
             'path' => "form_1.pdf",
             'documents' => $submissionData,
-            'status' => $this->faker->randomElement(ApplicationStatus::cases()),
+            'status' => ApplicationStatus::SUBMITTED->value,
             'year' => $this->faker->numberBetween(1, 4)
         ];
     }

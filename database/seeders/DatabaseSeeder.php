@@ -25,6 +25,7 @@ class DatabaseSeeder extends Seeder
             EventUserSeeder::class,
             AwardRegistrationSeeder::class,
             ApplicationSeeder::class,
+            // ApprovalSeeder::class,
         ]);
 
         User::factory(50)->create();

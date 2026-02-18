@@ -17,7 +17,7 @@ return new class extends Migration {
             $table->uuid('id')->primary();
             $table->foreignIdFor(User::class);
             $table->foreignIdFor(Application::class);
-            $table->string('reason');
+            $table->text('reason');
             $table->enum('status', ApprovalStatus::cases());
             $table->timestamps();
         });
