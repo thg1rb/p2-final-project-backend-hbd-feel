@@ -20,7 +20,10 @@ class ApplicationFactory extends Factory
      */
     public function definition(): array
     {
-        $submissionData = [];
+        $submissionData = [
+            "req_001" => ["file_path" => "options.pdf"],
+            "req_002" => ["file_path" => "futures.pdf"]
+        ];
         return [
             'student_id' => User::whereNotNull('student_id')->inRandomOrder()->first()?->id,
             'event_id' => Event::inRandomOrder()->first()?->id ?? $this->faker->uuid(),
