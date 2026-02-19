@@ -29,5 +29,9 @@ class DatabaseSeeder extends Seeder
         ]);
 
         User::factory(50)->create();
+
+        $this->call([
+            ApplicationSeeder::class,
+        ]);
     }
 }

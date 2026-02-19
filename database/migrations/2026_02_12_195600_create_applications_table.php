@@ -1,6 +1,7 @@
 <?php
 
-use App\Enums\ApplicationStatus;
+use App\Enums\ApprovalStatus;
+use App\Enums\RoleLevel;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -26,7 +27,8 @@ return new class extends Migration
             $table->integer('year');
             $table->double('grade');
 
-            $table->enum('status', ApplicationStatus::cases())->default('SUBMITTED');
+            $table->tinyInteger('level')->default(RoleLevel::NISIT->value);;
+            $table->enum('status', array_map(fn ($case) => $case->value, ApprovalStatus::cases()))->default('APPROVED');
 
             $table->timestamps();
         });
