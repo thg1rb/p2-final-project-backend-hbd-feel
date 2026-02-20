@@ -38,6 +38,7 @@ enum UserRole: string
             self::DEAN => RoleLevel::DEAN,
             self::NISIT_DEV => RoleLevel::NISIT_DEV,
             self::BOARD => RoleLevel::BOARD,
+            self::BOARD_HEAD => RoleLevel::BOARD_HEAD,
         };
     }
 }

@@ -18,7 +18,7 @@ class ApplicationController extends Controller
         return new User([
             'faculty_id' => 1,
             'department_id' => 3,
-            'role' => UserRole::DEAN,
+            'role' => UserRole::DEPT_HEAD,
         ]);
     }
 
