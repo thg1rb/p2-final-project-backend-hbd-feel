@@ -16,8 +16,8 @@ class ApplicationController extends Controller
     private function getMockUser(): User
     {
         return new User([
-            'faculty_id' => 1,
-            'department_id' => 3,
+            'faculty_id' => 3,
+            'department_id' => 14,
             'role' => UserRole::DEPT_HEAD,
         ]);
     }

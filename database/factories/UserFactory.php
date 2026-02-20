@@ -37,7 +37,7 @@ class UserFactory extends Factory
             'student_id' => fake()->unique()->numerify('##########'),
             'firstName' => fake()->firstName(),
             'lastName' => fake()->lastName(),
-            'username' => fake()->username(),
+            'username' => fake()->unique()->username(),
             'email' => fake()->unique()->safeEmail(),
             'email_verified_at' => now(),
             'role' => fake()->randomElement(['NISIT']),
