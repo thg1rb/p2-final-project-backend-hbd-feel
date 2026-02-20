@@ -6,6 +6,10 @@ use App\Http\Controllers\Controller;
 use App\Models\Application;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use App\Models\Award;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 use JsonException;
 
 class ApplicationController extends Controller
@@ -43,10 +47,51 @@ class ApplicationController extends Controller
     }
 
     public function getApplicationCountByStatus(Request $request): JsonResponse
-    {  
+    {
         $status = $request->input('status');
         $count = Application::where('status', $status)->count();
-        
+
         return response()->json($count);
     }
+    public function store(Request $request): JsonResponse
+    {
+            return DB::transaction(function () use ($request) {
+                $award = Award::findOrFail($request->award_id);
+                $requirements = $award->requirements ?? [];
+
+                $rules = [
+                    'award_id' => ['required', 'exists:awards,id'],
+                    'event_id' => ['required', 'exists:events,id'],
+                    'year' => ['required', 'integer'],
+                    'grade' => ['required', 'numeric'],
+                    'path' => ['required', 'string'],
+                    'documents' => ['required', 'array'],
+                ];
+
+                foreach ($requirements as $req) {
+                    $key = $req['id'];
+                    $rules["documents.$key"] = $req['required'] ? ['required', 'string'] : ['nullable', 'string'];
+                }
+
+                $validated = $request->validate($rules);
+
+                $application = \App\Models\Application::create([
+                    'student_id' => auth()->user()->student_id ,
+                    'award_id' => $validated['award_id'],
+                    'event_id' => $validated['event_id'],
+                    'year' => $validated['year'],
+                    'grade' => $validated['grade'],
+                    'path' => $validated['path'],
+                    'documents' => $validated['documents']
+                ]);
+
+
+                return response()->json([
+                    'message' => 'Application submitted successfully',
+                    'data'    => $application->load(['user','event','award'])
+                ], 201);
+            });
+
+    }
+
 }
