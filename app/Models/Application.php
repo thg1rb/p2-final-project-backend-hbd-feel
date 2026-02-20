@@ -30,7 +30,7 @@ class Application extends Model
 
     public function user()
     {
-        return $this->belongsTo(User::class, 'student_id', 'id');
+        return $this->belongsTo(User::class, 'student_id', 'student_id');
     }
 
     public function event()

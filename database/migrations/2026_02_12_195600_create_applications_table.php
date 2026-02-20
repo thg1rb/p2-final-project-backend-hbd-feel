@@ -15,9 +15,13 @@ return new class extends Migration
         Schema::create('applications', function (Blueprint $table) {
             $table->uuid('id')->primary();
             $table->string('student_id');
-            $table->uuid('event_id');
+            $table->foreign('student_id')
+                ->references('student_id')
+                ->on('users')
+                ->cascadeOnDelete();
+            $table->foreignId('event_id')->constrained()->cascadeOnDelete();
             $table->string('path');
-            $table->uuid('award_id');
+            $table->foreignId('award_id')->constrained()->cascadeOnDelete();
             $table->json('documents');
             $table->integer('year');
             $table->double('grade');

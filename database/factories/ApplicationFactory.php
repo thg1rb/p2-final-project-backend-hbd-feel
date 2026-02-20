@@ -24,8 +24,9 @@ class ApplicationFactory extends Factory
             "req_001" => ["file_path" => "options.pdf"],
             "req_002" => ["file_path" => "futures.pdf"]
         ];
+        $user = User::whereNotNull('student_id')->inRandomOrder()->first();
         return [
-            'student_id' => User::whereNotNull('student_id')->inRandomOrder()->first()?->id,
+            'student_id' => $user ? $user->student_id : '0000000000',
             'event_id' => Event::inRandomOrder()->first()?->id ?? $this->faker->uuid(),
             'award_id' => Award::inRandomOrder()->first()?->id ?? $this->faker->uuid(),
             'grade' => $this->faker->randomFloat(2, 2, 4),

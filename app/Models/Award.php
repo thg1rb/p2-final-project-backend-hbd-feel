@@ -38,4 +38,9 @@ class Award extends Model
     {
         return $this->HasMany(AwardRegistration::class);
     }
+
+    public function applications()
+    {
+        return $this->hasMany(Application::class, 'award_id');
+    }
 }

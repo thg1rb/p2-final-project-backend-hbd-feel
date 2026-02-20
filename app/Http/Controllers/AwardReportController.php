@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Application;
+use App\Models\Approval;
 use App\Models\Award;
 use App\Models\Event;
 use App\Models\User;
@@ -19,59 +21,62 @@ class AwardReportController extends Controller
         $search = $request->search;
         $awardType = $request->type;
 
-        $query = User::whereHas('awards.events', function ($q) use ($targetYear, $targetSemester, $awardType) {
+        $query = Application::query();
 
-            if ($targetYear != "") {
-                $q->where('academic_year', $targetYear);
-            }
-
-            if ($targetSemester != "") {
-                $q->where('semester', $targetSemester);
-            }
-
-            if ($awardType != "") {
-                $q->where('name', $awardType);
-            }
-        });
-        if ($search) {
-            $query->where(function ($q) use ($search) {
-                $q->where('firstName', 'LIKE', "%{$search}%")
-                    ->orWhere('lastName', 'LIKE', "%{$search}%");
+        if ($targetYear != "" || $targetSemester != "") {
+            $query->whereHas('event', function ($q) use ($targetYear, $targetSemester) {
+                if ($targetYear != "") $q->where('academic_year', $targetYear);
+                if ($targetSemester != "") $q->where('semester', $targetSemester);
             });
         }
-        $query->with('awards.events');
+
+        if ($awardType != "") {
+            $query->whereHas('award', function ($q) use ($awardType) {
+                $q->where('name', $awardType);
+            });
+        }
+
+        if ($search) {
+            $query->whereHas('user', function ($q) use ($search) {
+                $q->where('firstName', 'LIKE', "%{$search}%")
+                    ->orWhere('lastName', 'LIKE', "%{$search}%")
+                    ->orWhere('student_id', 'LIKE', "%{$search}%"); // หาจากรหัสนิสิตด้วย
+            });
+        }
+
+        $query->with(['user', 'award', 'event']);
 
         if ($request->input('export') == 'csv') {
-            $usersAll = $query->get();
-
-            return $this->exportCsv($usersAll);
+            return $this->exportCsv($query->get());
         }
-        $users = $query->paginate(5)
-            ->appends(request()->all());
 
-        $allYears = Event::select('academic_year')
-            ->distinct()
-            ->orderBy('academic_year', 'desc')
-            ->pluck('academic_year');
+        $applications = $query->paginate(5)->appends($request->all());
 
-        $allSemesters = Event::select('semester')
-            ->distinct()
-            ->orderBy('semester', 'asc')
-            ->pluck('semester');
+        $allYears = Event::distinct()->orderBy('academic_year', 'desc')->pluck('academic_year');
+        $allSemesters = Event::distinct()->orderBy('semester', 'asc')->pluck('semester');
 
+        $awardStats = Award::whereHas('events', function ($q) use ($targetYear, $targetSemester) {
+            if ($targetYear) $q->where('academic_year', $targetYear);
+            if ($targetSemester) $q->where('semester', $targetSemester);
+        })
+            ->withCount(['applications' => function ($q) use ($targetYear, $targetSemester) {
+                $q->whereHas('event', function ($sq) use ($targetYear, $targetSemester) {
+                    if ($targetYear) $sq->where('academic_year', $targetYear);
+                    if ($targetSemester) $sq->where('semester', $targetSemester);
+                });
+            }])
+            ->get()
+            ->groupBy('name')
+            ->map(fn($group) => $group->sum('applications_count'));
 
-        $awards = Award::query()
-            ->whereHas('events', function ($q) use ($targetYear, $targetSemester) {
-                if ($targetYear) $q->where('academic_year', $targetYear);
-                if ($targetSemester) $q->where('semester', $targetSemester);
-            })
-            ->withCount('users')
-            ->get();
-        $awardStats = $awards->groupBy('name')->map(function ($group) {
-            return $group->sum('users_count');
-        });
-
-        return view("report.index", compact('users', 'allYears', 'allSemesters', 'targetSemester', 'targetYear', 'awardStats'));
+        return view("report.index", [
+            'applications' => $applications,
+            'allYears' => $allYears,
+            'allSemesters' => $allSemesters,
+            'targetSemester' => $targetSemester,
+            'targetYear' => $targetYear,
+            'awardStats' => $awardStats
+        ]);
     }
 
     private function exportCsv($users)
@@ -105,5 +110,20 @@ class AwardReportController extends Controller
         };
 
         return response()->stream($callback, 200, $headers);
+    }
+
+    public function show($id)
+    {
+        $application = Application::with(['user.department', 'award', 'event'])
+            ->findOrFail($id);
+
+        $approvals = Approval::where('application_id', $id)
+            ->with('user')
+            ->orderBy('created_at', 'asc')
+            ->get();
+
+        $headDeptApproval = $approvals->firstWhere('user.role', 'DEPT_HEAD');
+
+        return view('report.show', compact('application', 'approvals', 'headDeptApproval'));
     }
 }

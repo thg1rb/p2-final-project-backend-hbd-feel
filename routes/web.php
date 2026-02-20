@@ -10,6 +10,7 @@ use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Auth\SocialAuthController;
 use App\Http\Controllers\AwardRegistrationController;
+use App\Http\Controllers\MinioController;
 
 Route::get('/', [MainDashboardController::class, 'index'])->middleware(['auth', 'verified'])->name('main');
 
@@ -71,5 +72,10 @@ Route::get('/users/create', [
 ])->name('users.create');
 
 Route::resource('users', UserController::class);
+
+Route::get('/report/{id}', [AwardReportController::class, 'show'])
+    ->name('report.show');
+
+Route::get('/file-preview', [MinioController::class, 'getFile'])->name('file.preview');
 
 require __DIR__ . '/auth.php';

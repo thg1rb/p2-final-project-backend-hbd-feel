@@ -30,6 +30,8 @@ class User extends Authenticatable
         'email',
         'password',
         'role',
+        'faculty_id',
+        'department_id'
     ];
 
     /**
@@ -104,5 +106,10 @@ class User extends Authenticatable
     public function approvals(): HasMany
     {
         return $this->hasMany(Approval::class);
+    }
+
+    public function applications(): HasMany
+    {
+        return $this->hasMany(Application::class);
     }
 }

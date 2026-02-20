@@ -1,3 +1,4 @@
+{{-- @var \App\Models\Application $application --}}
 <x-app-layout>
     <div class="p-10">
         <a class="flex gap-2 mb-10" href="{{ route('main') }}">
@@ -44,20 +45,60 @@
                             class="bg-primary rounded-xl text-white p-3 hover:scale-95 active:scale-90 transition-all">คัดกรอง</button>
                     </div>
                 </form>
-                @if ($users->isNotEmpty())
+                @if ($applications->isNotEmpty())
                     <div class="rounded-xl border border-gray-300 overflow-hidden bg-white">
                         <table class="w-full">
                             <thead class="divide-y border-b bg-gray-100">
                                 <tr class="divide-x">
                                     <th class=" p-4 text-start">ชื่อนิสิต</th>
+                                    <th class="  p-4 text-start">รหัสนิสิต</th>
+                                    <th class="  p-4 text-start">ภาควิชา</th>
+                                    <th class="  p-4 text-start">คณะ</th>
                                     <th class="  p-4 text-start">ประเภทรางวัล</th>
+                                    <th class="  p-4 text-start">สถานะ</th>
+                                    <th class="  p-4 text-start">วันที่ยื่น</th>
+                                    <th class="  p-4 text-start"></th>
                                 </tr>
                             </thead>
                             <tbody class="divide-y">
-                                @foreach ($users as $user)
+                                @foreach ($applications as $application)
                                     <tr class="divide-x">
-                                        <td class=" p-4">{{ $user->firstName . ' ' . $user->lastName }} </td>
-                                        <td class=" p-4">{{ $user->awards->first()->name }}</td>
+                                        <td class="p-4">
+                                            {{ $application->user->firstName }} {{ $application->user->lastName }}
+                                        </td>
+
+                                        <td class="p-4">
+                                            {{ $application->student_id }}
+                                        </td>
+
+                                        <td class="p-4">
+                                            {{ $application->user->department->name ?? 'ไม่ระบุ' }}
+                                        </td>
+
+                                        <td class="p-4">
+                                            {{ $application->user->faculty->name ?? 'ไม่ระบุ' }}
+                                        </td>
+
+                                        <td class="p-4">
+                                            {{ $application->award->name }}
+                                        </td>
+
+                                        <td class="p-4">
+                                            <span class="px-2 py-1 rounded-full text-xs ">
+                                                {{ $application->status }}
+                                            </span>
+                                        </td>
+
+                                        <td class="p-4">
+                                            {{ $application->created_at->format('d/m/Y') }}
+                                        </td>
+
+                                        <td class="p-4">
+                                            <a href="{{ route('report.show', $application->id) }}"
+                                                class="text-blue-500 hover:underline">
+                                                ดูรายละเอียด
+                                            </a>
+                                        </td>
                                     </tr>
                                 @endforeach
                             </tbody>
@@ -76,16 +117,16 @@
                         </div>
                     </a>
                     <div class="flex gap-4 items-center">
-                        @if ($users->onFirstPage())
+                        @if ($applications->onFirstPage())
                             <x-icon name="arrow-head-left" class="stroke-gray-300"></x-icon>
                         @else
-                            <a href="{{ $users->previousPageUrl() }}">
+                            <a href="{{ $applications->previousPageUrl() }}">
                                 <x-icon name="arrow-head-left"></x-icon>
                             </a>
                         @endif
-                        <p class="border rounded-xl py-2 px-5">{{ $users->currentPage() }}</p>
-                        @if ($users->hasMorePages())
-                            <a href="{{ $users->nextPageUrl() }}">
+                        <p class="border rounded-xl py-2 px-5">{{ $applications->currentPage() }}</p>
+                        @if ($applications->hasMorePages())
+                            <a href="{{ $applications->nextPageUrl() }}">
                                 <x-icon name="arrow-head-right"></x-icon>
                             </a>
                         @else

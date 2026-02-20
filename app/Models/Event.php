@@ -36,12 +36,18 @@ class Event extends Model
             ->withTimestamps();
     }
 
-    public function users() {
+    public function users()
+    {
         return $this->belongsToMany(User::class, 'event_user')->withTimestamps();
     }
 
-    public function awardRegistrations() : HasMany
+    public function awardRegistrations(): HasMany
     {
         return $this->HasMany(AwardRegistration::class);
+    }
+
+    public function applications()
+    {
+        return $this->hasMany(Application::class, 'event_id');
     }
 }

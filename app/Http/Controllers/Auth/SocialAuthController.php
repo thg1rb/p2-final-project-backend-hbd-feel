@@ -10,11 +10,13 @@ use Laravel\Socialite\Socialite;
 
 class SocialAuthController extends Controller
 {
-    public function redirectToProvider() {
+    public function redirectToProvider()
+    {
         return Socialite::driver('google')->redirect();
     }
 
-    public function handleProviderCallback() {
+    public function handleProviderCallback()
+    {
         $googleUser = Socialite::driver('google')->user();
 
         $user = User::where('email', $googleUser->getEmail())->first();
@@ -26,6 +28,9 @@ class SocialAuthController extends Controller
                 'username' => str_replace(' ', '.', $googleUser->getName()),
                 'email' => $googleUser->getEmail(),
                 'password' => bcrypt(fake()->password(20)),
+
+                'faculty_id'    => 1,
+                'department_id' => 1,
             ]);
         }
 
