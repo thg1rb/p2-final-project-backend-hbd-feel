@@ -4,6 +4,7 @@ use App\Http\Controllers\Api\ApplicationController;
 use App\Http\Controllers\Api\ApprovalController;
 use App\Http\Controllers\Api\AwardRegistrationController;
 use App\Http\Controllers\Api\MinioController;
+use App\Http\Controllers\Api\AuthController;
 use Illuminate\Support\Facades\Route;
 
 Route::post('/approvals', [ApprovalController::class, 'store']);
@@ -15,6 +16,8 @@ Route::get('/applications', [ApplicationController::class, 'getAllApplications']
 Route::get('/applications/count', [ApplicationController::class, 'getApplicationCountByStatus']);
 
 Route::get('/application/{id}', [ApplicationController::class, 'getApplicationById']);
+
+Route::post('/applications', [ApplicationController::class, 'store']);
 
 Route::get('/minio/download', [MinioController::class, 'getPreviewUrl']);
 

@@ -55,43 +55,79 @@ class ApplicationController extends Controller
     }
     public function store(Request $request): JsonResponse
     {
-            return DB::transaction(function () use ($request) {
-                $award = Award::findOrFail($request->award_id);
-                $requirements = $award->requirements ?? [];
+        return DB::transaction(function () use ($request) {
 
-                $rules = [
-                    'award_id' => ['required', 'exists:awards,id'],
-                    'event_id' => ['required', 'exists:events,id'],
-                    'year' => ['required', 'integer'],
-                    'grade' => ['required', 'numeric'],
-                    'path' => ['required', 'string'],
-                    'documents' => ['required', 'array'],
-                ];
+            $award = Award::findOrFail($request->award_id);
+            $requirements = $award->requirements ?? [];
 
-                foreach ($requirements as $req) {
-                    $key = $req['id'];
-                    $rules["documents.$key"] = $req['required'] ? ['required', 'string'] : ['nullable', 'string'];
+
+            $rules = [
+                'award_id' => ['required', 'exists:awards,id'],
+                'event_id' => ['required', 'exists:events,id'],
+                'year'     => ['required', 'integer'],
+                'grade'    => ['required', 'numeric'],
+                'path'     => ['required', 'file', 'mimes:pdf,jpg,png', 'max:10240'],
+                'documents'=> ['required', 'array'],
+            ];
+
+            foreach ($requirements as $req) {
+                $key = $req['id'];
+                $rules["documents.$key"] = $req['required']
+                    ? ['required', 'file', 'mimes:pdf,jpg,png', 'max:5120']
+                    : ['nullable', 'file', 'mimes:pdf,jpg,png', 'max:5120'];
+            }
+
+            $validated = $request->validate($rules);
+
+            $applicationFile = $request->file('path');
+            $appFileName = Str::uuid() . '.' . $applicationFile->getClientOriginalExtension();
+
+
+            $mainPath = Storage::disk('s3')->putFileAs(
+                'applications',
+                $applicationFile,
+                $appFileName
+            );
+            if ($mainPath === false) {
+                return response()->json(['error' => 'Could not upload main file to S3. Check your S3 credentials.'], 500);
+            }
+
+            $storedDocuments = [];
+            foreach ($requirements as $req) {
+                $key = $req['id'];
+
+                if ($request->hasFile("documents.$key")) {
+                    $file = $request->file("documents.$key");
+                    $fileName = Str::uuid() . '.' . $file->getClientOriginalExtension();
+
+                    $storedPath = Storage::disk('s3')->putFileAs(
+                        "documents",
+                        $file,
+                        $fileName
+                    );
+
+                    $storedDocuments[$key] = $storedPath;
+                } else {
+                    $storedDocuments[$key] = null;
                 }
+            }
 
-                $validated = $request->validate($rules);
+            $application = Application::create([
+                 'student_id' => auth()->user()->student_id,
+                'award_id'   => $validated['award_id'],
+                'event_id'   => $validated['event_id'],
+                'year'       => $validated['year'],
+                'grade'      => $validated['grade'],
+                'path'       => $mainPath,
+                'documents'  => $storedDocuments,
+                'status'     => 'SUBMITTED'
+            ]);
 
-                $application = \App\Models\Application::create([
-                    'student_id' => auth()->user()->student_id ,
-                    'award_id' => $validated['award_id'],
-                    'event_id' => $validated['event_id'],
-                    'year' => $validated['year'],
-                    'grade' => $validated['grade'],
-                    'path' => $validated['path'],
-                    'documents' => $validated['documents']
-                ]);
-
-
-                return response()->json([
-                    'message' => 'Application submitted successfully',
-                    'data'    => $application->load(['user','event','award'])
-                ], 201);
-            });
-
+            return response()->json([
+                'message' => 'Application submitted successfully',
+                'data'    => $application->load(['user', 'event', 'award'])
+            ], 201);
+        });
     }
 
 }
