@@ -60,7 +60,6 @@ class ApplicationController extends Controller
             $award = Award::findOrFail($request->award_id);
             $requirements = $award->requirements ?? [];
 
-
             $rules = [
                 'award_id' => ['required', 'exists:awards,id'],
                 'event_id' => ['required', 'exists:events,id'],
@@ -81,15 +80,10 @@ class ApplicationController extends Controller
 
             $applicationFile = $request->file('path');
             $appFileName = Str::uuid() . '.' . $applicationFile->getClientOriginalExtension();
+            $mainPath = Storage::disk('s3')->putFileAs('applications', $applicationFile, $appFileName);
 
-
-            $mainPath = Storage::disk('s3')->putFileAs(
-                'applications',
-                $applicationFile,
-                $appFileName
-            );
-            if ($mainPath === false) {
-                return response()->json(['error' => 'Could not upload main file to S3. Check your S3 credentials.'], 500);
+            if (!$mainPath) {
+                return response()->json(['error' => 'Could not upload main file.'], 500);
             }
 
             $storedDocuments = [];
@@ -106,14 +100,15 @@ class ApplicationController extends Controller
                         $fileName
                     );
 
-                    $storedDocuments[$key] = $storedPath;
-                } else {
-                    $storedDocuments[$key] = null;
+                    $storedDocuments[$key] = [
+                        'file_path' => $storedPath
+                    ];
                 }
             }
 
             $application = Application::create([
-                 'student_id' => auth()->user()->student_id,
+//                'student_id' => "2502275062",
+                'student_id' => auth()->user()->student_id,
                 'award_id'   => $validated['award_id'],
                 'event_id'   => $validated['event_id'],
                 'year'       => $validated['year'],
