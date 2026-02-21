@@ -2,7 +2,8 @@
 
 namespace App\Models;
 
-use App\Enums\ApplicationStatus;
+use App\Enums\ApprovalStatus;
+use App\Enums\RoleLevel;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -18,14 +19,16 @@ class Application extends Model
         'award_id',
         'path',
         'documents',
-        'status',
         'grade',
-        'year'
+        'year',
+        'level',
+        'status',
     ];
 
     protected $casts = [
         'documents' => 'array',
-        'status' => ApplicationStatus::class
+        'level' => RoleLevel::class,
+        'status' => ApprovalStatus::class,
     ];
 
     public function user()

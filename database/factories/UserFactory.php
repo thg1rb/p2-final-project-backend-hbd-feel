@@ -25,19 +25,27 @@ class UserFactory extends Factory
     {
         $department = \App\Models\Department::inRandomOrder()->first();
 
+        if (! $department) {
+            $faculty = \App\Models\Faculty::firstOrCreate(['name' => 'คณะวิทยาศาสตร์']);
+            $department = \App\Models\Department::firstOrCreate([
+                'name' => 'ภาควิชาวิทยาการคอมพิวเตอร์',
+                'faculty_id' => $faculty->id,
+            ]);
+        }
+
         return [
-            'student_id' => fake()->unique()->numerify("##########"),
+            'student_id' => fake()->unique()->numerify('##########'),
             'firstName' => fake()->firstName(),
             'lastName' => fake()->lastName(),
-            'username' => fake()->username(),
+            'username' => fake()->unique()->username(),
             'email' => fake()->unique()->safeEmail(),
             'email_verified_at' => now(),
-            'role' => fake()->randomElement(["NISIT"]),
+            'role' => fake()->randomElement(['NISIT']),
             'password' => static::$password ??= Hash::make('password'),
             'remember_token' => Str::random(10),
 
-            'faculty_id' => $department ? $department->faculty_id : null,
-            'department_id' => $department ? $department->id : null,
+            'faculty_id' => $department->faculty_id,
+            'department_id' => $department->id,
         ];
     }
 
@@ -46,7 +54,7 @@ class UserFactory extends Factory
      */
     public function unverified(): static
     {
-        return $this->state(fn(array $attributes) => [
+        return $this->state(fn (array $attributes) => [
             'email_verified_at' => null,
         ]);
     }

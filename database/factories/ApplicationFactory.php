@@ -2,7 +2,8 @@
 
 namespace Database\Factories;
 
-use App\Enums\ApplicationStatus;
+use App\Enums\ApprovalStatus;
+use App\Enums\RoleLevel;
 use App\Models\Award;
 use App\Models\Event;
 use App\Models\User;
@@ -26,14 +27,15 @@ class ApplicationFactory extends Factory
         ];
         $user = User::whereNotNull('student_id')->inRandomOrder()->first();
         return [
-            'student_id' => $user ? $user->student_id : '0000000000',
-            'event_id' => Event::inRandomOrder()->first()?->id ?? $this->faker->uuid(),
-            'award_id' => Award::inRandomOrder()->first()?->id ?? $this->faker->uuid(),
+            'student_id' => fn () => User::whereNotNull('student_id')->inRandomOrder()->first()?->student_id,
+            'event_id' => fn () => Event::inRandomOrder()->first()?->id ?? $this->faker->uuid(),
+            'award_id' => fn () => Award::inRandomOrder()->first()?->id ?? $this->faker->uuid(),
             'grade' => $this->faker->randomFloat(2, 2, 4),
-            'path' => "form_1.pdf",
+            'path' => 'form_1.pdf',
             'documents' => $submissionData,
-            'status' => ApplicationStatus::SUBMITTED->value,
-            'year' => $this->faker->numberBetween(1, 4)
+            'year' => $this->faker->numberBetween(1, 4),
+            'level' => fake()->randomElement(RoleLevel::cases()),
+            'status' => $this->faker->randomElement(ApprovalStatus::cases())->value,
         ];
     }
 }
