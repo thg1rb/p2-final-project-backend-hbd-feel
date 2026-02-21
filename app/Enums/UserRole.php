@@ -36,7 +36,7 @@ enum UserRole: string
             self::DEPT_HEAD => RoleLevel::DEPT_HEAD,
             self::ASSO_DEAN => RoleLevel::ASSO_DEAN,
             self::DEAN => RoleLevel::DEAN,
-            self::NISIT_DEV => RoleLevel::NISIT_DEV,
+            self::ADMIN => RoleLevel::ADMIN,
             self::BOARD => RoleLevel::BOARD,
             self::BOARD_HEAD => RoleLevel::BOARD_HEAD,
         };

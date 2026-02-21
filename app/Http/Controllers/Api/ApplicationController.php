@@ -16,9 +16,9 @@ class ApplicationController extends Controller
     private function getMockUser(): User
     {
         return new User([
-            'faculty_id' => 1,
-            'department_id' => 2,
-            'role' => UserRole::DEPT_HEAD,
+            'faculty_id' => 3,
+            'department_id' => 14,
+            'role' => UserRole::BOARD,
         ]);
     }
 
@@ -64,24 +64,32 @@ class ApplicationController extends Controller
                     });
                 break;
 
-            case UserRole::NISIT_DEV:
+            case UserRole::ADMIN:
                 $this->applyRoleFilter($query, RoleLevel::DEAN);
                 break;
 
             case UserRole::BOARD:
-                $this->applyRoleFilter($query, RoleLevel::NISIT_DEV);
+                $this->applyRoleFilter($query, RoleLevel::ADMIN);
                 break;
         }
 
         // search filter
         if ($request->filled('search')) {
-            $searchTerm = $request->input('search');
+            $searchTerm = trim($request->input('search'));
+            $searchWords = explode(' ', $searchTerm);
+            $searchWords = array_filter($searchWords, fn ($word) => ! empty(trim($word)));
 
-            $query->whereHas('user', function ($q) use ($searchTerm) {
-                $q->where('firstName', 'like', "%{$searchTerm}%")
-                    ->orWhere('lastName', 'like', "%{$searchTerm}%")
-                    ->orWhere('student_id', 'like', "%{$searchTerm}%");
-            });
+            if (! empty($searchWords)) {
+                $query->whereHas('user', function ($q) use ($searchWords) {
+                    foreach ($searchWords as $word) {
+                        $q->where(function ($innerQ) use ($word) {
+                            $innerQ->where('firstName', 'like', "%{$word}%")
+                                ->orWhere('lastName', 'like', "%{$word}%")
+                                ->orWhere('student_id', 'like', "%{$word}%");
+                        });
+                    }
+                });
+            }
         }
 
         // status filter
@@ -116,7 +124,6 @@ class ApplicationController extends Controller
 
         return response()->json($applications);
     }
-
 
     public function getApplicationById($id)
     {
@@ -156,12 +163,12 @@ class ApplicationController extends Controller
                     });
                 break;
 
-            case UserRole::NISIT_DEV:
+            case UserRole::ADMIN:
                 $this->applyRoleFilter($query, RoleLevel::DEAN);
                 break;
 
             case UserRole::BOARD:
-                $this->applyRoleFilter($query, RoleLevel::NISIT_DEV);
+                $this->applyRoleFilter($query, RoleLevel::ADMIN);
                 break;
         }
 
