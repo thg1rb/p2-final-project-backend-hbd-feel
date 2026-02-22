@@ -46,7 +46,7 @@
                 <x-progression :application="$application" :approvals="$approvals" />
 
                 @if ($application->status !== \App\Enums\ApplicationStatus::SUBMITTED)
-                    <x-comment-section :application="$application" />
+                    <x-comment-section :headDeptApproval="$headDeptApproval" />
                 @endif
             </div>
         </div>

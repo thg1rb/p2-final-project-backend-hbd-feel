@@ -1,9 +1,9 @@
 @props(['application'])
 @props(['approvals'])
 @php
-    $workflowOrder = ['HEAD_OF_DEPT', 'ASSO_DEAN', 'DEAN', 'NISIT_DEV', 'BOARD', 'BOARD_HEAD', 'CHANCELLOR'];
+    $workflowOrder = ['DEPT_HEAD', 'ASSO_DEAN', 'DEAN', 'NISIT_DEV', 'BOARD', 'BOARD_HEAD', 'CHANCELLOR'];
     $roleNames = [
-        'HEAD_OF_DEPT' => 'หัวหน้าภาควิชา',
+        'DEPT_HEAD' => 'หัวหน้าภาควิชา',
         'ASSO_DEAN' => 'รองคณบดี',
         'DEAN' => 'คณบดี',
         'NISIT_DEV' => 'หน่วยพัฒนานิสิต',
@@ -12,6 +12,8 @@
         'CHANCELLOR' => 'อธิการบดี',
     ];
     $hasRejected = false;
+
+    Log::info($approvals);
 @endphp
 
 <div class="flex flex-col gap-6 rounded-xl border border-gray-300 bg-white p-5 shadow-sm">

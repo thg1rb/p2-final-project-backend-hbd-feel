@@ -14,35 +14,49 @@
                 <form action="{{ route('report.award-report') }}">
                     <p class="mb-3">เลือกปีการศึกษาและภาคการศึกษาหรือคัดกรองตามชื่อนิสิตหรือคัดกรองตามหมวดหมู่รางวัล
                     </p>
-                    <div class="flex gap-5">
-                        <input type="text" name="search" placeholder="ค้นหาด้วยชื่อของนิสิต"
-                            class="border border-gray-300  rounded-xl w-full cursor-pointer focus:outline-primary focus:border-gray-300 focus:ring-offset-0 focus:ring-0 flex-1">
-                        <select name="year" id=""
-                            class="border border-gray-300  rounded-xl w-full cursor-pointer focus:outline-primary focus:border-gray-300 focus:ring-offset-0 focus:ring-0 flex-1">
-                            <option value="">ทั้งหมด</option>
-                            @foreach ($allYears as $year)
-                                <option value={{ $year }} @selected($targetYear == $year)>
-                                    {{ $year }}
-                                </option>
-                            @endforeach
-                        </select>
-                        <select name="semester" id=""
-                            class="border border-gray-300  rounded-xl w-full cursor-pointer focus:outline-primary focus:border-gray-300 focus:ring-offset-0 focus:ring-0 flex-1">
-                            <option value="">ทั้งหมด</option>
-                            @foreach ($allSemesters as $semester)
-                                <option value={{ $semester }} @selected($targetSemester == $semester)>
-                                    {{ $semester }}</option>
-                            @endforeach
-                        </select>
-                        <select name="type" id=""
-                            class="border border-gray-300  rounded-xl w-full cursor-pointer focus:outline-primary focus:border-gray-300 focus:ring-offset-0 focus:ring-0 flex-1">
-                            <option value="">ทั้งหมด</option>
-                            <option value="Extracurricular Activities">ด้านกิจกรรมเสริมหลักสูตร</option>
-                            <option value="Creativity & Innovation">ด้านความคิดสร้างสรรค์และนวัตกรรม</option>
-                            <option value="Good Conduct">ด้านความประพฤติดี</option>
-                        </select>
+                    <div class="flex gap-5 items-center">
+                        <div class="flex flex-col gap-2 flex-1">
+                            <p>ค้นหาด้วยชื่อของนิสิต</p>
+                            <input type="text" name="search" placeholder="ค้นหาด้วยชื่อของนิสิต"
+                                class="border border-gray-300  rounded-xl w-full cursor-pointer focus:outline-primary focus:border-gray-300 focus:ring-offset-0 focus:ring-0 flex-1">
+                        </div>
+                        <div class="flex flex-col gap-2 flex-1">
+                            <p>คัดกรองด้วยปีการศึกษา</p>
+                            <select name="year" id=""
+                                class="border border-gray-300  rounded-xl w-full cursor-pointer focus:outline-primary focus:border-gray-300 focus:ring-offset-0 focus:ring-0 flex-1">
+                                <option value="">ทั้งหมด</option>
+                                @foreach ($allYears as $year)
+                                    <option value={{ $year }} @selected($targetYear == $year)>
+                                        {{ $year }}
+                                    </option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <div class="flex flex-col gap-2 flex-1">
+                            <p>คัดกรองด้วยภาคการศึกษา</p>
+                            <select name="semester" id=""
+                                class="border border-gray-300  rounded-xl w-full cursor-pointer focus:outline-primary focus:border-gray-300 focus:ring-offset-0 focus:ring-0 flex-1">
+                                <option value="">ทั้งหมด</option>
+                                @foreach ($allSemesters as $semester)
+                                    <option value={{ $semester }} @selected($targetSemester == $semester)>
+                                        {{ $semester }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <div class="flex flex-col gap-2 flex-1">
+                            <p>คัดกรองด้วยประเภทของรางวัล</p>
+                            <select name="type" id=""
+                                class="border border-gray-300  rounded-xl w-full cursor-pointer focus:outline-primary focus:border-gray-300 focus:ring-offset-0 focus:ring-0 flex-1">
+                                <option value="">ทั้งหมด</option>
+                                <option value="Extracurricular Activities">ด้านกิจกรรมเสริมหลักสูตร</option>
+                                <option value="Creativity & Innovation">ด้านความคิดสร้างสรรค์และนวัตกรรม</option>
+                                <option value="Good Conduct">ด้านความประพฤติดี</option>
+                            </select>
+                        </div>
                         <button type="submit"
-                            class="bg-primary rounded-xl text-white p-3 hover:scale-95 active:scale-90 transition-all">คัดกรอง</button>
+                            class="bg-primary text-white p-3 hover:scale-95 active:scale-90 transition-all rounded-full h-fit">
+                            <x-icon name="search" size="20" class="stroke-gray-400"></x-icon>
+                        </button>
                     </div>
                 </form>
                 @if ($applications->isNotEmpty())
@@ -55,7 +69,6 @@
                                     <th class="  p-4 text-start">ภาควิชา</th>
                                     <th class="  p-4 text-start">คณะ</th>
                                     <th class="  p-4 text-start">ประเภทรางวัล</th>
-                                    <th class="  p-4 text-start">สถานะ</th>
                                     <th class="  p-4 text-start">วันที่ยื่น</th>
                                     <th class="  p-4 text-start"></th>
                                 </tr>
@@ -81,12 +94,6 @@
 
                                         <td class="p-4">
                                             {{ $application->award->name }}
-                                        </td>
-
-                                        <td class="p-4">
-                                            <span class="px-2 py-1 rounded-full text-xs ">
-                                                {{ $application->status }}
-                                            </span>
                                         </td>
 
                                         <td class="p-4">

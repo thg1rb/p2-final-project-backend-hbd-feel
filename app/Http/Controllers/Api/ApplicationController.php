@@ -16,8 +16,8 @@ class ApplicationController extends Controller
     private function getMockUser(): User
     {
         return new User([
-            'faculty_id' => 3,
-            'department_id' => 14,
+            'faculty_id' => 1,
+            'department_id' => 2,
             'role' => UserRole::DEPT_HEAD,
         ]);
     }
@@ -102,9 +102,7 @@ class ApplicationController extends Controller
                         ->orWhere(function ($q2) use ($level) {
                             // any higher level means already approved at current level
                             $q2->where('level', '>', $level);
-
                         });
-
                 });
             }
         }
