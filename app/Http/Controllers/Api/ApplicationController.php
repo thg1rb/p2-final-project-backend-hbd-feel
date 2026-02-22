@@ -2,8 +2,10 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Enums\Status;
 use App\Http\Controllers\Controller;
 use App\Models\Application;
+use App\Models\Event;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use App\Models\Award;
@@ -57,12 +59,32 @@ class ApplicationController extends Controller
     {
         return DB::transaction(function () use ($request) {
 
+            $event = Event::where('status', Status::OPENED)->first();
+
+            if (!$event) {
+                return response()->json([
+                    'error' => 'No opened event available.'
+                ], 400);
+            }
+
+            $studentId = auth()->user()->student_id;
+//            $studentId = "2525777311";
+            $alreadyApplied = Application::where('student_id', $studentId)
+                ->where('event_id', $event->id)
+                ->exists();
+
+            if ($alreadyApplied) {
+                return response()->json([
+                    'error' => 'You have already applied for this event.',$event->id
+                ], 400);
+            }
+
             $award = Award::findOrFail($request->award_id);
             $requirements = $award->requirements ?? [];
 
             $rules = [
                 'award_id' => ['required', 'exists:awards,id'],
-                'event_id' => ['required', 'exists:events,id'],
+//                'event_id' => ['required', 'exists:events,id'],
                 'year'     => ['required', 'integer'],
                 'grade'    => ['required', 'numeric'],
                 'path'     => ['required', 'file', 'mimes:pdf,jpg,png', 'max:10240'],
@@ -101,16 +123,16 @@ class ApplicationController extends Controller
                     );
 
                     $storedDocuments[$key] = [
-                        'file_path' => $storedPath
+                        'file_path' => $storedPath,
                     ];
                 }
             }
 
             $application = Application::create([
-//                'student_id' => "2502275062",
+//                'student_id' => "2525777311",
                 'student_id' => auth()->user()->student_id,
                 'award_id'   => $validated['award_id'],
-                'event_id'   => $validated['event_id'],
+                'event_id'   => $event->id,
                 'year'       => $validated['year'],
                 'grade'      => $validated['grade'],
                 'path'       => $mainPath,
