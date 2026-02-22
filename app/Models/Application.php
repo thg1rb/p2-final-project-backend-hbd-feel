@@ -38,7 +38,7 @@ class Application extends Model
             return $query;
         }
 
-        return $query->whereHas('event', fn($q) => $q->where('status', $status));
+        return $query->whereHas('event', fn ($q) => $q->where('status', $status));
     }
 
     public function scopeRoleLevelFilter($query, RoleLevel $roleLevel)
@@ -59,24 +59,24 @@ class Application extends Model
         return match ($user->role) {
             UserRole::NISIT => $query->whereHas(
                 'user',
-                fn($q) => $q->where('student_id', $user->student_id)
+                fn ($q) => $q->where('student_id', $user->student_id)
             ),
 
             UserRole::DEPT_HEAD => $query->whereHas(
                 'user',
-                fn($q) => $q->where('department_id', $user->department_id)
+                fn ($q) => $q->where('department_id', $user->department_id)
             ),
 
             UserRole::ASSO_DEAN => $query->roleLevelFilter(RoleLevel::DEPT_HEAD)
                 ->whereHas(
                     'user',
-                    fn($q) => $q->where('faculty_id', $user->faculty_id)
+                    fn ($q) => $q->where('faculty_id', $user->faculty_id)
                 ),
 
             UserRole::DEAN => $query->roleLevelFilter(RoleLevel::ASSO_DEAN)
                 ->whereHas(
                     'user',
-                    fn($q) => $q->where('faculty_id', $user->faculty_id)
+                    fn ($q) => $q->where('faculty_id', $user->faculty_id)
                 ),
 
             UserRole::ADMIN => $query->roleLevelFilter(RoleLevel::DEAN),
@@ -99,12 +99,12 @@ class Application extends Model
                 ->where('status', ApprovalStatus::REJECTED->value),
 
             'APPROVED' => $query->where(function ($q) use ($level) {
-                    $q->where(function ($q2) use ($level) {
-                        $q2->where('level', $level)
+                $q->where(function ($q2) use ($level) {
+                    $q2->where('level', $level)
                         ->where('status', ApprovalStatus::APPROVED->value);
-                    })
+                })
                     ->orWhere('level', '>', $level);
-                }),
+            }),
 
             default => $query,
         };
@@ -112,7 +112,7 @@ class Application extends Model
 
     public function scopeSearch($query, ?string $search)
     {
-        if (!$search) {
+        if (! $search) {
             return $query;
         }
 
@@ -124,13 +124,19 @@ class Application extends Model
             return $query;
         }
 
-        return $query->whereHas('user', function ($q) use ($words) {
+        return $query->where(function ($q) use ($words) {
+            $q->whereHas('user', function ($userQ) use ($words) {
+                foreach ($words as $word) {
+                    $userQ->where(function ($innerQ) use ($word) {
+                        $innerQ->where('firstName', 'like', "%{$word}%")
+                            ->orWhere('lastName', 'like', "%{$word}%")
+                            ->orWhere('student_id', 'like', "%{$word}%");
+                    });
+                }
+            });
+
             foreach ($words as $word) {
-                $q->where(function ($innerQ) use ($word) {
-                    $innerQ->where('firstName', 'like', "%{$word}%")
-                        ->orWhere('lastName', 'like', "%{$word}%")
-                        ->orWhere('student_id', 'like', "%{$word}%");
-                });
+                $q->orWhere('id', 'like', "%{$word}%");
             }
         });
     }
