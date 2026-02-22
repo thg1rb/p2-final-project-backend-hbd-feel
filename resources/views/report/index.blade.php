@@ -158,14 +158,14 @@
                     <div
                         class="flex justify-center items-center flex-col border rounded-xl p-5 flex-1 bg-red-50 border-red-500">
                         <p class="mb-1 text-red-500"><span
-                                class="font-bold text-4xl">{{ $awardStats->get('Extracurricular Activities', 0) }}</span>
+                                class="font-bold text-4xl">{{ $awardStats->get('ด้านกิจกรรมเสริมหลักสูตร', 0) }}</span>
                             รางวัล</p>
                         <p>ด้านกิจกรรมเสริมหลักสูตร</p>
                     </div>
                     <div
                         class="flex justify-center items-center flex-col border rounded-xl p-5 flex-1 bg-yellow-50 border-yellow-500">
                         <p class="mb-1 text-yellow-500"><span
-                                class="font-bold text-4xl ">{{ $awardStats->get('Creativity & Innovation', 0) }}</span>
+                                class="font-bold text-4xl ">{{ $awardStats->get('ด้านความคิดสร้างสรรค์และนวัตกรรม', 0) }}</span>
                             รางวัล
                         </p>
                         <p>ด้านความคิดสร้างสรรค์และนวัตกรรม</p>
@@ -173,7 +173,7 @@
                     <div
                         class="flex justify-center items-center flex-col border rounded-xl p-5 flex-1 bg-green-50 border-primary">
                         <p class="mb-1 text-primary"><span
-                                class="font-bold text-4xl ">{{ $awardStats->get('Good Conduct', 0) }}</span> รางวัล</p>
+                                class="font-bold text-4xl ">{{ $awardStats->get('ด้านความประพฤติดี', 0) }}</span> รางวัล</p>
                         <p>ด้านความประพฤติดี</p>
                     </div>
                 </div>

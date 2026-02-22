@@ -44,10 +44,6 @@
 
             <div class="flex-1 flex flex-col gap-6">
                 <x-progression :application="$application" :approvals="$approvals" />
-
-                @if ($application->status !== \App\Enums\ApplicationStatus::SUBMITTED)
-                    <x-comment-section :headDeptApproval="$headDeptApproval" />
-                @endif
             </div>
         </div>
     </div>
