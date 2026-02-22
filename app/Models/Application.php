@@ -32,6 +32,15 @@ class Application extends Model
         'status' => ApprovalStatus::class,
     ];
 
+    public function scopeWhereEventStatus($query, string $status, ?User $user = null)
+    {
+        if ($user && $user->role === UserRole::NISIT) {
+            return $query;
+        }
+
+        return $query->whereHas('event', fn($q) => $q->where('status', $status));
+    }
+
     public function scopeRoleLevelFilter($query, RoleLevel $roleLevel)
     {
         return $query->where(function ($q) use ($roleLevel) {
@@ -48,34 +57,31 @@ class Application extends Model
         $level = $user->role->level()->value;
 
         return match ($user->role) {
-            UserRole::DEPT_HEAD =>
-            $query->whereHas(
+            UserRole::NISIT => $query->whereHas(
                 'user',
-                fn($q) =>
-                $q->where('department_id', $user->department_id)
+                fn($q) => $q->where('student_id', $user->student_id)
             ),
 
-            UserRole::ASSO_DEAN =>
-            $query->roleLevelFilter(RoleLevel::DEPT_HEAD)
+            UserRole::DEPT_HEAD => $query->whereHas(
+                'user',
+                fn($q) => $q->where('department_id', $user->department_id)
+            ),
+
+            UserRole::ASSO_DEAN => $query->roleLevelFilter(RoleLevel::DEPT_HEAD)
                 ->whereHas(
                     'user',
-                    fn($q) =>
-                    $q->where('faculty_id', $user->faculty_id)
+                    fn($q) => $q->where('faculty_id', $user->faculty_id)
                 ),
 
-            UserRole::DEAN =>
-            $query->roleLevelFilter(RoleLevel::ASSO_DEAN)
+            UserRole::DEAN => $query->roleLevelFilter(RoleLevel::ASSO_DEAN)
                 ->whereHas(
                     'user',
-                    fn($q) =>
-                    $q->where('faculty_id', $user->faculty_id)
+                    fn($q) => $q->where('faculty_id', $user->faculty_id)
                 ),
 
-            UserRole::ADMIN =>
-            $query->roleLevelFilter(RoleLevel::DEAN),
+            UserRole::ADMIN => $query->roleLevelFilter(RoleLevel::DEAN),
 
-            UserRole::BOARD =>
-            $query->roleLevelFilter(RoleLevel::ADMIN),
+            UserRole::BOARD => $query->roleLevelFilter(RoleLevel::ADMIN),
 
             default => $query,
         };
@@ -86,16 +92,13 @@ class Application extends Model
         $previousLevel = $level - 1;
 
         return match ($status) {
-            'PENDING' =>
-            $query->where('level', $previousLevel)
+            'PENDING' => $query->where('level', $previousLevel)
                 ->where('status', ApprovalStatus::APPROVED->value),
 
-            'REJECTED' =>
-            $query->where('level', $level)
+            'REJECTED' => $query->where('level', $level)
                 ->where('status', ApprovalStatus::REJECTED->value),
 
-            'APPROVED' =>
-            $query->where(function ($q) use ($level) {
+            'APPROVED' => $query->where(function ($q) use ($level) {
                     $q->where(function ($q2) use ($level) {
                         $q2->where('level', $level)
                         ->where('status', ApprovalStatus::APPROVED->value);
@@ -109,15 +112,17 @@ class Application extends Model
 
     public function scopeSearch($query, ?string $search)
     {
-        if (!$search)
+        if (!$search) {
             return $query;
+        }
 
         $words = collect(explode(' ', trim($search)))
             ->filter()
             ->values();
 
-        if ($words->isEmpty())
+        if ($words->isEmpty()) {
             return $query;
+        }
 
         return $query->whereHas('user', function ($q) use ($words) {
             foreach ($words as $word) {
