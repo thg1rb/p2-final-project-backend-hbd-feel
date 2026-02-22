@@ -16,8 +16,8 @@
                     </p>
                     <div class="flex gap-5 items-center">
                         <div class="flex flex-col gap-2 flex-1">
-                            <p>ค้นหาด้วยชื่อของนิสิต</p>
-                            <input type="text" name="search" placeholder="ค้นหาด้วยชื่อของนิสิต"
+                            <p>ค้นหาด้วยรหัสใบสมัคร ชื่อจริง รหัสนิสิต</p>
+                            <input type="text" name="search" placeholder="ค้นหาด้วยรหัสใบสมัคร ชื่อจริง รหัสนิสิต"
                                 class="border border-gray-300  rounded-xl w-full cursor-pointer focus:outline-primary focus:border-gray-300 focus:ring-offset-0 focus:ring-0 flex-1">
                         </div>
                         <div class="flex flex-col gap-2 flex-1">
