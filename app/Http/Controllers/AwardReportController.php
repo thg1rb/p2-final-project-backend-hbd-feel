@@ -25,8 +25,10 @@ class AwardReportController extends Controller
 
         if ($targetYear != "" || $targetSemester != "") {
             $query->whereHas('event', function ($q) use ($targetYear, $targetSemester) {
-                if ($targetYear != "") $q->where('academic_year', $targetYear);
-                if ($targetSemester != "") $q->where('semester', $targetSemester);
+                if ($targetYear != "")
+                    $q->where('academic_year', $targetYear);
+                if ($targetSemester != "")
+                    $q->where('semester', $targetSemester);
             });
         }
 
@@ -37,10 +39,13 @@ class AwardReportController extends Controller
         }
 
         if ($search) {
-            $query->whereHas('user', function ($q) use ($search) {
-                $q->where('firstName', 'LIKE', "%{$search}%")
-                    ->orWhere('lastName', 'LIKE', "%{$search}%")
-                    ->orWhere('student_id', 'LIKE', "%{$search}%"); // หาจากรหัสนิสิตด้วย
+            $query->where(function ($q) use ($search) {
+                $q->whereHas('user', function ($userQ) use ($search) {
+                    $userQ->where('firstName', 'LIKE', "%{$search}%")
+                        ->orWhere('lastName', 'LIKE', "%{$search}%")
+                        ->orWhere('student_id', 'LIKE', "%{$search}%");
+                })
+                    ->orWhere('id', 'LIKE', "%{$search}%");
             });
         }
 
@@ -56,15 +61,21 @@ class AwardReportController extends Controller
         $allSemesters = Event::distinct()->orderBy('semester', 'asc')->pluck('semester');
 
         $awardStats = Award::whereHas('events', function ($q) use ($targetYear, $targetSemester) {
-            if ($targetYear) $q->where('academic_year', $targetYear);
-            if ($targetSemester) $q->where('semester', $targetSemester);
+            if ($targetYear)
+                $q->where('academic_year', $targetYear);
+            if ($targetSemester)
+                $q->where('semester', $targetSemester);
         })
-            ->withCount(['applications' => function ($q) use ($targetYear, $targetSemester) {
-                $q->whereHas('event', function ($sq) use ($targetYear, $targetSemester) {
-                    if ($targetYear) $sq->where('academic_year', $targetYear);
-                    if ($targetSemester) $sq->where('semester', $targetSemester);
-                });
-            }])
+            ->withCount([
+                'applications' => function ($q) use ($targetYear, $targetSemester) {
+                    $q->whereHas('event', function ($sq) use ($targetYear, $targetSemester) {
+                        if ($targetYear)
+                            $sq->where('academic_year', $targetYear);
+                        if ($targetSemester)
+                            $sq->where('semester', $targetSemester);
+                    });
+                }
+            ])
             ->get()
             ->groupBy('name')
             ->map(fn($group) => $group->sum('applications_count'));
@@ -84,11 +95,11 @@ class AwardReportController extends Controller
         $fileName = 'award-report.csv';
 
         $headers = [
-            "Content-type"        => "text/csv",
+            "Content-type" => "text/csv",
             "Content-Disposition" => "attachment; filename=$fileName",
-            "Pragma"              => "no-cache",
-            "Cache-Control"       => "must-revalidate, post-check=0, pre-check=0",
-            "Expires"             => "0"
+            "Pragma" => "no-cache",
+            "Cache-Control" => "must-revalidate, post-check=0, pre-check=0",
+            "Expires" => "0"
         ];
 
         $callback = function () use ($users) {
