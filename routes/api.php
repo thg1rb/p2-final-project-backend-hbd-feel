@@ -6,6 +6,7 @@ use App\Http\Controllers\Api\AwardRegistrationController;
 use App\Http\Controllers\Api\MinioController;
 use App\Http\Controllers\Api\AuthController;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\Api\AwardController;
 
 Route::post('/approvals', [ApprovalController::class, 'store']);
 
@@ -24,3 +25,5 @@ Route::get('/minio/download', [MinioController::class, 'getPreviewUrl']);
 Route::get('/approvals/{id}', [ApprovalController::class, 'getApprovalRequestByApplicationId']);
 
 Route::get('/approvals/{id}/{userId}', [ApprovalController::class, 'getApprovalRequestByApplicationIdAndUserId']);
+
+Route::apiResource('/awards', AwardController::class);

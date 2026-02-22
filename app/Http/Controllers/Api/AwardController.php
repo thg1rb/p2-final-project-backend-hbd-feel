@@ -14,7 +14,7 @@ class AwardController extends Controller
     public function index()
     {
         //
-        return response()->json(Award::all(['name','form_path','requirements']));
+        return response()->json(Award::all(['id', 'name','form_path','requirements']));
     }
 
     /**
@@ -31,7 +31,7 @@ class AwardController extends Controller
     public function show(string $id)
     {
         //
-        return response()->json(Award::findOrFail($id,['name','form_path','requirements']));
+        return response()->json(Award::findOrFail($id,['id', 'name','form_path','requirements']));
     }
 
     /**
