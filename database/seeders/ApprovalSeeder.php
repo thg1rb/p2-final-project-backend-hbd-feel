@@ -29,11 +29,12 @@ class ApprovalSeeder extends Seeder
                 RoleLevel::DEPT_HEAD->value => UserRole::DEPT_HEAD,
                 RoleLevel::ASSO_DEAN->value => UserRole::ASSO_DEAN,
                 RoleLevel::DEAN->value => UserRole::DEAN,
-                RoleLevel::NISIT_DEV->value => UserRole::NISIT_DEV,
+                RoleLevel::ADMIN->value => UserRole::ADMIN,
                 RoleLevel::BOARD->value => UserRole::BOARD,
             ];
 
             $finalStatus = null;
+            $lastLevel = null;
 
             for ($i = 1; $i <= $level->value; $i++) {
                 $userRole = $roleLevelToUserRole[$i] ?? null;
@@ -71,6 +72,7 @@ class ApprovalSeeder extends Seeder
                 ]);
 
                 $finalStatus = $approvalStatus;
+                $lastLevel = RoleLevel::from($i);
 
                 if ($approvalStatus === ApprovalStatus::REJECTED) {
                     break;
@@ -80,6 +82,7 @@ class ApprovalSeeder extends Seeder
             if ($finalStatus) {
                 $application->update([
                     'status' => $finalStatus,
+                    'level' => $lastLevel,
                 ]);
             }
         });
