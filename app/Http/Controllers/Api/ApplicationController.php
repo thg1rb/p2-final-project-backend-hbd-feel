@@ -35,91 +35,26 @@ class ApplicationController extends Controller
 
     public function getAllApplications(Request $request)
     {
-        $query = Application::with(['user', 'event', 'award', 'user.faculty', 'user.department']);
-
-        // TODO: Using real user
         $user = $this->getMockUser();
-
         $level = $user->role->level()->value;
-        $previousLevel = $level - 1;
 
-        switch ($user->role) {
-            case UserRole::DEPT_HEAD:
-                $query->whereHas('user', function ($q) use ($user) {
-                    $q->where('department_id', $user->department_id);
-                });
-                break;
-
-            case UserRole::ASSO_DEAN:
-                $this->applyRoleFilter($query, RoleLevel::DEPT_HEAD)
-                    ->whereHas('user', function ($q) use ($user) {
-                        $q->where('faculty_id', $user->faculty_id);
-                    });
-                break;
-
-            case UserRole::DEAN:
-                $this->applyRoleFilter($query, RoleLevel::ASSO_DEAN)
-                    ->whereHas('user', function ($q) use ($user) {
-                        $q->where('faculty_id', $user->faculty_id);
-                    });
-                break;
-
-            case UserRole::ADMIN:
-                $this->applyRoleFilter($query, RoleLevel::DEAN);
-                break;
-
-            case UserRole::BOARD:
-                $this->applyRoleFilter($query, RoleLevel::ADMIN);
-                break;
-        }
-
-        // search filter
-        if ($request->filled('search')) {
-            $searchTerm = trim($request->input('search'));
-            $searchWords = explode(' ', $searchTerm);
-            $searchWords = array_filter($searchWords, fn ($word) => ! empty(trim($word)));
-
-            if (! empty($searchWords)) {
-                $query->whereHas('user', function ($q) use ($searchWords) {
-                    foreach ($searchWords as $word) {
-                        $q->where(function ($innerQ) use ($word) {
-                            $innerQ->where('firstName', 'like', "%{$word}%")
-                                ->orWhere('lastName', 'like', "%{$word}%")
-                                ->orWhere('student_id', 'like', "%{$word}%");
-                        });
-                    }
-                });
-            }
-        }
-
-        // status filter
-        if ($request->filled('status')) {
-            if ($request->input('status') === 'PENDING') {
-                $query->where('level', $previousLevel)
-                    ->where('status', ApprovalStatus::APPROVED->value);
-            } elseif ($request->input('status') === 'REJECTED') {
-                $query->where('level', $level)
-                    ->where('status', ApprovalStatus::REJECTED->value);
-            } elseif ($request->input('status') === 'APPROVED') {
-                $query->where(function ($q) use ($level) {
-                    $q->where(function ($q2) use ($level) {
-                        // current level must be approved
-                        $q2->where('level', $level)
-                            ->where('status', ApprovalStatus::APPROVED->value);
-                    })
-                        ->orWhere(function ($q2) use ($level) {
-                            // any higher level means already approved at current level
-                            $q2->where('level', '>', $level);
-                        });
-                });
-            }
-        }
-
-        $page = max(1, (int) ($request->input('page') ?? 1));
-        $pageSize = min(100, max(1, (int) ($request->input('page_size') ?? 10)));
-
-        $applications = $query
-            ->paginate(perPage: $pageSize, page: $page)
+        $applications = Application::with([
+            'user',
+            'event',
+            'award',
+            'user.faculty',
+            'user.department'
+        ])
+            ->visibleFor($user)
+            ->search($request->input('search'))
+            ->when(
+                $request->filled('status'),
+                fn($q) => $q->filterByStatus($request->input('status'), $level)
+            )
+            ->paginate(
+                perPage: min(100, max(1, (int) $request->input('page_size', 10))),
+                page: max(1, (int) $request->input('page', 1))
+            )
             ->withQueryString();
 
         return response()->json($applications);
@@ -135,69 +70,14 @@ class ApplicationController extends Controller
     public function getApplicationCountByStatus(): JsonResponse
     {
         $user = $this->getMockUser();
-
         $level = $user->role->level()->value;
-        $previousLevel = $level - 1;
 
-        // IMPORTANT: create base query
-        $query = Application::query();
-
-        // apply same role filter as getAllApplications
-        switch ($user->role) {
-            case UserRole::DEPT_HEAD:
-                $query->whereHas('user', function ($q) use ($user) {
-                    $q->where('department_id', $user->department_id);
-                });
-                break;
-            case UserRole::ASSO_DEAN:
-                $this->applyRoleFilter($query, RoleLevel::DEPT_HEAD)
-                    ->whereHas('user', function ($q) use ($user) {
-                        $q->where('faculty_id', $user->faculty_id);
-                    });
-                break;
-
-            case UserRole::DEAN:
-                $this->applyRoleFilter($query, RoleLevel::ASSO_DEAN)
-                    ->whereHas('user', function ($q) use ($user) {
-                        $q->where('faculty_id', $user->faculty_id);
-                    });
-                break;
-
-            case UserRole::ADMIN:
-                $this->applyRoleFilter($query, RoleLevel::DEAN);
-                break;
-
-            case UserRole::BOARD:
-                $this->applyRoleFilter($query, RoleLevel::ADMIN);
-                break;
-        }
-
-        $pending = (clone $query)
-            ->where('level', $previousLevel)
-            ->where('status', ApprovalStatus::APPROVED->value)
-            ->count();
-
-        $approved = (clone $query)
-            ->where(function ($q) use ($level) {
-                // current level must be APPROVED
-                $q->where(function ($q2) use ($level) {
-                    $q2->where('level', $level)
-                        ->where('status', ApprovalStatus::APPROVED->value);
-                })
-                    // any higher level means already approved current level
-                    ->orWhere('level', '>', $level);
-            })
-            ->count();
-
-        $rejected = (clone $query)
-            ->where('level', '=', $level)
-            ->where('status', ApprovalStatus::REJECTED->value)
-            ->count();
+        $baseQuery = Application::visibleFor($user);
 
         return response()->json([
-            'pending' => $pending,
-            'approved' => $approved,
-            'rejected' => $rejected,
+            'pending' => (clone $baseQuery)->filterByStatus('PENDING', $level)->count(),
+            'approved' => (clone $baseQuery)->filterByStatus('APPROVED', $level)->count(),
+            'rejected' => (clone $baseQuery)->filterByStatus('REJECTED', $level)->count(),
         ]);
     }
 }
