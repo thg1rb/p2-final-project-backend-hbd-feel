@@ -5,7 +5,10 @@ namespace App\Http\Controllers\Api;
 use App\Enums\Status;
 use App\Enums\UserRole;
 use App\Http\Controllers\Controller;
+use App\Http\Resources\ApplicationIndexResource;
+use App\Http\Resources\ApplicationResource;
 use App\Models\Application;
+use App\Models\Event;
 use App\Models\User;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -69,5 +72,19 @@ class ApplicationController extends Controller
             'approved' => (clone $baseQuery)->filterByStatus('APPROVED', $level)->count(),
             'rejected' => (clone $baseQuery)->filterByStatus('REJECTED', $level)->count(),
         ]);
+    }
+
+    public function getApplicationByStudentId($id) {
+        $applications = Application::with(['user', 'event', 'award'])->where('student_id', $id)->latest()->get();
+        $currEvent = Event::get()->where('status', 'OPENED')->first();
+        $user = User::with(['faculty', 'department'])->get()->where('student_id', $id)->first();
+
+//        return response()->json($applications);
+        return new ApplicationIndexResource([
+            'applications' => $applications,
+            'current_event' => $currEvent,
+            'student' => $user,
+        ]);
+
     }
 }
