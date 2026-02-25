@@ -22,16 +22,17 @@ class SocialAuthController extends Controller
         $user = User::where('email', $googleUser->getEmail())->first();
 
         if (!$user) {
-            $user = User::create([
-                'firstName' => $googleUser->getName(),
-                'lastName' => '',
-                'username' => str_replace(' ', '.', $googleUser->getName()),
-                'email' => $googleUser->getEmail(),
-                'password' => bcrypt(fake()->password(20)),
-
-                'faculty_id'    => 1,
-                'department_id' => 1,
-            ]);
+            return view('auth.register-disabled');
+//            $user = User::create([
+//                'firstName' => $googleUser->getName(),
+//                'lastName' => '',
+//                'username' => str_replace(' ', '.', $googleUser->getName()),
+//                'email' => $googleUser->getEmail(),
+//                'password' => bcrypt(fake()->password(20)),
+//
+//                'faculty_id'    => 1,
+//                'department_id' => 1,
+//            ]);
         }
 
         $user->markEmailAsVerified();
