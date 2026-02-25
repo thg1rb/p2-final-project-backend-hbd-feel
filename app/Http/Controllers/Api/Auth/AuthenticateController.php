@@ -37,4 +37,12 @@ class AuthenticateController extends Controller
         }
 
     }
+
+    public function revoke(Request $request) {
+        $request->user()->currentAccessToken()->delete();
+        return response()->json([
+            'success' => true,
+            'message' => 'Token revoked'
+        ]);
+    }
 }

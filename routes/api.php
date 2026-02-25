@@ -25,6 +25,10 @@ Route::get('/approvals/{id}', [ApprovalController::class, 'getApprovalRequestByA
 
 Route::get('/approvals/{id}/{userId}', [ApprovalController::class, 'getApprovalRequestByApplicationIdAndUserId']);
 
-Route::post('/login', [AuthenticateController::class, 'login']);
+Route::post('/login', [AuthenticateController::class, 'login'])->name('user.login');
+
+Route::middleware(['throttle:api', 'auth:sanctum'])->as('api.')->group(function () {
+    Route::delete('revoke', [AuthenticateController::class, 'revoke'])->name('user.revoke');
+});
 
 Route::apiResource('/awards', AwardController::class);
