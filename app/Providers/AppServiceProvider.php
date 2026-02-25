@@ -34,6 +34,7 @@ class AppServiceProvider extends ServiceProvider
             'activity' => \App\Models\ActivityAwardRegistration::class,
             'innovation' => \App\Models\InnovationAwardRegistration::class,
             'behavior' => \App\Models\BehaviorAwardRegistration::class,
+            'user' => \App\Models\User::class,
         ]);
     }
 }

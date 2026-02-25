@@ -19,6 +19,49 @@ class UserSeeder extends Seeder
         foreach (UserRole::cases() as $role) {
             $faculty = $faculties->random();
             $department = \App\Models\Department::where('faculty_id', $faculty->id)->get()->random();
+//
+
+            User::query()->createOrFirst(
+                ['email' => 'narakorn.th@ku.th',],
+                [
+                    'student_id' => 6610405905,
+                    'firstName' => "Narakorn",
+                    'lastName' => 'Thanapornpakdee',
+                    'username' => 'narakorn',
+                    'password' => 'password',
+                    'role' => UserRole::NISIT,
+                    'faculty_id' => 1,
+                    'department_id' => 1,
+                ]
+            );
+
+            User::query()->firstOrCreate(
+                ['email' => 'user01@example.com'],
+                [
+                    'student_id' => 6610400000,
+                    'firstName' => "user",
+                    'lastName' => 'user',
+                    'username' => 'user01',
+                    'password' => 'password',
+                    'role' => UserRole::NISIT,
+                    'faculty_id' => $faculty->id,
+                    'department_id' => $department->id,
+                ]
+            );
+
+            User::query()->firstOrCreate(
+                ['email' => 'admin@example.com'],
+                [
+                    'student_id' => fake()->numerify("##########"),
+                    'firstName' => "Adminstrator",
+                    'lastName' => 'S',
+                    'username' => 'admin',
+                    'password' => 'password',
+                    'role' => UserRole::ADMIN,
+                    'faculty_id' => $faculty->id,
+                    'department_id' => $department->id,
+                ]
+            );
 
             User::factory()->create([
                 'student_id' => $role === UserRole::NISIT ? fake()->numerify("##########") : null,
