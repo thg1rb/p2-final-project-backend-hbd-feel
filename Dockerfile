@@ -7,13 +7,11 @@ RUN apt-get update && apt-get install -y \
     unzip \
     libicu-dev \
     libzip-dev \
+    libonig-dev \
     zip \
-    && docker-php-ext-install \
-        pdo \
-        pdo_mysql \
-        mbstring \
-        intl \
-        bcmath
+    && docker-php-ext-install pdo pdo_mysql mbstring intl bcmath \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
 
 RUN a2enmod rewrite
 
