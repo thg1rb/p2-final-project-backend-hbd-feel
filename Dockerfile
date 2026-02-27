@@ -1,33 +1,22 @@
-FROM php:8.4-fpm-alpine
+FROM php:8.2-apache
 
-# 1. ติดตั้ง Library ของระบบที่จำเป็นสำหรับ Extension ต่างๆ
-# icu-dev จำเป็นสำหรับ intl, libzip-dev สำหรับ zip
-RUN apk add --no-cache \
-    icu-dev \
-    libzip-dev \
-    git \
-    unzip
+WORKDIR /var/www/html
 
-# 2. สั่งติดตั้ง PHP Extension (เพิ่ม intl และ zip เข้าไป)
-RUN docker-php-ext-configure intl \
-    && docker-php-ext-install pdo pdo_mysql intl zip
+# เปิด mod_rewrite
+RUN a2enmod rewrite
 
-# 3. คัดลอก Composer เหมือนเดิม
-COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
+# ติดตั้ง extension ที่ Laravel ใช้
+RUN docker-php-ext-install pdo pdo_mysql
 
-WORKDIR /var/www
-
+# copy ไฟล์โปรเจค
 COPY . .
 
-# 4. รันคำสั่งติดตั้ง
-RUN composer install --no-dev --optimize-autoloader --no-scripts
+# เปลี่ยน permission
+RUN chown -R www-data:www-data /var/www/html
 
-WORKDIR /var/www
+# ให้ Apache ชี้ไปที่ public folder
+ENV APACHE_DOCUMENT_ROOT=/var/www/html/public
+RUN sed -ri -e 's!/var/www/html!${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/sites-available/*.conf
+RUN sed -ri -e 's!/var/www/!${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/apache2.conf /etc/apache2/conf-available/*.conf
 
-COPY . .
-
-# 4. เพิ่ม --no-scripts เพื่อป้องกันไม่ให้ Laravel รันสคริปต์ที่ต้องพึ่งพาไฟล์ระบบในขณะ Build
-RUN composer install --no-dev --optimize-autoloader --no-scripts
-
-# 5. (แนะนำเพิ่มเติม) ตั้งค่า Permission ให้ Laravel เขียนไฟล์ได้
-RUN chown -R www-data:www-data /var/www/storage /var/www/bootstrap/cache
+EXPOSE 80
