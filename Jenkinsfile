@@ -19,7 +19,12 @@ pipeline {
             steps {
                 sh """
                     apt-get update
-                    apt-get install -y git unzip libicu-dev
+                    apt-get install -y \
+                        git unzip \
+                        libicu-dev \
+                        libsqlite3-dev \
+                        sqlite3
+
                     docker-php-ext-install intl pdo pdo_sqlite
 
                     curl -sS https://getcomposer.org/installer | php
