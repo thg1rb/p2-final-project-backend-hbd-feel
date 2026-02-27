@@ -19,11 +19,16 @@ pipeline {
             steps {
                 sh """
                     apt-get update
-                    apt-get install -y git unzip libicu-dev libsqlite3-dev sqlite3
+                    apt-get install -y git unzip curl libicu-dev libsqlite3-dev sqlite3 nodejs npm
                     docker-php-ext-install intl pdo pdo_sqlite
 
+                    # Composer
                     curl -sS https://getcomposer.org/installer | php
                     php composer.phar install
+
+                    # NPM
+                    npm install
+                    npm run build
 
                     cp .env.example .env
                     php artisan key:generate
