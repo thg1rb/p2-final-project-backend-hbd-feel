@@ -19,19 +19,19 @@ spec:
           ports:
             - containerPort: 80
           env:
-            env:
-              - name: APP_ENV
-                value: production
-              - name: APP_KEY
-                valueFrom:
-                  secretKeyRef:
-                    name: laravel-secrets
-                    key: APP_KEY
-              - name: DB_PASSWORD
-                valueFrom:
-                  secretKeyRef:
-                    name: laravel-secrets
-                    key: DB_PASSWORD
+            - name: APP_ENV
+              value: production
+            - name: APP_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: laravel-secrets
+                  key: APP_KEY
+            - name: DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: laravel-secrets
+                  key: DB_PASSWORD
+
 ---
 apiVersion: v1
 kind: Service
