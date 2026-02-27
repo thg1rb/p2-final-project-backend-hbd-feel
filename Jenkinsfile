@@ -9,36 +9,26 @@ pipeline {
 
     stages {
         // STAGE 1: Setup & Unit Test
-// STAGE 1: Setup & Unit Test
         stage('Unit Test') {
             agent {
-                docker {
-                    image 'php:8.2-cli'
-                    args '-u root'
-                }
-            }
-            environment {
-                COMPOSER_HOME = "${WORKSPACE}/.composer"
+                docker { image 'php:8.4-cli' }
             }
             steps {
-                sh '''
+                sh """
                     apt-get update
-                    apt-get install -y git unzip zip libzip-dev sqlite3 libsqlite3-dev
+                    apt-get install -y git unzip libicu-dev
 
-                    docker-php-ext-install pdo pdo_sqlite
+                    docker-php-ext-install intl pdo pdo_sqlite
 
                     cp .env.example .env
                     sed -i 's/DB_CONNECTION=mysql/DB_CONNECTION=sqlite/g' .env
                     sed -i 's/DB_DATABASE=laravel/DB_DATABASE=:memory:/g' .env
 
-                    mkdir -p $COMPOSER_HOME
-
                     curl -sS https://getcomposer.org/installer | php
                     php composer.phar install
-
                     php artisan key:generate
                     php artisan test
-                '''
+                """
             }
         }
 
