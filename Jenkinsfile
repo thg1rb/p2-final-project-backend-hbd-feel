@@ -14,7 +14,7 @@ pipeline {
             agent {
                 docker {
                     image 'php:8.2-cli'
-                    args '-u root'   // 👈 สำคัญมาก
+                    args '-u root'
                 }
             }
             environment {
@@ -23,7 +23,8 @@ pipeline {
             steps {
                 sh '''
                     apt-get update
-                    apt-get install -y git unzip zip libzip-dev
+                    apt-get install -y git unzip zip libzip-dev sqlite3 libsqlite3-dev
+
                     docker-php-ext-install pdo pdo_sqlite
 
                     cp .env.example .env
