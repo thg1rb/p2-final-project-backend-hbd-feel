@@ -1,3 +1,16 @@
+# ---------- Stage 1: Build Frontend ----------
+FROM node:20 AS nodebuilder
+
+WORKDIR /app
+
+COPY package*.json ./
+RUN npm install
+
+COPY . .
+RUN npm run build
+
+
+# ---------- Stage 2: PHP + Apache ----------
 FROM php:8.4-apache
 
 WORKDIR /var/www/html
