@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Api\ApplicationController;
 use App\Http\Controllers\Api\ApprovalController;
+use App\Http\Controllers\API\Auth\AuthenticateController;
 use App\Http\Controllers\Api\MinioController;
 use App\Http\Controllers\Api\AuthController;
 use Illuminate\Support\Facades\Route;
@@ -23,5 +24,11 @@ Route::get('/minio/download', [MinioController::class, 'getPreviewUrl']);
 Route::get('/approvals/{id}', [ApprovalController::class, 'getApprovalRequestByApplicationId']);
 
 Route::get('/approvals/{id}/{userId}', [ApprovalController::class, 'getApprovalRequestByApplicationIdAndUserId']);
+
+Route::post('/login', [AuthenticateController::class, 'login'])->name('user.login');
+
+Route::middleware(['throttle:api', 'auth:sanctum'])->as('api.')->group(function () {
+    Route::delete('revoke', [AuthenticateController::class, 'revoke'])->name('user.revoke');
+});
 
 Route::apiResource('/awards', AwardController::class);
