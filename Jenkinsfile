@@ -4,11 +4,11 @@ pipeline {
     environment {
         DOCKER_IMAGE = "coconutdog5321/laravel-app"
         DOCKER_TAG = "latest"
-        DOCKER_CREDS = "docker-hub-creds" // ID ที่ตั้งไว้ใน Jenkins Credentials
+        DOCKER_CREDS = "docker-hub-creds"
     }
 
     stages {
-        // STAGE 1: Setup & Unit Test
+
         stage('Unit & Feature Test') {
             agent {
                 docker {
@@ -22,11 +22,9 @@ pipeline {
                     apt-get install -y git unzip curl libicu-dev libsqlite3-dev sqlite3 nodejs npm
                     docker-php-ext-install intl pdo pdo_sqlite
 
-                    # Composer
                     curl -sS https://getcomposer.org/installer | php
                     php composer.phar install
 
-                    # NPM
                     npm install
                     npm run build
 
@@ -40,8 +38,10 @@ pipeline {
             }
         }
 
-        // STAGE 2: Build & Push Docker Image
         stage('Build & Push Docker') {
+            when {
+                branch 'main'
+            }
             steps {
                 script {
                     docker.withRegistry('https://index.docker.io/v1/', DOCKER_CREDS) {
@@ -52,14 +52,20 @@ pipeline {
             }
         }
 
-        // STAGE 3: Deploy to Local K8S
         stage('Deploy to K8S') {
+            when {
+                branch 'main'
+            }
             steps {
-                script {
-                    // ใช้ kubectl ที่ติดตั้งในเครื่อง Jenkins
-                    sh "kubectl apply -f k8s/laravel-deploy.yml"
-                    sh "kubectl rollout restart deployment/laravel-app"
-                }
+                sh """
+                    curl -LO "https://dl.k8s.io/release/\$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
+                    chmod +x kubectl
+                    mv kubectl /usr/local/bin/
+
+                    kubectl apply -f k8s/laravel-deploy.yml
+                    kubectl apply -f k8s/laravel-ingress.yml
+                    kubectl rollout restart deployment/laravel-app
+                """
             }
         }
     }
