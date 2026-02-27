@@ -104,8 +104,7 @@ class ApplicationController extends Controller
                 ], 400);
             }
 
-//            $studentId = auth()->user()->student_id;
-            $studentId = "9327529263";
+            $studentId = auth()->user()->student_id;
             $alreadyApplied = Application::where('student_id', $studentId)
                 ->where('event_id', $event->id)
                 ->exists();
@@ -166,8 +165,7 @@ class ApplicationController extends Controller
             }
 
             $application = Application::create([
-                'student_id' => "9327529263",
-//                'student_id' => auth()->user()->student_id,
+                'student_id' => auth()->user()->student_id,
                 'award_id'   => $validated['award_id'],
                 'event_id'   => $event->id,
                 'year'       => $validated['year'],
