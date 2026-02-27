@@ -29,6 +29,7 @@ class AuthenticateController extends Controller
                     'name' => $user->firstName." ".$user->lastName,
                     'email' => $user->email,
                     'role' => $user->role,
+                    'student_id' => $user->student_id
                 ]
             ]);
 
