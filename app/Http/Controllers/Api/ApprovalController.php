@@ -2,7 +2,8 @@
 
 namespace App\Http\Controllers\Api;
 
-use App\Enums\ApplicationStatus;
+use App\Enums\ApprovalStatus;
+use App\Enums\RoleLevel;
 use App\Enums\UserRole;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreApprovalRequest;
@@ -41,6 +42,7 @@ class ApprovalController extends Controller
             ->where('application_id', $applicationId)
             ->where('user_id', $userId)
             ->first();
+
         return response()->json($approval);
     }
 
@@ -56,82 +58,77 @@ class ApprovalController extends Controller
             abort(403, 'Cannot approve a rejected application');
         }
 
-        if (!$this->isValidApprover($user->role, $application->status)) {
-            abort(403, 'Wrong approver for current status');
+        if (! $this->isValidApprover($user->role, $application->level, $application->status)) {
+            abort(403, 'Wrong approver for current level');
         }
 
-        if (!$this->canUserApprove($application->id, $user->id, $user->role)) {
+        if (! $this->canUserApprove($application->id, $user->id, $user->role)) {
             abort(403, 'User has already approved this application');
         }
 
-        $currentStatus = $application->status;
-        $newStatus = $this->getNextStatus($currentStatus, $user->role, $request->status, $application->id);
-        $application->update(['status' => $newStatus]);
+        $nextStatus = $this->getNextStatus($application->level, $user->role, $request->status, $application->id, true);
+        $application->update($nextStatus);
 
         Approval::create($request->validated());
-
-        if ($user->role === UserRole::BOARD && $currentStatus === ApplicationStatus::APPROVED_NISIT_DEV) {
-            $boardStatus = $this->calculateBoardStatus($currentStatus, $application->id);
-            if ($boardStatus !== $application->refresh()->status) {
-                $application->update(['status' => $boardStatus]);
-            }
-        }
 
         return response()->noContent(201);
     }
 
-    private function isRejected(ApplicationStatus $status): bool
+    private function isRejected(ApprovalStatus $status): bool
     {
-        return str_starts_with($status->value, 'REJECTED_');
+        return $status === ApprovalStatus::REJECTED;
     }
 
-    private function isValidApprover(UserRole $userRole, ApplicationStatus $currentStatus): bool
+    private function isValidApprover(UserRole $userRole, RoleLevel $currentLevel, ApprovalStatus $currentStatus): bool
     {
-        return match ($currentStatus) {
-            ApplicationStatus::SUBMITTED => $userRole === UserRole::DEPT_HEAD,
-            ApplicationStatus::APPROVED_DEPT_HEAD => $userRole === UserRole::ASSO_DEAN,
-            ApplicationStatus::APPROVED_ASSO_DEAN => $userRole === UserRole::DEAN,
-            ApplicationStatus::APPROVED_DEAN => $userRole === UserRole::NISIT_DEV,
-            ApplicationStatus::APPROVED_NISIT_DEV => $userRole === UserRole::BOARD,
-            default => false,
-        };
+        if ($this->isRejected($currentStatus)) {
+            return false;
+        }
+
+        $expectedApproverLevel = $currentLevel->value + 1;
+
+        return $userRole->level()->value === $expectedApproverLevel;
     }
 
     private function canUserApprove(string $applicationId, string $userId, UserRole $userRole): bool
     {
-        return !Approval::where('application_id', $applicationId)
+        return ! Approval::where('application_id', $applicationId)
             ->where('user_id', $userId)
             ->exists();
     }
 
-    private function getNextStatus(ApplicationStatus $currentStatus, UserRole $userRole, string $approvalStatusValue, string $applicationId): ApplicationStatus
+    private function getNextStatus(RoleLevel $currentLevel, UserRole $userRole, string $approvalStatusValue, string $applicationId, bool $includeCurrentVote = false): array
     {
-        $approvalValue = $approvalStatusValue;
+        $approvalStatus = ApprovalStatus::from($approvalStatusValue);
 
-        return match ([$currentStatus, $userRole]) {
-            [ApplicationStatus::SUBMITTED, UserRole::DEPT_HEAD] => $approvalValue === 'APPROVED'
-                ? ApplicationStatus::APPROVED_DEPT_HEAD
-                : ApplicationStatus::REJECTED_DEPT_HEAD,
-            [ApplicationStatus::APPROVED_DEPT_HEAD, UserRole::ASSO_DEAN] => $approvalValue === 'APPROVED'
-                ? ApplicationStatus::APPROVED_ASSO_DEAN
-                : ApplicationStatus::REJECTED_ASSO_DEAN,
-            [ApplicationStatus::APPROVED_ASSO_DEAN, UserRole::DEAN] => $approvalValue === 'APPROVED'
-                ? ApplicationStatus::APPROVED_DEAN
-                : ApplicationStatus::REJECTED_DEAN,
-            [ApplicationStatus::APPROVED_DEAN, UserRole::NISIT_DEV] => $approvalValue === 'APPROVED'
-                ? ApplicationStatus::APPROVED_NISIT_DEV
-                : ApplicationStatus::REJECTED_NISIT_DEV,
-            [ApplicationStatus::APPROVED_NISIT_DEV, UserRole::BOARD] => $this->calculateBoardStatus($currentStatus, $applicationId),
-            default => $currentStatus,
-        };
+        if ($userRole === UserRole::BOARD && $currentLevel === RoleLevel::ADMIN) {
+            return $this->calculateBoardStatus($currentLevel, $applicationId, $approvalStatus, $includeCurrentVote);
+        }
+
+        $nextLevel = RoleLevel::from($currentLevel->value + 1);
+
+        if ($approvalStatus === ApprovalStatus::REJECTED) {
+            return [
+                'level' => $nextLevel,
+                'status' => ApprovalStatus::REJECTED,
+            ];
+        }
+
+        return [
+            'level' => $nextLevel,
+            'status' => ApprovalStatus::APPROVED,
+        ];
     }
 
-    private function calculateBoardStatus(ApplicationStatus $currentStatus, string $applicationId): ApplicationStatus
+    private function calculateBoardStatus(RoleLevel $currentLevel, string $applicationId, ApprovalStatus $currentVoteStatus, bool $includeCurrentVote): array
     {
         $totalBoardUsers = User::where('role', UserRole::BOARD)->count();
 
         if ($totalBoardUsers === 0) {
-            return $currentStatus;
+            return [
+                'level' => $currentLevel,
+                'status' => ApprovalStatus::APPROVED,
+            ];
         }
 
         $boardApprovals = Approval::where('application_id', $applicationId)
@@ -142,21 +139,41 @@ class ApprovalController extends Controller
         $approvedCount = $boardApprovals->where('status', 'APPROVED')->count();
         $rejectedCount = $boardApprovals->where('status', 'REJECTED')->count();
 
+        if ($includeCurrentVote) {
+            if ($currentVoteStatus === ApprovalStatus::APPROVED) {
+                $approvedCount++;
+            } else {
+                $rejectedCount++;
+            }
+        }
+
         $threshold = $totalBoardUsers / 2;
 
         if ($approvedCount > $threshold) {
-            return ApplicationStatus::APPROVED_BOARD;
+            return [
+                'level' => RoleLevel::BOARD,
+                'status' => ApprovalStatus::APPROVED,
+            ];
         }
 
         if ($rejectedCount > $threshold) {
-            return ApplicationStatus::REJECTED_BOARD;
+            return [
+                'level' => RoleLevel::ADMIN,
+                'status' => ApprovalStatus::REJECTED,
+            ];
         }
 
         if ($approvedCount === $rejectedCount && ($approvedCount > 0 || $rejectedCount > 0)) {
-            return ApplicationStatus::REJECTED_BOARD;
+            return [
+                'level' => RoleLevel::ADMIN,
+                'status' => ApprovalStatus::REJECTED,
+            ];
         }
 
-        return $currentStatus;
+        return [
+            'level' => $currentLevel,
+            'status' => ApprovalStatus::APPROVED,
+        ];
     }
 
     /**

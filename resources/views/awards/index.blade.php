@@ -7,14 +7,14 @@
 
         {{-- Header --}}
         <div class="flex flex-col md:flex-row gap-y-5 justify-between items-center">
-            <div>
-                <h1 class="font-bold text-[32px]">จัดการหมวดรางวัล</h1>
-                <p class="font-light text-[16px]">เพิ่ม แก้ไข หรือลบข้อมูลรางวัลในระบบ</p>
+            <div class="flex-col flex gap-2">
+                <h1 class="font-bold text-2xl">จัดการหมวดรางวัล</h1>
+                <p class="text-gray-400">เพิ่ม แก้ไข หรือลบข้อมูลรางวัลในระบบ</p>
             </div>
             <a href="{{ route('awards.create') }}"
-               class="px-[10px] py-[6px] w-full md:w-fit flex flex-row justify-center items-center gap-x-[10px] bg-primary text-white rounded-md transition-all hover:scale-105">
+                class="px-[10px] py-[6px] w-full md:w-fit flex flex-row justify-center items-center gap-x-[10px] bg-primary text-white rounded-md transition-all hover:scale-105">
                 <x-icon name="plus" size="30" />
-                <p class="font-semibold text-[20px]">เพิ่มหมวดรางวัล</p>
+                <p class="p-2">เพิ่มหมวดรางวัล</p>
             </a>
         </div>
 
@@ -24,47 +24,51 @@
                 <div class="relative flex-1">
                     <x-icon name="search" class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
                     <input name="search" placeholder="ค้นหาชื่อหมวดรางวัล" value="{{ request('search') }}"
-                           class="w-full rounded-md border-slate-300 pl-10 placeholder:font-light placeholder:text-slate-400">
+                        class="w-full rounded-md border-slate-300 pl-10 placeholder:font-light placeholder:text-slate-400">
                 </div>
-                <button type="submit"
-                        class="px-10 py-1.5 bg-primary font-semibold text-white text-[18px] rounded-md">
+                <button type="submit" class="px-10 py-1.5 bg-primary text-white  rounded-md">
                     ค้นหา
                 </button>
             </form>
             <div class="rounded-xl border border-gray-300 bg-white overflow-hidden">
                 <table class="w-full">
                     <thead class="divide-y border-b bg-gray-100">
-                    <tr class="divide-x">
-                        <th class="px-6 py-3 text-left cursor-pointer hover:bg-gray-200 transition">หมวดรางวัล</th>
-                        <th class="px-6 py-3 text-left cursor-pointer hover:bg-gray-200 transition">รางวัล</th>
-                        <th class="px-2 py-3 text-center cursor-pointer hover:bg-gray-200 transition">ดำเนินการ</th>
-                    </tr>
+                        <tr class="divide-x">
+                            <th class="px-6 py-3 text-left cursor-pointer hover:bg-gray-200 transition">หมวดรางวัล</th>
+                            <th class="px-6 py-3 text-left cursor-pointer hover:bg-gray-200 transition">รางวัล</th>
+                            <th class="px-2 py-3 text-center cursor-pointer hover:bg-gray-200 transition">ดำเนินการ</th>
+                        </tr>
                     </thead>
                     <tbody class="divide-y">
-                    @forelse($awards as $award)
-                        <tr class="divide-x">
-                            <td class="px-6 py-3 text-left">{{ $award->name }}</td>
-                            <td class="px-6 py-3 text-left">{{ NumberFormatter::create(app()->getLocale(), NumberFormatter::DECIMAL)->format($award->reward) }}</td>
-                            <td class="px-2 py-3 text-center flex items-center justify-center gap-2">
-                                <a href="{{ route('awards.edit', $award) }}" class="py-1 px-3 bg-blue-200 hover:bg-blue-300 font-semibold text-blue-700 rounded-md cursor-pointer transition-all hover:scale-105">
-                                    แก้ไข
-                                </a>
-                                <form action="{{ route('awards.destroy', $award) }}" method="POST" onsubmit="return confirm('คุณแน่ใจหรือไม่ที่จะลบหมวดรางวัลนี้?');">
-                                    @csrf
-                                    @method('DELETE')
-                                    <button class="py-1 px-3 bg-red-200 hover:bg-red-300 font-semibold text-red-700 rounded-md cursor-pointer transition-all hover:scale-105">
-                                        ลบ
-                                    </button>
-                                </form>
-                            </td>
-                        </tr>
-                    @empty
-                        <tr class="divide-x">
-                            <td colspan="6" class="px-6 py-32 text-center text-slate-500">
-                                ไม่พบหมวดรางวัล
-                            </td>
-                        </tr>
-                    @endforelse
+                        @forelse($awards as $award)
+                            <tr class="divide-x">
+                                <td class="px-6 py-3 text-left">{{ $award->name }}</td>
+                                <td class="px-6 py-3 text-left">
+                                    {{ NumberFormatter::create(app()->getLocale(), NumberFormatter::DECIMAL)->format($award->reward) }}
+                                </td>
+                                <td class="px-2 py-3 text-center flex items-center justify-center gap-2">
+                                    <a href="{{ route('awards.edit', $award) }}"
+                                        class="py-1 px-3 bg-blue-200 hover:bg-blue-300 font-semibold text-blue-700 rounded-md cursor-pointer transition-all hover:scale-105">
+                                        แก้ไข
+                                    </a>
+                                    <form action="{{ route('awards.destroy', $award) }}" method="POST"
+                                        onsubmit="return confirm('คุณแน่ใจหรือไม่ที่จะลบหมวดรางวัลนี้?');">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button
+                                            class="py-1 px-3 bg-red-200 hover:bg-red-300 font-semibold text-red-700 rounded-md cursor-pointer transition-all hover:scale-105">
+                                            ลบ
+                                        </button>
+                                    </form>
+                                </td>
+                            </tr>
+                        @empty
+                            <tr class="divide-x">
+                                <td colspan="6" class="px-6 py-32 text-center text-slate-500">
+                                    ไม่พบหมวดรางวัล
+                                </td>
+                            </tr>
+                        @endforelse
                     </tbody>
                 </table>
             </div>

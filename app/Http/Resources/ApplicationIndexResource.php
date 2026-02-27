@@ -5,7 +5,7 @@ namespace App\Http\Resources;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
-class AwardRegistrationIndexResource extends JsonResource
+class ApplicationIndexResource extends JsonResource
 {
     /**
      * Transform the resource into an array.
@@ -15,11 +15,11 @@ class AwardRegistrationIndexResource extends JsonResource
     public function toArray(Request $request): array
     {
         return [
-            'registrations' => AwardRegistrationResource::collection(
-                $this->resource['registrations']
+            'applications' => ApplicationResource::collection(
+                $this->resource['applications']
             ),
-            'currentEvent' => $this->resource['currentEvent'],
-            'allStats' => $this->resource['allStats'],
+            'current_event' => $this->resource['current_event'],
+            'student' => $this->resource['student'],
         ];
     }
 }

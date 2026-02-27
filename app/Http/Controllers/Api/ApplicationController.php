@@ -3,7 +3,10 @@
 namespace App\Http\Controllers\Api;
 
 use App\Enums\Status;
+use App\Enums\UserRole;
 use App\Http\Controllers\Controller;
+use App\Http\Resources\ApplicationIndexResource;
+use App\Http\Resources\ApplicationResource;
 use App\Models\Application;
 use App\Models\Event;
 use Illuminate\Http\JsonResponse;
@@ -13,30 +16,44 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use JsonException;
+use App\Models\User;
 
 class ApplicationController extends Controller
 {
+    private function getMockUser(): User
+    {
+        return new User([
+            'student_id' => null,
+            'faculty_id' => 3,
+            'department_id' => 14,
+            'role' => UserRole::BOARD,
+        ]);
+    }
+
     public function getAllApplications(Request $request)
     {
-        $query = Application::with(['user', 'event', 'award', 'user.faculty', 'user.department']);
+        $user = $this->getMockUser();
+        $level = $user->role->level()->value;
 
-        if ($request->filled('search')) {
-            $searchTerm = $request->input('search');
-            $query->whereHas('user', function ($q) use ($searchTerm) {
-                $q->where('firstName', 'like', "%{$searchTerm}%")
-                    ->orWhere('lastName', 'like', "%{$searchTerm}%")
-                    ->orWhere('student_id', 'like', "%{$searchTerm}%");
-            });
-        }
-
-        if ($request->filled('status')) {
-            $query->where('status', $request->input('status'));
-        }
-
-        $page = max(1, (int) ($request->input('page') ?? 1));
-        $pageSize = min(100, max(1, (int) ($request->input('page_size') ?? 10)));
-
-        $applications = $query->paginate(perPage: $pageSize, page: $page)->withQueryString();
+        $applications = Application::with([
+            'user',
+            'event',
+            'award',
+            'user.faculty',
+            'user.department',
+        ])
+            ->visibleFor($user)
+            ->whereEventStatus(Status::OPENED->value, $user)
+            ->search($request->input('search'))
+            ->when(
+                $request->filled('status'),
+                fn ($q) => $q->filterByStatus($request->input('status'), $level)
+            )
+            ->paginate(
+                perPage: min(100, max(1, (int) $request->input('page_size', 10))),
+                page: max(1, (int) $request->input('page', 1))
+            )
+            ->withQueryString();
 
         return response()->json($applications);
     }
@@ -48,12 +65,32 @@ class ApplicationController extends Controller
         return response()->json($applications);
     }
 
-    public function getApplicationCountByStatus(Request $request): JsonResponse
+    public function getApplicationCountByStatus(): JsonResponse
     {
-        $status = $request->input('status');
-        $count = Application::where('status', $status)->count();
+        $user = $this->getMockUser();
+        $level = $user->role->level()->value;
 
-        return response()->json($count);
+        $baseQuery = Application::visibleFor($user)->whereEventStatus(Status::OPENED->value, $user);
+
+        return response()->json([
+            'pending' => (clone $baseQuery)->filterByStatus('PENDING', $level)->count(),
+            'approved' => (clone $baseQuery)->filterByStatus('APPROVED', $level)->count(),
+            'rejected' => (clone $baseQuery)->filterByStatus('REJECTED', $level)->count(),
+        ]);
+    }
+
+    public function getApplicationByStudentId($id) {
+        $applications = Application::with(['user', 'event', 'award'])->where('student_id', $id)->latest()->get();
+        $currEvent = Event::get()->where('status', 'OPENED')->first();
+        $user = User::with(['faculty', 'department'])->get()->where('student_id', $id)->first();
+
+//        return response()->json($applications);
+        return new ApplicationIndexResource([
+            'applications' => $applications,
+            'current_event' => $currEvent,
+            'student' => $user,
+        ]);
+
     }
     public function store(Request $request): JsonResponse
     {

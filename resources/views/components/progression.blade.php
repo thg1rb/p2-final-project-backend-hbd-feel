@@ -1,9 +1,9 @@
 @props(['application'])
 @props(['approvals'])
 @php
-    $workflowOrder = ['HEAD_OF_DEPT', 'ASSO_DEAN', 'DEAN', 'NISIT_DEV', 'BOARD', 'BOARD_HEAD', 'CHANCELLOR'];
+    $workflowOrder = ['DEPT_HEAD', 'ASSO_DEAN', 'DEAN', 'NISIT_DEV', 'BOARD', 'BOARD_HEAD', 'CHANCELLOR'];
     $roleNames = [
-        'HEAD_OF_DEPT' => 'หัวหน้าภาควิชา',
+        'DEPT_HEAD' => 'หัวหน้าภาควิชา',
         'ASSO_DEAN' => 'รองคณบดี',
         'DEAN' => 'คณบดี',
         'NISIT_DEV' => 'หน่วยพัฒนานิสิต',
@@ -12,6 +12,7 @@
         'CHANCELLOR' => 'อธิการบดี',
     ];
     $hasRejected = false;
+
 @endphp
 
 <div class="flex flex-col gap-6 rounded-xl border border-gray-300 bg-white p-5 shadow-sm">
@@ -23,13 +24,14 @@
     <div class="flex flex-col h-fit">
         @foreach ($workflowOrder as $index => $role)
             @php
-                $approval = $approvals->first(fn($a) => $a->user->role === $role);
+                $approval = $approvals->first(fn($a) => $a->user->role->value === $role);
                 $isLast = $loop->last;
+                Log::info($approval);
 
                 if ($hasRejected) {
                     $status = 'NOT_STARTED';
                 } elseif ($approval) {
-                    $isApproved = $approval->status === 'APPROVED';
+                    $isApproved = $approval->status->value === 'APPROVED';
                     $status = $isApproved ? 'APPROVED' : 'REJECT';
                     if (!$isApproved) {
                         $hasRejected = true;
@@ -40,10 +42,10 @@
 
                 $styles = match ($status) {
                     'APPROVED' => [
-                        'border' => 'border-blue-600',
-                        'bg' => 'bg-blue-600',
+                        'border' => 'border-primary',
+                        'bg' => 'bg-primary',
                         'icon' => 'check',
-                        'text' => 'text-blue-600',
+                        'text' => 'text-primary',
                     ],
                     'PENDING' => [
                         'border' => 'border-amber-500',
@@ -74,17 +76,17 @@
                         </div>
                     </div>
                     @if (!$isLast)
-                        <div class="h-10 w-0.5 {{ $styles['bg'] }}"></div>
+                        <div class="h-full w-0.5 {{ $styles['bg'] }}"></div>
                     @endif
                 </div>
-                <div class="flex flex-col gap-1">
+                <div class="flex flex-col gap-1 pb-7">
                     <p class="font-medium {{ $styles['text'] }}">{{ $roleNames[$role] }}</p>
                     @if ($status !== 'NOT_STARTED' && $approval)
                         <p class="text-sm font-medium">{{ $approval->user->firstName }} {{ $approval->user->lastName }}
                         </p>
                         <p class="text-xs text-gray-400">{{ $approval->created_at->translatedFormat('j M Y H:i') }}</p>
                         @if ($approval->reason)
-                            <p class="text-xs text-red-400 mt-1 italic">"{{ $approval->reason }}"</p>
+                            <p class="text-xs text-gray-600 mt-1 italic">"{{ $approval->reason }}"</p>
                         @endif
                     @else
                         <p class="text-sm text-gray-400 italic">ยังไม่มีการดำเนินการ</p>

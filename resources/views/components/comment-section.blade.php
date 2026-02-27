@@ -1,7 +1,7 @@
-@props(['application'])
+@props(['headDeptApproval'])
 <div class="flex flex-col gap-4 rounded-xl border border-gray-300 bg-white p-7 shadow-sm">
     <div class="flex gap-3 font-bold">
-        <x-icon name="message-square" class="text-blue-600" />
+        <x-icon name="comment" class="text-blue-600" />
         <p>ความคิดเห็นหัวหน้าภาควิชา</p>
     </div>
     @if ($headDeptApproval)
