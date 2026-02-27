@@ -9,9 +9,14 @@ use App\Http\Resources\ApplicationIndexResource;
 use App\Http\Resources\ApplicationResource;
 use App\Models\Application;
 use App\Models\Event;
-use App\Models\User;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use App\Models\Award;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
+use JsonException;
+use App\Models\User;
 
 class ApplicationController extends Controller
 {
@@ -87,4 +92,96 @@ class ApplicationController extends Controller
         ]);
 
     }
+    public function store(Request $request): JsonResponse
+    {
+        return DB::transaction(function () use ($request) {
+
+            $event = Event::where('status', Status::OPENED)->first();
+
+            if (!$event) {
+                return response()->json([
+                    'error' => 'No opened event available.'
+                ], 400);
+            }
+
+            $studentId = auth()->user()->student_id;
+//            $studentId = "2525777311";
+            $alreadyApplied = Application::where('student_id', $studentId)
+                ->where('event_id', $event->id)
+                ->exists();
+
+            if ($alreadyApplied) {
+                return response()->json([
+                    'error' => 'You have already applied for this event.',$event->id
+                ], 400);
+            }
+
+            $award = Award::findOrFail($request->award_id);
+            $requirements = $award->requirements ?? [];
+
+            $rules = [
+                'award_id' => ['required', 'exists:awards,id'],
+//                'event_id' => ['required', 'exists:events,id'],
+                'year'     => ['required', 'integer'],
+                'grade'    => ['required', 'numeric'],
+                'path'     => ['required', 'file', 'mimes:pdf,jpg,png', 'max:10240'],
+                'documents'=> ['required', 'array'],
+            ];
+
+            foreach ($requirements as $req) {
+                $key = $req['id'];
+                $rules["documents.$key"] = $req['required']
+                    ? ['required', 'file', 'mimes:pdf,jpg,png', 'max:5120']
+                    : ['nullable', 'file', 'mimes:pdf,jpg,png', 'max:5120'];
+            }
+
+            $validated = $request->validate($rules);
+
+            $applicationFile = $request->file('path');
+            $appFileName = Str::uuid() . '.' . $applicationFile->getClientOriginalExtension();
+            $mainPath = Storage::disk('s3')->putFileAs('applications', $applicationFile, $appFileName);
+
+            if (!$mainPath) {
+                return response()->json(['error' => 'Could not upload main file.'], 500);
+            }
+
+            $storedDocuments = [];
+            foreach ($requirements as $req) {
+                $key = $req['id'];
+
+                if ($request->hasFile("documents.$key")) {
+                    $file = $request->file("documents.$key");
+                    $fileName = Str::uuid() . '.' . $file->getClientOriginalExtension();
+
+                    $storedPath = Storage::disk('s3')->putFileAs(
+                        "documents",
+                        $file,
+                        $fileName
+                    );
+
+                    $storedDocuments[$key] = [
+                        'file_path' => $storedPath,
+                    ];
+                }
+            }
+
+            $application = Application::create([
+//                'student_id' => "2525777311",
+                'student_id' => auth()->user()->student_id,
+                'award_id'   => $validated['award_id'],
+                'event_id'   => $event->id,
+                'year'       => $validated['year'],
+                'grade'      => $validated['grade'],
+                'path'       => $mainPath,
+                'documents'  => $storedDocuments,
+                'status'     => 'SUBMITTED'
+            ]);
+
+            return response()->json([
+                'message' => 'Application submitted successfully',
+                'data'    => $application->load(['user', 'event', 'award'])
+            ], 201);
+        });
+    }
+
 }
