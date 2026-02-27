@@ -12,23 +12,32 @@ pipeline {
 // STAGE 1: Setup & Unit Test
         stage('Unit Test') {
             agent {
-                docker { image 'php:8.2-cli' } // ใช้ Image PHP รัน stage นี้โดยเฉพาะ
+                docker {
+                    image 'php:8.2-cli'
+                    args '-u root'   // 👈 สำคัญมาก
+                }
+            }
+            environment {
+                COMPOSER_HOME = "${WORKSPACE}/.composer"
             }
             steps {
-                script {
-                    // สำหรับ DB แนะนำให้ใช้ SQLite :memory: ในการ Test บน Jenkins เพื่อความง่าย
-                    sh """
-                        cp .env.example .env
-                        sed -i 's/DB_CONNECTION=mysql/DB_CONNECTION=sqlite/g' .env
-                        sed -i 's/DB_DATABASE=laravel/DB_DATABASE=:memory:/g' .env
+                sh '''
+                    apt-get update
+                    apt-get install -y git unzip zip libzip-dev
+                    docker-php-ext-install pdo pdo_sqlite
 
-                        # ติดตั้ง composer และรัน test
-                        curl -sS https://getcomposer.org/installer | php
-                        php composer.phar install
-                        php artisan key:generate
-                        php artisan test
-                    """
-                }
+                    cp .env.example .env
+                    sed -i 's/DB_CONNECTION=mysql/DB_CONNECTION=sqlite/g' .env
+                    sed -i 's/DB_DATABASE=laravel/DB_DATABASE=:memory:/g' .env
+
+                    mkdir -p $COMPOSER_HOME
+
+                    curl -sS https://getcomposer.org/installer | php
+                    php composer.phar install
+
+                    php artisan key:generate
+                    php artisan test
+                '''
             }
         }
 
