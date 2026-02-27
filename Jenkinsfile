@@ -40,7 +40,10 @@ pipeline {
 
         stage('Build & Push Docker') {
             when {
-                branch 'main'
+                anyOf {
+                    branch 'main'
+                    branch 'feature/setup-cicd'
+                }
             }
             steps {
                 script {
