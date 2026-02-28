@@ -85,7 +85,7 @@ jobs:
             --from-literal=APP_KEY="${{ secrets.LARAVEL_APP_KEY }}" \
             --from-literal=DB_PASSWORD="${{ secrets.DB_PASSWORD }}" \
             --dry-run=client -o yaml | kubectl apply -f -
-
+          sleep 5
           # หลังจากสร้าง Secret เสร็จ ก็สั่ง Deploy ตัวแอปต่อได้เลย
           kubectl apply -f k8s/laravel-deploy.yml
           kubectl rollout restart deployment/laravel-app
