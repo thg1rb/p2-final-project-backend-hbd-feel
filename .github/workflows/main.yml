@@ -28,7 +28,7 @@ jobs:
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
         with:
-          php-version: '8.4' # ปรับตามโปรเจกต์
+          php-version: '8.4'
           extensions: mbstring, dom, curl, libxml, mysql
       - name: Install Dependencies
         run: |
@@ -76,21 +76,16 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      # เพิ่มขั้นตอนนี้เข้าไปครับ
-#      - name: Install kubectl
-#        run: |
-#          curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
-#          chmod +x kubectl
-#          sudo mv kubectl /usr/local/bin/
-
-#      - name: Setup kubeconfig
-#        run: |
-#          mkdir -p ~/.kube
-#          cp /root/.kube/config ~/.kube/config
-#          export KUBECONFIG=~/.kube/config
-
       - name: Deploy to K8S
         run: |
-          mkdir -p ~/.kube # สร้าง folder รองรับ config
+          mkdir -p ~/.kube
+
+          # 🌟 เพิ่มบรรทัดนี้: ให้ GitHub Actions ดึง Secret มาสร้างใน K8s ทันที
+          kubectl create secret generic laravel-secrets \
+            --from-literal=APP_KEY="${{ secrets.LARAVEL_APP_KEY }}" \
+            --from-literal=DB_PASSWORD="${{ secrets.DB_PASSWORD }}" \
+            --dry-run=client -o yaml | kubectl apply -f -
+
+          # หลังจากสร้าง Secret เสร็จ ก็สั่ง Deploy ตัวแอปต่อได้เลย
           kubectl apply -f k8s/laravel-deploy.yml
           kubectl rollout restart deployment/laravel-app

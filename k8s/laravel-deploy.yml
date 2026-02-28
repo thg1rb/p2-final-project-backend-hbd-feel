@@ -31,6 +31,16 @@ spec:
                 secretKeyRef:
                   name: laravel-secrets
                   key: DB_PASSWORD
+            - name: DB_CONNECTION
+              value: mysql
+            - name: DB_HOST
+              value: mysql # ชื่อ Service ของ MySQL ใน K8s
+            - name: DB_PORT
+              value: "3306"
+            - name: DB_DATABASE
+              value: nisit-reward
+            - name: DB_USERNAME
+              value: laravel
 
 ---
 apiVersion: v1
