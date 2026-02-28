@@ -15,9 +15,9 @@ class EventFactory extends Factory
      *
      * @return array<string, mixed>
      */
+    protected static $index = 0;
     public function definition(): array
     {
-        // Hardcoded unique combinations
         $combinations = [
             ['academic_year' => 2563, 'semester' => 1],
             ['academic_year' => 2563, 'semester' => 2],
@@ -30,9 +30,14 @@ class EventFactory extends Factory
             ['academic_year' => 2567, 'semester' => 1],
             ['academic_year' => 2567, 'semester' => 2],
         ];
-        $combination = $this->faker->unique()->randomElement($combinations);
 
-        // Only the latest `academic_year` and `semester` (2569/2) should be OPENED
+        // ดึงค่าตามลำดับ index ปัจจุบัน
+        // ใช้ % เพื่อป้องกัน Error กรณีสั่งสร้างเกินจำนวนที่มีใน array (จะวนกลับมาเริ่มใหม่)
+        $combination = $combinations[self::$index % count($combinations)];
+
+        // เพิ่มค่า index สำหรับการเรียกครั้งต่อไป
+        self::$index++;
+
         $status = ($combination['academic_year'] === 2567 && $combination['semester'] === 2)
             ? Status::OPENED
             : Status::CLOSED;

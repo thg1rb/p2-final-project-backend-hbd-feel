@@ -17,22 +17,18 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use JsonException;
 use App\Models\User;
+use Illuminate\Support\Facades\Log;
 
 class ApplicationController extends Controller
 {
-    private function getMockUser(): User
-    {
-        return new User([
-            'student_id' => null,
-            'faculty_id' => 3,
-            'department_id' => 14,
-            'role' => UserRole::BOARD,
-        ]);
-    }
-
     public function getAllApplications(Request $request)
     {
-        $user = $this->getMockUser();
+        $user = $request->user();
+
+        if (!$user) {
+            return response()->json(['message' => 'Unauthenticated'], 401);
+        }
+
         $level = $user->role->level()->value;
 
         $applications = Application::with([
@@ -47,7 +43,7 @@ class ApplicationController extends Controller
             ->search($request->input('search'))
             ->when(
                 $request->filled('status'),
-                fn ($q) => $q->filterByStatus($request->input('status'), $level)
+                fn($q) => $q->filterByStatus($request->input('status'), $level)
             )
             ->paginate(
                 perPage: min(100, max(1, (int) $request->input('page_size', 10))),
@@ -65,9 +61,9 @@ class ApplicationController extends Controller
         return response()->json($applications);
     }
 
-    public function getApplicationCountByStatus(): JsonResponse
+    public function getApplicationCountByStatus(Request $request): JsonResponse
     {
-        $user = $this->getMockUser();
+        $user = $request->user();
         $level = $user->role->level()->value;
 
         $baseQuery = Application::visibleFor($user)->whereEventStatus(Status::OPENED->value, $user);
@@ -79,18 +75,18 @@ class ApplicationController extends Controller
         ]);
     }
 
-    public function getApplicationByStudentId($id) {
+    public function getApplicationByStudentId($id)
+    {
         $applications = Application::with(['user', 'event', 'award'])->where('student_id', $id)->latest()->get();
         $currEvent = Event::get()->where('status', 'OPENED')->first();
         $user = User::with(['faculty', 'department'])->get()->where('student_id', $id)->first();
 
-//        return response()->json($applications);
+        //        return response()->json($applications);
         return new ApplicationIndexResource([
             'applications' => $applications,
             'current_event' => $currEvent,
             'student' => $user,
         ]);
-
     }
     public function store(Request $request): JsonResponse
     {
@@ -111,7 +107,8 @@ class ApplicationController extends Controller
 
             if ($alreadyApplied) {
                 return response()->json([
-                    'error' => 'You have already applied for this event.',$event->id
+                    'error' => 'You have already applied for this event.',
+                    $event->id
                 ], 400);
             }
 
@@ -120,11 +117,11 @@ class ApplicationController extends Controller
 
             $rules = [
                 'award_id' => ['required', 'exists:awards,id'],
-//                'event_id' => ['required', 'exists:events,id'],
+                //                'event_id' => ['required', 'exists:events,id'],
                 'year'     => ['required', 'integer'],
                 'grade'    => ['required', 'numeric'],
                 'path'     => ['required', 'file', 'mimes:pdf,jpg,png', 'max:10240'],
-                'documents'=> ['required', 'array'],
+                'documents' => ['required', 'array'],
             ];
 
             foreach ($requirements as $req) {
@@ -181,5 +178,4 @@ class ApplicationController extends Controller
             ], 201);
         });
     }
-
 }

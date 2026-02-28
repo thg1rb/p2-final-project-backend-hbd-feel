@@ -19,6 +19,11 @@ class DatabaseSeeder extends Seeder
             DepartmentSeeder::class,
             EventSeeder::class,
             UserSeeder::class,
+        ]);
+
+        User::factory(50)->create();
+
+        $this->call([
             AwardSeeder::class,
             UserAwardSeeder::class,
             EventAwardSeeder::class,
@@ -27,7 +32,5 @@ class DatabaseSeeder extends Seeder
             ApplicationSeeder::class,
             ApprovalSeeder::class,
         ]);
-
-        User::factory(50)->create();
     }
 }

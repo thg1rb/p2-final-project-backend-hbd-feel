@@ -25,11 +25,11 @@ class ApplicationFactory extends Factory
             "req_001" => ["file_path" => "options.pdf"],
             "req_002" => ["file_path" => "futures.pdf"]
         ];
-        $user = User::whereNotNull('student_id')->inRandomOrder()->first();
+
         return [
-            'student_id' => fn () => User::whereNotNull('student_id')->inRandomOrder()->first()?->student_id,
-            'event_id' => fn () => Event::inRandomOrder()->first()?->id ?? $this->faker->uuid(),
-            'award_id' => fn () => Award::inRandomOrder()->first()?->id ?? $this->faker->uuid(),
+            'student_id' => null,
+            'event_id' => 10,
+            'award_id' => Award::inRandomOrder()->first()?->id ?? 1,
             'grade' => $this->faker->randomFloat(2, 2, 4),
             'path' => 'form_1.pdf',
             'documents' => $submissionData,
