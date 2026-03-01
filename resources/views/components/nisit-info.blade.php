@@ -28,10 +28,14 @@
         </div>
         <div class="flex flex-col gap-2">
             <p class="text-sm text-gray-400">ประเภทรางวัลที่เสนอ</p>
-            <div
-                class="flex w-fit items-center justify-center gap-1 rounded-full border border-blue-500 bg-blue-50 px-2 py-1 text-sm text-blue-500">
-                <x-icon name="badge" class="w-4 h-4" />
-                <p>{{ $application->award->name }}</p>
+            <div class="flex gap-3 items-center">
+                <div
+                    class="flex w-fit items-center justify-center gap-1 rounded-full border border-blue-500 bg-blue-50 px-2 py-1 text-sm text-blue-500">
+                    <x-icon name="badge" class="w-4 h-4" />
+                    <p>{{ $application->award->name }}</p>
+                </div>
+                <a href="{{ route('report.edit', $application->id) }}"
+                    class="text-sm text-blue-400 underline cursor-pointer">แก้ไขประเภทรางวัล</a>
             </div>
         </div>
     </div>

@@ -69,6 +69,7 @@
                                     <th class="  p-4 text-start">ภาควิชา</th>
                                     <th class="  p-4 text-start">คณะ</th>
                                     <th class="  p-4 text-start">ประเภทรางวัล</th>
+                                    <th class="  p-4 text-start">สถานะ</th>
                                     <th class="  p-4 text-start">วันที่ยื่น</th>
                                     <th class="  p-4 text-start"></th>
                                 </tr>
@@ -94,6 +95,25 @@
 
                                         <td class="p-4">
                                             {{ $application->award->name }}
+                                        </td>
+
+                                        <td class="p-4">
+                                            @if ($application->status->value === \App\Enums\ApplicationStatus::REJECTED->value)
+                                                <div
+                                                    class="rounded-full border border-red-400 bg-red-100 px-3 py-1 text-red-500 text-sm w-fit">
+                                                    ปฏิเสธ
+                                                </div>
+                                            @elseif ($application->status->value !== \App\Enums\ApplicationStatus::REJECTED->value && $application->level !== 6)
+                                                <div
+                                                    class="rounded-full border border-amber-400 bg-amber-100 px-3 py-1 text-amber-500 text-sm w-fit">
+                                                    รอพิจารณา
+                                                </div>
+                                            @elseif ($application->status - value !== \App\Enums\ApplicationStatus::APPROVED->value && $application->level === 6)
+                                                <div
+                                                    class="rounded-full border border-blue-500 bg-blue-50 px-3 py-1 text-blue-600 text-sm w-fit">
+                                                    อนุมัติ
+                                                </div>
+                                            @endif
                                         </td>
 
                                         <td class="p-4">
@@ -173,7 +193,8 @@
                     <div
                         class="flex justify-center items-center flex-col border rounded-xl p-5 flex-1 bg-green-50 border-primary">
                         <p class="mb-1 text-primary"><span
-                                class="font-bold text-4xl ">{{ $awardStats->get('ด้านความประพฤติดี', 0) }}</span> รางวัล</p>
+                                class="font-bold text-4xl ">{{ $awardStats->get('ด้านความประพฤติดี', 0) }}</span>
+                            รางวัล</p>
                         <p>ด้านความประพฤติดี</p>
                     </div>
                 </div>
