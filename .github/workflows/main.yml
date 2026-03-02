@@ -73,6 +73,7 @@ jobs:
             ${{ secrets.DOCKERHUB_USERNAME }}/laravel-app:latest
 
   # JOB 3: สั่ง K8S ในเครื่อง Local (รันบน Self-hosted Runner)
+  # JOB 3: สั่ง K8S ในเครื่อง Local (รันบน Self-hosted Runner)
   deploy-local:
     needs: build-docker
     runs-on: self-hosted
@@ -83,13 +84,16 @@ jobs:
         run: |
           mkdir -p ~/.kube
 
-          # 🌟 เพิ่มบรรทัดนี้: ให้ GitHub Actions ดึง Secret มาสร้างใน K8s ทันที
+          # 1. สร้าง/อัปเดต Secret
           kubectl create secret generic laravel-secrets \
             --from-literal=APP_KEY="${{ secrets.LARAVEL_APP_KEY }}" \
             --from-literal=DB_PASSWORD="${{ secrets.DB_PASSWORD }}" \
             --dry-run=client -o yaml | kubectl apply -f -
+
           sleep 5
-          # หลังจากสร้าง Secret เสร็จ ก็สั่ง Deploy ตัวแอปต่อได้เลย
+
+          # 2. Apply Config
           kubectl apply -f k8s/laravel-deploy.yml
-#          kubectl rollout restart deployment/laravel-app
+
+          # 3. อัปเดต Image โดยใช้ SHA (จะทำให้ K8s Restart Pod ให้อัตโนมัติทันที)
           kubectl set image deployment/laravel-app laravel=${{ secrets.DOCKERHUB_USERNAME }}/laravel-app:${{ github.sha }}
