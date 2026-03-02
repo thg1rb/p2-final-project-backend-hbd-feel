@@ -6,7 +6,7 @@
         @csrf
 
         <div class="mb-5">
-            เข้าสู่ระบบ test
+            เข้าสู่ระบบ
 
         </div>
 
