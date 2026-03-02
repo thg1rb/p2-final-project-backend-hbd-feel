@@ -67,7 +67,10 @@ jobs:
         with:
           context: .
           push: true
-          tags: ${{ secrets.DOCKERHUB_USERNAME }}/laravel-app:latest
+#          tags: ${{ secrets.DOCKERHUB_USERNAME }}/laravel-app:latest
+          tags: |
+            ${{ secrets.DOCKERHUB_USERNAME }}/laravel-app:${{ github.sha }}
+            ${{ secrets.DOCKERHUB_USERNAME }}/laravel-app:latest
 
   # JOB 3: สั่ง K8S ในเครื่อง Local (รันบน Self-hosted Runner)
   deploy-local:
@@ -88,6 +91,5 @@ jobs:
           sleep 5
           # หลังจากสร้าง Secret เสร็จ ก็สั่ง Deploy ตัวแอปต่อได้เลย
           kubectl apply -f k8s/laravel-deploy.yml
-          kubectl rollout restart deployment/laravel-app
-#          kubectl patch deployment laravel-app \
-#          -p "{\"spec\":{\"template\":{\"metadata\":{\"annotations\":{\"build_time\":\"$(date +%s)\"}}}}}"
+#          kubectl rollout restart deployment/laravel-app
+          kubectl set image deployment/laravel-app laravel=${{ secrets.DOCKERHUB_USERNAME }}/laravel-app:${{ github.sha }}
