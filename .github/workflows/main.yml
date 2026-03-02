@@ -75,7 +75,6 @@ jobs:
     runs-on: self-hosted
     steps:
       - uses: actions/checkout@v4
-
       - name: Deploy to K8S
         run: |
           mkdir -p ~/.kube
@@ -89,4 +88,5 @@ jobs:
           # หลังจากสร้าง Secret เสร็จ ก็สั่ง Deploy ตัวแอปต่อได้เลย
           kubectl apply -f k8s/laravel-deploy.yml
 #          kubectl rollout restart deployment/laravel-app
-          kubectl patch deployment laravel-app -p "{\"spec\":{\"template\":{\"metadata\":{\"annotations\":{\"build_time\":\"$(date +%s)\"}}}}} "
+          kubectl patch deployment laravel-app \
+          -p "{\"spec\":{\"template\":{\"metadata\":{\"annotations\":{\"build_time\":\"$(date +%s)\"}}}}}"
