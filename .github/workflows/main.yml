@@ -85,10 +85,10 @@ jobs:
       - name: Set Environment Variables
         run: |
             if [[ "${{ github.ref }}" == "refs/heads/main" ]]; then
-              echo "APP_HOST=prod.k8s.dev" >> $GITHUB_ENV
+              echo "APP_HOST=prod.api.k8s.dev" >> $GITHUB_ENV
               echo "K8S_NAMESPACE=production" >> $GITHUB_ENV
             else
-              echo "APP_HOST=uat.k8s.dev" >> $GITHUB_ENV
+              echo "APP_HOST=uat.api.k8s.dev" >> $GITHUB_ENV
               echo "K8S_NAMESPACE=uat" >> $GITHUB_ENV
             fi
 
