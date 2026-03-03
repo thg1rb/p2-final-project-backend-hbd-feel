@@ -39,6 +39,18 @@ class AuthenticateController extends Controller
 
     }
 
+    public function me(Request $request) {
+        $user = $request->user();
+        return response()->json([
+            'user' => [
+                'name' => $user->firstName." ".$user->lastName,
+                'email' => $user->email,
+                'role' => $user->role,
+                'student_id' => $user->student_id
+            ]
+        ]);
+    }
+
     public function revoke(Request $request) {
         $request->user()->currentAccessToken()->delete();
         return response()->json([
