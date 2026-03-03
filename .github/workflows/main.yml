@@ -127,7 +127,7 @@ jobs:
 #          sleep 5
 #
 #          # 2. Apply Config
-#          kubectl apply -f k8s/laravel-deploy.yml
+#          kubectl apply -f k8s/deployment.yml
 #
 #          # 3. อัปเดต Image โดยใช้ SHA (จะทำให้ K8s Restart Pod ให้อัตโนมัติทันที)
 #          kubectl set image deployment/laravel-app laravel=${{ secrets.DOCKERHUB_USERNAME }}/laravel-app:${{ github.sha }}
