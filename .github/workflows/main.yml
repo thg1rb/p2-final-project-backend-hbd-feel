@@ -97,6 +97,9 @@ jobs:
             # 1. สร้าง Namespace ถ้ายังไม่มี
             kubectl create namespace ${K8S_NAMESPACE} --dry-run=client -o yaml | kubectl apply -f -
 
+            sed -i "s/laravel.local/${APP_HOST}/g" k8s/ingress.yml
+            sed -i "s/https:\/\/laravel.local/https:\/\/${APP_HOST}/g" k8s/deployment.yml
+
             # 2. อัปเดต Secret ใน Namespace นั้นๆ
             kubectl create secret generic laravel-secrets \
               --from-literal=APP_KEY="${{ secrets.LARAVEL_APP_KEY }}" \
@@ -107,8 +110,6 @@ jobs:
             kubectl apply -f k8s/ -n ${K8S_NAMESPACE}
 
             # 4. อัปเดต Host ใน Ingress แบบ Dynamic (ใช้ sed เปลี่ยนค่าในไฟล์ชั่วคราว)
-            sed -i "s/laravel.local/${APP_HOST}/g" k8s/ingress.yml
-            sed -i "s/laravel.local/${APP_HOST}/g" k8s/deployment.yml
             kubectl apply -f k8s/ingress.yml -n ${K8S_NAMESPACE}
 
             # 5. Force Update Image
