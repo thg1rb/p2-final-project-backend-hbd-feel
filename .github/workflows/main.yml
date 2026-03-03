@@ -108,6 +108,7 @@ jobs:
 
             # 4. อัปเดต Host ใน Ingress แบบ Dynamic (ใช้ sed เปลี่ยนค่าในไฟล์ชั่วคราว)
             sed -i "s/laravel.local/${APP_HOST}/g" k8s/ingress.yml
+            sed -i "s/laravel.local/${APP_HOST}/g" k8s/deployment.yml
             kubectl apply -f k8s/ingress.yml -n ${K8S_NAMESPACE}
 
             # 5. Force Update Image
