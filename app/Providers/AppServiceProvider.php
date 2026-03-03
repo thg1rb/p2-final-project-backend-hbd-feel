@@ -38,8 +38,7 @@ class AppServiceProvider extends ServiceProvider
             'user' => \App\Models\User::class,
         ]);
 
-        if (config('app.env') !== 'local') {
-            URL::forceScheme('https');
-        }
+        \Illuminate\Support\Facades\URL::forceRootUrl(config('app.url'));
+        \Illuminate\Support\Facades\URL::forceScheme('https');
     }
 }
