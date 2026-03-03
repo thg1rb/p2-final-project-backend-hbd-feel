@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Enums\ApplicationStatus;
 use App\Enums\Status;
 use App\Enums\UserRole;
 use App\Http\Controllers\Controller;
@@ -21,6 +22,35 @@ use Illuminate\Support\Facades\Log;
 
 class ApplicationController extends Controller
 {
+    public function getAllApplicationsWithoutPaginate(Request $request)
+    {
+        $user = $request->user();
+
+        if (!$user) {
+            return response()->json(['message' => 'Unauthenticated'], 401);
+        }
+
+        $level = $user->role->level()->value;
+
+        $applications = Application::with([
+            'user',
+            'event',
+            'award',
+            'user.faculty',
+            'user.department',
+        ])
+            ->visibleFor($user)
+            ->whereEventStatus(Status::OPENED->value, $user)
+            ->search($request->input('search'))
+            ->when(
+                $request->filled('status'),
+                fn($q) => $q->filterByStatus($request->input('status'), $level)
+            )
+            ->get();
+
+        return response()->json($applications);
+    }
+
     public function getAllApplications(Request $request)
     {
         $user = $request->user();
@@ -51,6 +81,8 @@ class ApplicationController extends Controller
             )
             ->withQueryString();
 
+        Log::info("LOG: ", $applications->toArray());
+
         return response()->json($applications);
     }
 
@@ -72,6 +104,25 @@ class ApplicationController extends Controller
             'pending' => (clone $baseQuery)->filterByStatus('PENDING', $level)->count(),
             'approved' => (clone $baseQuery)->filterByStatus('APPROVED', $level)->count(),
             'rejected' => (clone $baseQuery)->filterByStatus('REJECTED', $level)->count(),
+        ]);
+    }
+
+    public function getApplicationCountInprogress(Request $request): JsonResponse
+    {
+        $user = $request->user();
+
+        $totalInprogressRemaining = Application::visibleFor($user)
+            ->whereEventStatus(Status::OPENED->value, $user)
+            ->where('applications.level', '<', 6)
+            ->count();
+
+        $totalRemaining = Application::visibleFor($user)
+            ->whereEventStatus(Status::OPENED->value, $user)
+            ->count();
+
+        return response()->json([
+            'total' => $totalRemaining,
+            'totalInprogress' => $totalInprogressRemaining
         ]);
     }
 

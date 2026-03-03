@@ -11,4 +11,5 @@ enum RoleLevel: int
   case ADMIN = 4;
   case BOARD = 5;
   case BOARD_HEAD = 6;
+  case CHANCELLOR = -1;
 }

@@ -31,6 +31,7 @@ class ApprovalSeeder extends Seeder
                 RoleLevel::DEAN->value => UserRole::DEAN,
                 RoleLevel::ADMIN->value => UserRole::ADMIN,
                 RoleLevel::BOARD->value => UserRole::BOARD,
+                RoleLevel::BOARD_HEAD->value => UserRole::BOARD_HEAD
             ];
 
             $finalStatus = null;
