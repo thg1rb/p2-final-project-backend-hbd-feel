@@ -44,7 +44,7 @@ spec:
             - name: DB_USERNAME
               value: laravel
             - name: APP_URL
-              value: "https://laravel.local"
+              value: "http://laravel.local"
             - name: FILESYSTEM_DISK
               value: local
             - name: AWS_URL

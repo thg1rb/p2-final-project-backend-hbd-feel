@@ -38,7 +38,5 @@ class AppServiceProvider extends ServiceProvider
             'user' => \App\Models\User::class,
         ]);
 
-        \Illuminate\Support\Facades\URL::forceRootUrl(config('app.url'));
-        \Illuminate\Support\Facades\URL::forceScheme('https');
     }
 }
