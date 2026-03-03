@@ -18,7 +18,8 @@ test('profile information can be updated', function () {
     $response = $this
         ->actingAs($user)
         ->patch('/profile', [
-            'name' => 'Test User',
+            'firstName' => 'NewFirstName', // เพิ่มบรรทัดนี้
+            'lastName' => 'NewLastName',   // เพิ่มบรรทัดนี้
             'email' => 'test@example.com',
         ]);
 
@@ -28,7 +29,8 @@ test('profile information can be updated', function () {
 
     $user->refresh();
 
-    $this->assertSame('Test User', $user->name);
+    $this->assertSame('NewFirstName', $user->firstName);
+    $this->assertSame('NewLastName', $user->lastName);
     $this->assertSame('test@example.com', $user->email);
     $this->assertNull($user->email_verified_at);
 });
@@ -39,7 +41,8 @@ test('email verification status is unchanged when the email address is unchanged
     $response = $this
         ->actingAs($user)
         ->patch('/profile', [
-            'name' => 'Test User',
+            'firstName' => 'NewFirstName', // แก้ให้ตรงกับ Assertion ด้านล่าง
+            'lastName' => 'NewLastName',  // แก้ให้ตรงกับ Assertion ด้านล่าง
             'email' => $user->email,
         ]);
 
@@ -64,7 +67,9 @@ test('user can delete their account', function () {
         ->assertRedirect('/');
 
     $this->assertGuest();
-    $this->assertNull($user->fresh());
+    $this->assertSoftDeleted('users', [
+        'id' => $user->id,
+    ]);
 });
 
 test('correct password must be provided to delete account', function () {
