@@ -94,26 +94,32 @@ jobs:
 
       - name: Deploy to K8S
         run: |
-            # 1. สร้าง Namespace ถ้ายังไม่มี
-            kubectl create namespace ${K8S_NAMESPACE} --dry-run=client -o yaml | kubectl apply -f -
+          # 1. สร้าง Namespace ถ้ายังไม่มี
+          kubectl create namespace ${K8S_NAMESPACE} --dry-run=client -o yaml | kubectl apply -f -
 
-            sed -i "s/laravel.local/${APP_HOST}/g" k8s/ingress.yml
-            sed -i "s/https:\/\/laravel.local/https:\/\/${APP_HOST}/g" k8s/deployment.yml
+          # 2. สร้าง/อัปเดต Secret
+          kubectl create secret generic laravel-secrets \
+            --from-literal=APP_KEY="${{ secrets.LARAVEL_APP_KEY }}" \
+            --from-literal=DB_PASSWORD="${{ secrets.DB_PASSWORD }}" \
+            -n ${K8S_NAMESPACE} --dry-run=client -o yaml | kubectl apply -f -
 
-            # 2. อัปเดต Secret ใน Namespace นั้นๆ
-            kubectl create secret generic laravel-secrets \
-              --from-literal=APP_KEY="${{ secrets.LARAVEL_APP_KEY }}" \
-              --from-literal=DB_PASSWORD="${{ secrets.DB_PASSWORD }}" \
-              -n ${K8S_NAMESPACE} --dry-run=client -o yaml | kubectl apply -f -
+          # 3. Apply K8S files
+          kubectl apply -f k8s/ -n ${K8S_NAMESPACE}
 
-            # 3. Apply ไฟล์ทั้งหมดในโฟลเดอร์ k8s
-            kubectl apply -f k8s/ -n ${K8S_NAMESPACE}
+          kubectl patch ingress laravel-ingress \
+          -n ${K8S_NAMESPACE} \
+          --type=json \
+          -p='[{"op": "replace", "path": "/spec/rules/0/host", "value": "'"${APP_HOST}"'"}]'
 
-            # 4. อัปเดต Host ใน Ingress แบบ Dynamic (ใช้ sed เปลี่ยนค่าในไฟล์ชั่วคราว)
-            kubectl apply -f k8s/ingress.yml -n ${K8S_NAMESPACE}
+          # 4. ตั้งค่า APP_URL แบบ dynamic (แทน sed)
+          kubectl set env deployment/laravel-app \
+            APP_URL=https://${APP_HOST} \
+            -n ${K8S_NAMESPACE}
 
-            # 5. Force Update Image
-            kubectl set image deployment/laravel-app laravel=${{ secrets.DOCKERHUB_USERNAME }}/laravel-app:${{ github.sha }} -n ${K8S_NAMESPACE}
+          # 5. Force update image ด้วย SHA
+          kubectl set image deployment/laravel-app \
+            laravel=${{ secrets.DOCKERHUB_USERNAME }}/laravel-app:${{ github.sha }} \
+            -n ${K8S_NAMESPACE}
 
 #      - name: Deploy to K8S
 #        run: |
