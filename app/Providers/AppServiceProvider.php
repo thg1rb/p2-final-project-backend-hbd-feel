@@ -36,5 +36,9 @@ class AppServiceProvider extends ServiceProvider
             'behavior' => \App\Models\BehaviorAwardRegistration::class,
             'user' => \App\Models\User::class,
         ]);
+
+        if (config('app.env') !== 'local') {
+            URL::forceScheme('https');
+        }
     }
 }
