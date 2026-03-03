@@ -22,7 +22,7 @@ spec:
             - name: APP_ENV
               value: local
             - name: APP_DEBUG
-              value: "false"
+              value: "true"
             - name: APP_KEY
               valueFrom:
                 secretKeyRef:
