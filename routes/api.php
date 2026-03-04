@@ -26,6 +26,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/applications', [ApplicationController::class, 'store']);
     Route::get('/applications', [ApplicationController::class, 'getAllApplications']);
     Route::get('/applications/count', [ApplicationController::class, 'getApplicationCountByStatus']);
+    Route::get('/me', [AuthenticateController::class, 'me']);
     Route::get('/applications/count/inprogress', [ApplicationController::class, 'getApplicationCountInprogress']);
     Route::get('/applications/all', [ApplicationController::class, 'getAllApplicationsWithoutPaginate']);
 });
