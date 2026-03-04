@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Auth;
 
+use App\Enums\UserRole;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Auth\LoginRequest;
 use Illuminate\Http\RedirectResponse;
@@ -22,12 +23,17 @@ class AuthenticatedSessionController extends Controller
     /**
      * Handle an incoming authentication request.
      */
-    public function store(LoginRequest $request): RedirectResponse
+    public function store(LoginRequest $request)
     {
         $request->authenticate();
+        $user = Auth::user();
+
+        if ($user->role != UserRole::ADMIN) {
+            Auth::guard('web')->logout();
+            return view('auth.register-disabled');
+        }
 
         $request->session()->regenerate();
-        $user = Auth::user();
         return redirect($user->getRedirectRoute());
     }
 

@@ -19,6 +19,7 @@ class Event extends Model
         'semester',
         'start_date',
         'end_date',
+        'path'
     ];
 
     protected function casts(): array

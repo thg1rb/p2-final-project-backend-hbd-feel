@@ -26,4 +26,29 @@ class MinioController extends Controller
             return response()->json(['error' => $e->getMessage()], 500);
         }
     }
+
+    public function uploadFile(Request $request)
+    {
+
+        $request->validate([
+            'file' => 'required|mimes:pdf|max:10240',
+            'folder' => 'nullable|string'
+        ]);
+        try {
+            $file = $request->file('file');
+            $folder = $request->input('folder', 'event');
+
+            $path = $file->store($folder, 's3');
+
+            return response()->json([
+                'message' => 'Upload successful',
+                'path' => $path,
+            ], 201);
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'Upload failed',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
 }
