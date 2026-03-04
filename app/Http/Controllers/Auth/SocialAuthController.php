@@ -34,10 +34,13 @@ class SocialAuthController extends Controller
             return redirect("http://localhost:3000/oauth");
         }
 
-        $user->markEmailAsVerified();
+
 
         if ($from == 'svelte') {
             $token = $user->createToken('svelte-app')->plainTextToken;
+            if (!$user->email_verified_at) {
+                return redirect("http://localhost:3000/oauth?token={$token}&activate=true");
+            }
             return redirect("http://localhost:3000/oauth?token={$token}");
         }
 

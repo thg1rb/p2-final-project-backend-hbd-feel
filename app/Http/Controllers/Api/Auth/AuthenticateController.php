@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Auth\LoginRequest;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\ValidationException;
 
 class AuthenticateController extends Controller
@@ -29,7 +30,8 @@ class AuthenticateController extends Controller
                     'name' => $user->firstName." ".$user->lastName,
                     'email' => $user->email,
                     'role' => $user->role,
-                    'student_id' => $user->student_id
+                    'student_id' => $user->student_id,
+                    'force_password_change' => !$user->email_verified_at
                 ]
             ]);
 
@@ -46,8 +48,10 @@ class AuthenticateController extends Controller
                 'name' => $user->firstName." ".$user->lastName,
                 'email' => $user->email,
                 'role' => $user->role,
-                'student_id' => $user->student_id
-            ]
+                'student_id' => $user->student_id,
+                'force_password_change' => !$user->email_verified_at
+            ],
+
         ]);
     }
 
@@ -56,6 +60,31 @@ class AuthenticateController extends Controller
         return response()->json([
             'success' => true,
             'message' => 'Token revoked'
+        ]);
+    }
+    public function changePassword(Request $request) {
+        $user = $request->user();
+
+        $rules = [
+            'password' => ['required', \Illuminate\Validation\Rules\Password::defaults(), 'confirmed'],
+        ];
+
+        // Only require old password if NOT first login
+        if ($user->email_verified_at) {
+            $rules['current_password'] = ['required', 'current_password'];
+        }
+
+        $validated = $request->validate($rules);
+
+        $user->update([
+            'password' => Hash::make($validated['password']),
+        ]);
+
+        $user->markEmailAsVerified();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Password updated successfully'
         ]);
     }
 }
