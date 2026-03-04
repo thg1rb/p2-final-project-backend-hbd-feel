@@ -43,8 +43,8 @@ spec:
               value: nisit-reward
             - name: DB_USERNAME
               value: laravel
-            - name: APP_URL
-              value: "https://laravel.local"
+#            - name: APP_URL
+#              value: "https://laravel.local"
             - name: FILESYSTEM_DISK
               value: local
             - name: AWS_URL

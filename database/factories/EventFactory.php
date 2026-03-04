@@ -49,6 +49,7 @@ class EventFactory extends Factory
             'academic_year' => $combination['academic_year'],
             'semester' => $combination['semester'],
             'status' => $status,
+            'path' => $status === Status::CLOSED ? "form_1.pdf" : null,
             'start_date' => $startDate,
             'end_date' => $endDate,
         ];
