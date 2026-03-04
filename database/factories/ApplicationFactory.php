@@ -34,7 +34,7 @@ class ApplicationFactory extends Factory
             'path' => 'form_1.pdf',
             'documents' => $submissionData,
             'year' => $this->faker->numberBetween(1, 4),
-            'level' => fake()->randomElement(RoleLevel::cases()),
+            'level' => 6,
             'status' => $this->faker->randomElement(ApprovalStatus::cases())->value,
         ];
     }
