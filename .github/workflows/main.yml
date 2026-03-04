@@ -8,7 +8,7 @@ on:
       - feature/setup-cicd
 
 jobs:
-  # JOB 1: ทดสอบโค้ด (รันบน Cloud ของ GitHub เพื่อความเร็ว)
+  # JOB 1: ทดสอบโค้ด (รันบน C loud ของ GitHub เพื่อความเร็ว)
   laravel-tests:
     runs-on: ubuntu-latest
     services:
