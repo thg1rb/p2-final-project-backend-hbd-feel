@@ -9,6 +9,7 @@ on:
 
 jobs:
   # JOB 1: ทดสอบโค้ด (รันบน C loud ของ GitHub เพื่อความเร็ว)
+  # JOB 1: ทดสอบโค้ดและทำ Code Analysis
   laravel-tests:
     runs-on: ubuntu-latest
     services:
@@ -27,11 +28,15 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
+
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
         with:
           php-version: '8.4'
-          extensions: mbstring, dom, curl, libxml, mysql
+          # เพิ่ม pcov เข้าไปใน extensions เพื่อให้ PHP รองรับการทำ Coverage
+          extensions: mbstring, dom, curl, libxml, mysql, pcov
+          coverage: pcov # เปิดใช้งาน pcov
+
       - name: Install Dependencies
         run: |
           php -r "copy('.env.example', '.env');"
@@ -43,7 +48,7 @@ jobs:
           npm install
           npm run build
 
-      - name: Run Tests
+      - name: Run Tests and Generate Coverage
         env:
           DB_CONNECTION: mysql
           DB_HOST: 127.0.0.1
@@ -51,7 +56,23 @@ jobs:
           DB_DATABASE: testing
           DB_USERNAME: root
           DB_PASSWORD: password
-        run: php artisan test
+        # เพิ่ม Flag --coverage-clover เพื่อบอกให้ Laravel สร้างไฟล์ coverage.xml
+        run: php artisan test --coverage-clover=coverage.xml
+
+      # สเต็ปใหม่: ส่งข้อมูลไปให้ SonarQube
+      - name: SonarQube Scan
+        uses: sonarsource/sonarqube-scan-action@master
+        env:
+          # แนะนำให้ตั้งชื่อ Secret แยกจาก Frontend เช่น SONAR_TOKEN_BACKEND
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN_BACKEND }}
+          SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
+        with:
+          args: >
+            -Dsonar.projectKey=myapp-backend
+            -Dsonar.sources=app,routes,database,config
+            -Dsonar.tests=tests
+            -Dsonar.php.coverage.reportPaths=coverage.xml
+            -Dsonar.exclusions=vendor/**,node_modules/**,public/**,bootstrap/cache/**
 
   # JOB 2: Build Docker Image (ถ้าจะใช้ K8S ต้องมีขั้นตอนนี้เพื่อให้ K8S ดึงภาพไปรันได้)
   build-docker:
