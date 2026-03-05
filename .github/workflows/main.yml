@@ -65,6 +65,7 @@ jobs:
         env:
           # แนะนำให้ตั้งชื่อ Secret แยกจาก Frontend เช่น SONAR_TOKEN_BACKEND
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+
           SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
         with:
           args: >
