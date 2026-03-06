@@ -137,4 +137,26 @@ class AwardReportController extends Controller
 
         return view('report.show', compact('application', 'approvals', 'headDeptApproval'));
     }
+
+    public function edit($id)
+    {
+        $application = Application::with(['user.department', 'award', 'event'])
+            ->findOrFail($id);
+        $awards = Award::all();
+        return view('report.edit', compact('application', 'awards'));
+    }
+
+    public function update(Request $request, Application $application)
+    {
+        $request->validate([
+            'award_id' => 'required|exists:awards,id',
+        ]);
+
+        $application->update([
+            'award_id' => $request->award_id
+        ]);
+
+        return redirect()->route('report.show', $application)
+            ->with('success', 'เปลี่ยนประเภทรางวัลสำเร็จ');
+    }
 }

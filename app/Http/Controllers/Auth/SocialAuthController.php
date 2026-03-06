@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Auth;
 
+use App\Enums\UserRole;
 use App\Http\Controllers\Controller;
 use App\Models\User;
 use Illuminate\Http\Request;
@@ -10,8 +11,12 @@ use Laravel\Socialite\Socialite;
 
 class SocialAuthController extends Controller
 {
-    public function redirectToProvider()
+    public function redirectToProvider(Request $request)
     {
+        $from = $request->query('from', '');
+
+        session(['oauth_from' => $from]);
+
         return Socialite::driver('google')->redirect();
     }
 
@@ -21,20 +26,20 @@ class SocialAuthController extends Controller
 
         $user = User::where('email', $googleUser->getEmail())->first();
 
-        if (!$user) {
-            $user = User::create([
-                'firstName' => $googleUser->getName(),
-                'lastName' => '',
-                'username' => str_replace(' ', '.', $googleUser->getName()),
-                'email' => $googleUser->getEmail(),
-                'password' => bcrypt(fake()->password(20)),
+        $from = session('oauth_from', '');
 
-                'faculty_id'    => 1,
-                'department_id' => 1,
-            ]);
+        if ((!$user && $from != "svelte") || $user && $user->role != UserRole::ADMIN && $from != "svelte") {
+            return view('auth.register-disabled');
+        } else if (!$user && $from == "svelte") {
+            return redirect("http://localhost:3000/oauth");
         }
 
         $user->markEmailAsVerified();
+
+        if ($from == 'svelte') {
+            $token = $user->createToken('svelte-app')->plainTextToken;
+            return redirect("http://localhost:3000/oauth?token={$token}");
+        }
 
         Auth::login($user);
         return redirect()->intended('/dashboard');

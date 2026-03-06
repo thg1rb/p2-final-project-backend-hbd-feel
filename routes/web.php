@@ -59,7 +59,7 @@ Route::get('/auth/google/redirect', [SocialAuthController::class, 'redirectToPro
 Route::get('/auth/google/callback', [SocialAuthController::class, 'handleProviderCallback'])
     ->name('google.callback');
 
-Route::get('/report', [AwardReportController::class, 'index'])->name('report.award-report');
+
 
 Route::get('/users', [
     UserController::class,
@@ -73,8 +73,10 @@ Route::get('/users/create', [
 
 Route::resource('users', UserController::class);
 
-Route::get('/report/{id}', [AwardReportController::class, 'show'])
-    ->name('report.show');
+Route::get('/report/{id}', [AwardReportController::class, 'show'])->name('report.show');
+Route::get('/report', [AwardReportController::class, 'index'])->name('report.award-report');
+Route::get('/report/edit/{id}', [AwardReportController::class, 'edit'])->name('report.edit');
+Route::put('report/{application}', [AwardReportController::class, 'update'])->name('report.update');
 
 Route::get('/file-preview', [MinioController::class, 'getFile'])->name('file.preview');
 

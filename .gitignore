@@ -5,6 +5,7 @@
 .env.production
 .phpactor.json
 .phpunit.result.cache
+.secrets
 /.fleet
 /.idea
 /.nova
@@ -21,6 +22,7 @@
 /vendor
 Homestead.json
 Homestead.yaml
+actions-runner
 Thumbs.db
 data/.minio.sys/
 data/

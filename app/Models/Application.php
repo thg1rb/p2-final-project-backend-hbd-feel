@@ -38,7 +38,7 @@ class Application extends Model
             return $query;
         }
 
-        return $query->whereHas('event', fn ($q) => $q->where('status', $status));
+        return $query->whereHas('event', fn($q) => $q->where('status', $status));
     }
 
     public function scopeRoleLevelFilter($query, RoleLevel $roleLevel)
@@ -54,34 +54,36 @@ class Application extends Model
 
     public function scopeVisibleFor($query, User $user)
     {
-        $level = $user->role->level()->value;
+        // $level = $user->role->level()->value;
 
         return match ($user->role) {
             UserRole::NISIT => $query->whereHas(
                 'user',
-                fn ($q) => $q->where('student_id', $user->student_id)
+                fn($q) => $q->where('student_id', $user->student_id)
             ),
 
             UserRole::DEPT_HEAD => $query->whereHas(
                 'user',
-                fn ($q) => $q->where('department_id', $user->department_id)
+                fn($q) => $q->where('department_id', $user->department_id)
             ),
 
             UserRole::ASSO_DEAN => $query->roleLevelFilter(RoleLevel::DEPT_HEAD)
                 ->whereHas(
                     'user',
-                    fn ($q) => $q->where('faculty_id', $user->faculty_id)
+                    fn($q) => $q->where('faculty_id', $user->faculty_id)
                 ),
 
             UserRole::DEAN => $query->roleLevelFilter(RoleLevel::ASSO_DEAN)
                 ->whereHas(
                     'user',
-                    fn ($q) => $q->where('faculty_id', $user->faculty_id)
+                    fn($q) => $q->where('faculty_id', $user->faculty_id)
                 ),
 
             UserRole::ADMIN => $query->roleLevelFilter(RoleLevel::DEAN),
 
             UserRole::BOARD => $query->roleLevelFilter(RoleLevel::ADMIN),
+
+            UserRole::CHANCELLOR => $query->where('status', '!=', 'REJECTED'),
 
             default => $query,
         };

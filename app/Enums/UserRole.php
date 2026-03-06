@@ -39,6 +39,7 @@ enum UserRole: string
             self::ADMIN => RoleLevel::ADMIN,
             self::BOARD => RoleLevel::BOARD,
             self::BOARD_HEAD => RoleLevel::BOARD_HEAD,
+            self::CHANCELLOR => RoleLevel::CHANCELLOR,
         };
     }
 }
