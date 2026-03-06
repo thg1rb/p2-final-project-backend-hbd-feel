@@ -49,12 +49,11 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '20'
-          cache: 'npm'
 
       - name: Install NPM dependencies & Build Assets
         run: |
-          npm install
-          npm run build
+          yarn install
+          yarn run build
       # -----------------------------------------------------------
 
       - name: Run Tests and Generate Coverage
