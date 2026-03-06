@@ -38,11 +38,24 @@ jobs:
           extensions: mbstring, dom, curl, libxml, mysql, pcov
           coverage: pcov
 
-      - name: Install Dependencies
+      - name: Install PHP Dependencies
         run: |
           php -r "copy('.env.example', '.env');"
           composer install --no-ansi --no-interaction --no-scripts --no-progress --prefer-dist
           php artisan key:generate
+
+      # --- แก้ไขเพิ่มสเต็ป NPM ตรงนี้ เพื่อป้องกัน Vite manifest not found ---
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install NPM dependencies & Build Assets
+        run: |
+          npm install
+          npm run build
+      # -----------------------------------------------------------
 
       - name: Run Tests and Generate Coverage
         env:
@@ -54,7 +67,6 @@ jobs:
           DB_PASSWORD: password
         run: php artisan test --coverage-clover=coverage.xml
 
-      # ฝากไฟล์ coverage ไว้เพื่อใช้ใน Job ถัดไป
       - name: Upload Coverage Report
         uses: actions/upload-artifact@v4
         with:
