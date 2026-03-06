@@ -6,14 +6,13 @@ on:
       - main
       - develop
       - feature/setup-cicd
-  # เพิ่มการเช็คเมื่อมีการเปิด Pull Request เข้าหา branch เหล่านี้
   pull_request:
     branches:
       - main
       - develop
 
 jobs:
-  # JOB 1: ทดสอบโค้ด (รันทุกกรณีทั้ง Push และ PR)
+  # JOB 1: รัน Unit Test อย่างเดียว
   laravel-tests:
     runs-on: ubuntu-latest
     services:
@@ -29,7 +28,6 @@ jobs:
           --health-interval=20s
           --health-timeout=10s
           --health-retries=5
-
     steps:
       - uses: actions/checkout@v4
 
@@ -46,11 +44,6 @@ jobs:
           composer install --no-ansi --no-interaction --no-scripts --no-progress --prefer-dist
           php artisan key:generate
 
-      - name: Install NPM dependencies & Build Assets
-        run: |
-          npm install
-          npm run build
-
       - name: Run Tests and Generate Coverage
         env:
           DB_CONNECTION: mysql
@@ -60,6 +53,27 @@ jobs:
           DB_USERNAME: root
           DB_PASSWORD: password
         run: php artisan test --coverage-clover=coverage.xml
+
+      # ฝากไฟล์ coverage ไว้เพื่อใช้ใน Job ถัดไป
+      - name: Upload Coverage Report
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-report
+          path: coverage.xml
+
+  # JOB 2: วิเคราะห์โค้ดด้วย SonarQube
+  sonarqube-analysis:
+    needs: laravel-tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # Sonar ต้องการประวัติ git เพื่อวิเคราะห์ความเปลี่ยนแปลง
+
+      - name: Download Coverage Report
+        uses: actions/download-artifact@v4
+        with:
+          name: coverage-report
 
       - name: SonarQube Scan
         uses: sonarsource/sonarqube-scan-action@master
@@ -74,74 +88,55 @@ jobs:
             -Dsonar.php.coverage.reportPaths=coverage.xml
             -Dsonar.exclusions=vendor/**,node_modules/**,public/**,bootstrap/cache/**
 
-  # JOB 2: Build Docker (รันทุกกรณี แต่ Push เฉพาะเมื่อไม่ใช่ PR)
+  # JOB 3: Build Docker (รอให้ทั้ง Test และ Sonar ผ่านก่อน หรือเลือกแค่ Test ก็ได้)
   build-docker:
-    needs: laravel-tests
+    needs: [laravel-tests, sonarqube-analysis]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-
       - name: Login to Docker Hub
-        # ล็อกอินเฉพาะตอนที่จะ Push จริงเท่านั้น
         if: github.event_name != 'pull_request'
         uses: docker/login-action@v3
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
-
       - name: Build and push
         uses: docker/build-push-action@v5
         with:
           context: .
-          # ถ้าเป็น PR ให้ push: false (แค่เช็คว่า Build ผ่านไหม)
           push: ${{ github.event_name != 'pull_request' }}
           tags: |
             ${{ secrets.DOCKERHUB_USERNAME }}/laravel-app:${{ github.sha }}
             ${{ secrets.DOCKERHUB_USERNAME }}/laravel-app:latest
 
-  # JOB 3: Deploy (รันเฉพาะเมื่อมีการ Push/Merge ลง Branch เท่านั้น)
+  # JOB 4: Deploy ไปยัง K8S
   deploy-local:
     needs: build-docker
-    # เงื่อนไขสำคัญ: ห้ามรัน Job นี้ถ้ามาจาก Pull Request
     if: github.event_name != 'pull_request'
     runs-on: self-hosted
     steps:
       - uses: actions/checkout@v4
-
       - name: Set Environment Variables
         run: |
           if [[ "${{ github.ref }}" == "refs/heads/main" ]]; then
-              echo "APP_HOST=prod.api.k8s.dev" >> $GITHUB_ENV
-              echo "K8S_NAMESPACE=production" >> $GITHUB_ENV
-            elif [[ "${{ github.ref }}" == "refs/heads/develop" ]]; then
-              echo "APP_HOST=uat.api.k8s.dev" >> $GITHUB_ENV
-              echo "K8S_NAMESPACE=uat" >> $GITHUB_ENV
-            elif [[ "${{ github.ref }}" == "refs/heads/feature/setup-cicd" ]]; then
-              # ตั้งค่าสำหรับ branch ทดสอบ CICD
-              echo "APP_HOST=test.api.k8s.dev" >> $GITHUB_ENV
-              echo "K8S_NAMESPACE=test" >> $GITHUB_ENV
+            echo "APP_HOST=prod.api.k8s.dev" >> $GITHUB_ENV
+            echo "K8S_NAMESPACE=production" >> $GITHUB_ENV
+          elif [[ "${{ github.ref }}" == "refs/heads/develop" ]]; then
+            echo "APP_HOST=uat.api.k8s.dev" >> $GITHUB_ENV
+            echo "K8S_NAMESPACE=uat" >> $GITHUB_ENV
+          elif [[ "${{ github.ref }}" == "refs/heads/feature/setup-cicd" ]]; then
+            echo "APP_HOST=test.api.k8s.dev" >> $GITHUB_ENV
+            echo "K8S_NAMESPACE=test" >> $GITHUB_ENV
           fi
 
       - name: Deploy to K8S
         run: |
           kubectl create namespace ${K8S_NAMESPACE} --dry-run=client -o yaml | kubectl apply -f -
-
           kubectl create secret generic laravel-secrets \
             --from-literal=APP_KEY="${{ secrets.LARAVEL_APP_KEY }}" \
             --from-literal=DB_PASSWORD="${{ secrets.DB_PASSWORD }}" \
             -n ${K8S_NAMESPACE} --dry-run=client -o yaml | kubectl apply -f -
-
           kubectl apply -f k8s/ -n ${K8S_NAMESPACE}
-
-          kubectl patch ingress laravel-ingress \
-            -n ${K8S_NAMESPACE} \
-            --type=json \
-            -p='[{"op": "replace", "path": "/spec/rules/0/host", "value": "'"${APP_HOST}"'"}]'
-
-          kubectl set env deployment/laravel-app \
-            APP_URL=https://${APP_HOST} \
-            -n ${K8S_NAMESPACE}
-
-          kubectl set image deployment/laravel-app \
-            laravel=${{ secrets.DOCKERHUB_USERNAME }}/laravel-app:${{ github.sha }} \
-            -n ${K8S_NAMESPACE}
+          kubectl patch ingress laravel-ingress -n ${K8S_NAMESPACE} --type=json -p='[{"op": "replace", "path": "/spec/rules/0/host", "value": "'"${APP_HOST}"'"}]'
+          kubectl set env deployment/laravel-app APP_URL=https://${APP_HOST} -n ${K8S_NAMESPACE}
+          kubectl set image deployment/laravel-app laravel=${{ secrets.DOCKERHUB_USERNAME }}/laravel-app:${{ github.sha }} -n ${K8S_NAMESPACE}
