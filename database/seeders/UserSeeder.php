@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Enums\CampusType;
 use App\Enums\UserRole;
 use App\Models\User;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
@@ -19,7 +20,7 @@ class UserSeeder extends Seeder
         foreach (UserRole::cases() as $role) {
             $faculty = $faculties->random();
             $department = \App\Models\Department::where('faculty_id', $faculty->id)->get()->random();
-//
+            //
 
             User::query()->createOrFirst(
                 ['email' => 'narakorn.th@ku.th',],
@@ -32,6 +33,7 @@ class UserSeeder extends Seeder
                     'role' => UserRole::NISIT,
                     'faculty_id' => 1,
                     'department_id' => 1,
+                    'campus' => CampusType::BANGKHEN,
                 ]
             );
 
@@ -46,6 +48,7 @@ class UserSeeder extends Seeder
                     'role' => UserRole::NISIT,
                     'faculty_id' => $faculty->id,
                     'department_id' => $department->id,
+                    'campus' => CampusType::BANGKHEN,
                 ]
             );
 
@@ -60,20 +63,24 @@ class UserSeeder extends Seeder
                     'role' => UserRole::ADMIN,
                     'faculty_id' => $faculty->id,
                     'department_id' => $department->id,
+                    'campus' => CampusType::BANGKHEN,
                 ]
             );
 
-            User::factory()->create([
-                'student_id' => $role === UserRole::NISIT ? fake()->numerify("##########") : null,
-                'firstName' => $role->value,
-                'lastName' => 'Account',
-                'username' => fake()->userName(),
-                'email' => fake()->userName() . '@example.com',
-                'password' => 'password',
-                'role' => $role,
-                'faculty_id' => $faculty->id,
-                'department_id' => $department->id,
-            ]);
+            foreach (CampusType::cases() as $campus) {
+                User::factory()->create([
+                    'student_id' => $role === UserRole::NISIT ? fake()->numerify("##########") : null,
+                    'firstName' => $role->value,
+                    'lastName' => 'Account',
+                    'username' => fake()->userName(),
+                    'email' => fake()->userName() . '@example.com',
+                    'password' => 'password',
+                    'role' => $role,
+                    'faculty_id' => $faculty->id,
+                    'department_id' => $department->id,
+                    'campus' => $campus
+                ]);
+            }
         }
 
         // สำหรับนิสิต 10 คน
@@ -87,6 +94,7 @@ class UserSeeder extends Seeder
                 'faculty_id' => $faculty->id,
                 'department_id' => $department->id,
                 'student_id' => fake()->numerify("##########"),
+                'campus' => CampusType::BANGKHEN,
             ]);
         }
     }

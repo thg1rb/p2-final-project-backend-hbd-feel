@@ -24,6 +24,7 @@ class Application extends Model
         'year',
         'level',
         'status',
+        'campus',
     ];
 
     protected $casts = [

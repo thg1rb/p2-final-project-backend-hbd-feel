@@ -16,6 +16,7 @@ class Award extends Model
         'name',
         'form_path',
         'requirements',
+        'campus',
     ];
 
     protected $casts = [
