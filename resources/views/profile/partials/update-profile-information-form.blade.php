@@ -31,7 +31,7 @@
 
         <div>
             <x-input-label for="username" :value="__('username')" />
-            <x-text-input id="username" name="username" type="text" class="mt-1 block w-full bg-[#707070]/10 cursor-not-allowed" :value="old('username', $user->username)" required autocomplete="username" disabled />
+            <x-text-input id="username" name="username" type="text" class="mt-1 block w-full" :value="old('username', $user->username)" required autocomplete="username"  />
             <x-input-error class="mt-2" :messages="$errors->get('username')" />
         </div>
 

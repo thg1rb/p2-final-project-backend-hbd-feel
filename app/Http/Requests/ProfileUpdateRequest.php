@@ -26,6 +26,7 @@ class ProfileUpdateRequest extends FormRequest
                 'max:255',
                 Rule::unique(User::class)->ignore($this->user()->id),
             ],
+            'username' => ['required', 'string', 'max:255', 'min:3', Rule::unique(User::class)->ignore($this->user()->id),],
         ];
     }
 }

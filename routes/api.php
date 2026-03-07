@@ -30,6 +30,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/applications/count/inprogress', [ApplicationController::class, 'getApplicationCountInprogress']);
     Route::get('/applications/all', [ApplicationController::class, 'getAllApplicationsWithoutPaginate']);
     Route::post('/auth/change-password', [AuthenticateController::class, 'changePassword']);
+    Route::post('/auth/update-user-details', [AuthenticateController::class, 'changeUserDetails']);
 });
 
 
