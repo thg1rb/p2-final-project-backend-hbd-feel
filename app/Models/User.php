@@ -4,6 +4,7 @@ namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 use App\Enums\UserRole;
+use App\Notifications\ApiResetPasswordNotification;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -110,5 +111,10 @@ class User extends Authenticatable
     public function approvals(): HasMany
     {
         return $this->hasMany(Approval::class);
+    }
+
+    public function sendPasswordResetNotification($token)
+    {
+        $this->notify(new ApiResetPasswordNotification($token));
     }
 }
