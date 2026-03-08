@@ -55,8 +55,6 @@ class Application extends Model
 
     public function scopeVisibleFor($query, User $user)
     {
-        // $level = $user->role->level()->value;
-
         return match ($user->role) {
             UserRole::NISIT => $query->whereHas(
                 'user',
@@ -80,9 +78,9 @@ class Application extends Model
                     fn($q) => $q->where('faculty_id', $user->faculty_id)
                 ),
 
-            UserRole::ADMIN => $query->roleLevelFilter(RoleLevel::DEAN),
+            UserRole::NISIT_DEV => $query->roleLevelFilter(RoleLevel::DEAN),
 
-            UserRole::BOARD => $query->roleLevelFilter(RoleLevel::ADMIN),
+            UserRole::BOARD => $query->roleLevelFilter(RoleLevel::NISIT_DEV),
 
             UserRole::CHANCELLOR => $query->where('status', '!=', 'REJECTED'),
 

@@ -101,7 +101,7 @@ class ApprovalController extends Controller
     {
         $approvalStatus = ApprovalStatus::from($approvalStatusValue);
 
-        if ($userRole === UserRole::BOARD && $currentLevel === RoleLevel::ADMIN) {
+        if ($userRole === UserRole::BOARD && $currentLevel === RoleLevel::NISIT_DEV) {
             return $this->calculateBoardStatus($currentLevel, $applicationId, $approvalStatus, $includeCurrentVote);
         }
 
@@ -158,14 +158,14 @@ class ApprovalController extends Controller
 
         if ($rejectedCount > $threshold) {
             return [
-                'level' => RoleLevel::ADMIN,
+                'level' => RoleLevel::NISIT_DEV,
                 'status' => ApprovalStatus::REJECTED,
             ];
         }
 
         if ($approvedCount === $rejectedCount && ($approvedCount > 0 || $rejectedCount > 0)) {
             return [
-                'level' => RoleLevel::ADMIN,
+                'level' => RoleLevel::NISIT_DEV,
                 'status' => ApprovalStatus::REJECTED,
             ];
         }

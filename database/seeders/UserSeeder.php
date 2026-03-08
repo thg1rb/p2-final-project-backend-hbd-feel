@@ -60,7 +60,7 @@ class UserSeeder extends Seeder
                     'lastName' => 'S',
                     'username' => 'admin',
                     'password' => 'password',
-                    'role' => UserRole::ADMIN,
+                    'role' => UserRole::NISIT_DEV,
                     'faculty_id' => $faculty->id,
                     'department_id' => $department->id,
                     'campus' => CampusType::BANGKHEN,

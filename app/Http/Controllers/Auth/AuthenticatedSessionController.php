@@ -28,7 +28,7 @@ class AuthenticatedSessionController extends Controller
         $request->authenticate();
         $user = Auth::user();
 
-        if ($user->role != UserRole::ADMIN) {
+        if ($user->role != UserRole::NISIT_DEV) {
             Auth::guard('web')->logout();
             return view('auth.register-disabled');
         }
