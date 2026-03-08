@@ -100,19 +100,25 @@
 
                                         <td class="p-4">
                                             @if ($application->status->value === \App\Enums\ApplicationStatus::REJECTED->value)
+                                                {{-- 1. ถ้าถูกปฏิเสธ ไม่ว่าจะเลเวลไหน ให้จบที่นี่ --}}
                                                 <div
                                                     class="rounded-full border border-red-400 bg-red-100 px-3 py-1 text-red-500 text-sm w-fit">
                                                     ปฏิเสธ
                                                 </div>
-                                            @elseif ($application->status->value !== \App\Enums\ApplicationStatus::REJECTED->value && $application->level !== 5)
+                                            @elseif (
+                                                $application->status->value === \App\Enums\ApplicationStatus::APPROVED->value &&
+                                                    $application->level->value === 5 &&
+                                                    !$event)
+                                                {{-- 2. ถ้าอนุมัติเรียบร้อย (ถึงเลเวล 5 แล้ว) --}}
+                                                <div
+                                                    class="rounded-full border border-primary bg-green-50 px-3 py-1 text-primary text-sm w-fit">
+                                                    อนุมัติ
+                                                </div>
+                                            @else
+                                                {{-- 3. กรณีอื่นๆ (ยังไม่ถูก Reject และยังไม่ถึงขั้นอนุมัติสุดท้าย) --}}
                                                 <div
                                                     class="rounded-full border border-amber-400 bg-amber-100 px-3 py-1 text-amber-500 text-sm w-fit">
                                                     รอพิจารณา
-                                                </div>
-                                            @elseif ($application->status->value !== \App\Enums\ApplicationStatus::APPROVED->value && $application->level === 5)
-                                                <div
-                                                    class="rounded-full border border-blue-500 bg-blue-50 px-3 py-1 text-blue-600 text-sm w-fit">
-                                                    อนุมัติ
                                                 </div>
                                             @endif
                                         </td>

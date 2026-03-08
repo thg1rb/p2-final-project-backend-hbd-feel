@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Enums\RoleLevel;
 use App\Enums\Status;
 use App\Models\Application;
 use App\Models\Event;
@@ -32,7 +33,7 @@ class EndEventController extends Controller
 
         // ดึง Stats (totalInprogress)
         $totalInprogress = Application::where('status', '!=', 'REJECTED')
-            ->where('level', '!=', 6)
+            ->where('level', '!=', RoleLevel::BOARD)
             ->count();
 
         $event = Event::where('status', Status::OPENED)
