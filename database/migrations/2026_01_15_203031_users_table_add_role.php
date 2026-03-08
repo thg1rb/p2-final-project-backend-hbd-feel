@@ -19,7 +19,6 @@ return new class extends Migration
                 'DEAN',
                 'NISIT_DEV',
                 'BOARD',
-                'CHANCELLOR',
             ])->after('lastName')->default('NISIT');
         });
     }

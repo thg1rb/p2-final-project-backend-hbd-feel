@@ -10,5 +10,4 @@ enum RoleLevel: int
   case DEAN = 3;
   case NISIT_DEV = 4;
   case BOARD = 5;
-  case CHANCELLOR = -1;
 }
