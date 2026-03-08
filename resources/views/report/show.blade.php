@@ -1,5 +1,6 @@
 @php
     use App\Enums\RoleLevel;
+    use App\Enums\ApprovalStatus;
 
     Log::info('LOG Application Data: ', $application->toArray());
 @endphp
@@ -13,22 +14,26 @@
         <div class="flex flex-col gap-2">
             <div class="flex items-center justify-start gap-3">
                 <p class="text-2xl font-bold">{{ $application->id }}</p>
-                @if ($application->status->value === \App\Enums\ApprovalStatus::REJECTED->value)
-                    {{-- 1. ถ้าถูกปฏิเสธ ไม่ว่าจะเลเวลไหน ให้จบที่นี่ --}}
-                    <div class="rounded-full border border-red-400 bg-red-100 px-3 py-1 text-red-500 text-sm">
+                @if ($application->status->value === ApprovalStatus::REJECTED->value)
+                    <div
+                        class="rounded-full border border-red-400 bg-red-100 px-3 py-1 text-red-500 text-sm w-fit">
                         ปฏิเสธ
                     </div>
-                @elseif (
-                    $application->status->value === \App\Enums\ApprovalStatus::APPROVED->value &&
-                        $application->level->value === RoleLevel::BOARD->value &&
-                        !$event)
-                    {{-- 2. ถ้าอนุมัติเรียบร้อย (ถึงเลเวล 5 แล้ว) --}}
-                    <div class="rounded-full border border-primary bg-green-50 px-3 py-1 text-primary text-sm">
+                @elseif ($application->level->value === RoleLevel::BOARD->value && !$event)
+                    <div
+                        class="rounded-full border border-primary bg-green-50 px-3 py-1 text-primary text-sm w-fit">
                         อนุมัติ
                     </div>
+                @elseif (
+                    $application->status->value === ApprovalStatus::APPROVED->value &&
+                        $application->level->value >= RoleLevel::NISIT_DEV->value)
+                    <div
+                        class="rounded-full border border-orange-400 bg-orange-50 px-3 py-1 text-orange-500 text-sm w-fit">
+                        กำลังดำเนินการ
+                    </div>
                 @else
-                    {{-- 3. กรณีอื่นๆ (ยังไม่ถูก Reject และยังไม่ถึงขั้นอนุมัติสุดท้าย) --}}
-                    <div class="rounded-full border border-amber-400 bg-amber-100 px-3 py-1 text-amber-500 text-sm">
+                    <div
+                        class="rounded-full border border-amber-400 bg-amber-100 px-3 py-1 text-amber-500 text-sm w-fit">
                         รอพิจารณา
                     </div>
                 @endif
