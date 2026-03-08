@@ -10,7 +10,6 @@ enum UserRole: string
     case DEAN = 'DEAN';
     case NISIT_DEV = 'NISIT_DEV';
     case BOARD = 'BOARD';
-    case BOARD_HEAD = 'BOARD_HEAD';
     case CHANCELLOR = 'CHANCELLOR';
 
     public static function label(self $role): string
@@ -21,8 +20,7 @@ enum UserRole: string
             self::ASSO_DEAN => 'รองคณบดี',
             self::DEAN => 'คณบดี',
             self::NISIT_DEV => 'กองพัฒนานิสิต',
-            self::BOARD => 'กรรมการ',
-            self::BOARD_HEAD => 'ประธานกรรมการ',
+            self::BOARD => 'คณะกรรมการ',
             self::CHANCELLOR => 'อธิการบดี',
         };
     }
@@ -36,7 +34,6 @@ enum UserRole: string
             self::DEAN => RoleLevel::DEAN,
             self::NISIT_DEV => RoleLevel::NISIT_DEV,
             self::BOARD => RoleLevel::BOARD,
-            self::BOARD_HEAD => RoleLevel::BOARD_HEAD,
             self::CHANCELLOR => RoleLevel::CHANCELLOR,
         };
     }

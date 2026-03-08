@@ -5,8 +5,6 @@ namespace Database\Factories;
 use App\Enums\ApprovalStatus;
 use App\Enums\RoleLevel;
 use App\Models\Award;
-use App\Models\Event;
-use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
@@ -34,7 +32,7 @@ class ApplicationFactory extends Factory
             'path' => 'form_1.pdf',
             'documents' => $submissionData,
             'year' => $this->faker->numberBetween(1, 4),
-            'level' => 6,
+            'level' => RoleLevel::BOARD,
             'status' => $this->faker->randomElement(ApprovalStatus::cases())->value,
         ];
     }
