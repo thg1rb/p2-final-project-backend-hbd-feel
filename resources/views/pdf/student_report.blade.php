@@ -123,6 +123,7 @@
                     <th>ชื่อ-นามสกุล</th>
                     <th>คณะ</th>
                     <th>ภาควิชา</th>
+                    <th>ปีการศึกษา</th>
                 </tr>
             </thead>
             <tbody>
@@ -133,6 +134,7 @@
                         <td>{{ $app->user->firstName }} {{ $app->user->lastName }}</td>
                         <td>{{ $app->user->faculty->name }}</td>
                         <td>{{ $app->user->department->name }}</td>
+                        <td>{{ $app->year }}</td>
                     </tr>
                 @endforeach
             </tbody>

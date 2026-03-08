@@ -3,12 +3,14 @@
 namespace App\Http\Controllers;
 
 use App\Enums\AwardType;
+use App\Enums\Status;
 use App\Models\Application;
 use App\Models\Approval;
 use App\Models\Award;
 use App\Models\Event;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Log;
 
@@ -83,13 +85,18 @@ class AwardReportController extends Controller
             ->groupBy('name')
             ->map(fn($group) => $group->sum('applications_count'));
 
+        $event = Event::where('status', Status::OPENED)
+            ->where('campus', Auth::user()->campus)
+            ->first();
+
         return view("report.index", [
             'applications' => $applications,
             'allYears' => $allYears,
             'allSemesters' => $allSemesters,
             'targetSemester' => $targetSemester,
             'targetYear' => $targetYear,
-            'awardStats' => $awardStats
+            'awardStats' => $awardStats,
+            'event' => $event,
         ]);
     }
 
@@ -136,9 +143,13 @@ class AwardReportController extends Controller
             ->orderBy('created_at', 'asc')
             ->get();
 
+        $event = Event::where('status', Status::OPENED)
+            ->where('campus', Auth::user()->campus)
+            ->first();
+
         $headDeptApproval = $approvals->firstWhere('user.role', 'DEPT_HEAD');
 
-        return view('report.show', compact('application', 'approvals', 'headDeptApproval'));
+        return view('report.show', compact('application', 'approvals', 'headDeptApproval', 'event'));
     }
 
     public function edit($id)
