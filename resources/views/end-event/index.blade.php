@@ -13,8 +13,8 @@
                 </div>
 
                 {{-- ส่วนที่ 1: เช็คว่าไม่มีงานค้าง (In Progress) --}}
-                @if ($stats['totalInprogress'] !== 0 && !$hasParams)
-                    <div class="flex flex-col gap-10">
+                @if ($stats['totalInprogress'] !== 0 || !$event)
+                    <div class="flex flex-col gap-10 border-border border-2 rounded-xl">
                         <div class="flex items-center gap-5 rounded-2xl bg-gray-100 p-8">
                             <div class="rounded-2xl bg-gray-200 p-5 text-gray-600">
                                 <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -30,10 +30,7 @@
                             </div>
                         </div>
                     </div>
-                @endif
-
-                {{-- ส่วนที่ 2: แสดงตารางและปุ่มอัปโหลดเมื่อมีข้อมูล --}}
-                @if ($applications->count() > 0 || $hasParams)
+                @else
                     <div class="flex flex-col gap-7">
 
                         @if ($applications->count() > 0)
@@ -74,6 +71,10 @@
                                     </div>
                                 </div>
                             </div>
+                        @endif
+
+                        {{-- ส่วนที่ 2: แสดงตารางและปุ่มอัปโหลดเมื่อมีข้อมูล --}}
+                        @if ($applications->count() > 0 || $hasParams)
                         @endif {{-- ปิด @if ($applications->count() > 0) --}}
 
                         {{-- <div class="bg-white rounded-xl shadow overflow-hidden">
@@ -99,10 +100,6 @@
                         </div> --}}
 
                     </div> {{-- ปิด div ของส่วนที่ 2 --}}
-                @else
-                    <div class="text-center p-20 bg-white rounded-xl shadow">
-                        <p class="text-gray-400">ยังไม่มีรายชื่อนิสิตที่รอพิจารณา</p>
-                    </div>
                 @endif {{-- ปิด @if ($applications->count() > 0 || $hasParams) --}}
 
             </div>

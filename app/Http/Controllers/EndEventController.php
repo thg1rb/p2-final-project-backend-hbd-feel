@@ -31,7 +31,15 @@ class EndEventController extends Controller
         $applications = $query->paginate(10);
 
         // ดึง Stats (totalInprogress)
-        $totalInprogress = Application::where('status', 'PENDING')->count();
+        $totalInprogress = Application::where('status', '!=', 'REJECTED')
+            ->where('level', '!=', 6)
+            ->count();
+
+        $event = Event::where('status', Status::OPENED)
+            ->where('campus', Auth::user()->campus)
+            ->first();
+        Log::info($event);
+
         $total = Application::count();
 
         return view('end-event.index', [
@@ -41,7 +49,8 @@ class EndEventController extends Controller
                 'totalInprogress' => $totalInprogress
             ],
             // 'user' => Auth::user(),
-            'hasParams' => $request->hasAny(['search', 'status'])
+            'hasParams' => $request->hasAny(['search', 'status']),
+            'event' => $event
         ]);
     }
 
