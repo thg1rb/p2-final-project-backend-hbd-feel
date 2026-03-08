@@ -6,7 +6,6 @@
 
         const fileInfo = document.getElementById("file-info");
         const fileLink = document.getElementById("file-link");
-        const removeBtn = document.getElementById("remove-file");
 
 
         input.addEventListener("change", function(event) {
@@ -39,25 +38,68 @@
             fileInfo.classList.remove("hidden");
         });
 
-        removeBtn.addEventListener("click", function () {
+        const container = document.getElementById("dynamic-fields");
+        const addBtn = document.getElementById("add-field");
 
-            // clear input
-            input.value = "";
+        let index = {{ isset($award) && $award->extra_fields ? count($award->extra_fields) : 1 }};
 
-            // remove preview
-            preview.src = "";
-            preview.classList.add("hidden");
-            previewContainer.classList.add("hidden");
+        function createField() {
 
-            // hide file info
-            fileInfo.classList.add("hidden");
+            const id = `req_${String(index).padStart(3, '0')}`;
 
-            // revoke memory
-            if (currentObjectURL) {
-                URL.revokeObjectURL(currentObjectURL);
-                currentObjectURL = null;
+            const wrapper = document.createElement("div");
+            wrapper.className = `
+                field-row
+                flex flex-col gap-2
+                p-4 rounded-lg border
+                bg-gray-50
+            `;
+
+        wrapper.innerHTML = `
+        <input type="hidden" name="requirements[${index}][id]" value="${id}">
+
+        <input
+            type="text"
+            name="requirements[${index}][name]"
+            placeholder="เช่น Transcript หรือ สำเนาบัตรนิสิต"
+            class="w-full rounded-md border-gray-300 shadow-sm text-sm
+                   focus:ring-emerald-500 focus:border-emerald-500"
+        >
+
+        <div class="flex items-center justify-between">
+
+            <label class="flex items-center gap-2 text-sm text-gray-600">
+                <input type="hidden" name="requirements[${index}][required]" value="0">
+
+                <input
+                    type="checkbox"
+                    name="requirements[${index}][required]"
+                    value="1"
+                    class="rounded border-gray-300 text-emerald-600 focus:ring-emerald-500"
+                >
+
+                จำเป็นต้องอัปโหลด
+            </label>
+
+            <button
+                type="button"
+                class="remove-field text-sm text-red-500 hover:text-red-700">
+                ลบ
+            </button>
+
+        </div>
+    `;
+
+            container.appendChild(wrapper);
+            index++;
+        }
+
+        addBtn.addEventListener("click", createField);
+
+        container.addEventListener("click", (e) => {
+            if (e.target.classList.contains("remove-field")) {
+                e.target.closest(".field-row").remove();
             }
-
         });
     });
 
@@ -102,7 +144,7 @@
 {{--                </div>--}}
                 <div class="flex flex-col w-full">
                     <p class="block text-sm font-medium text-gray-700 mb-2">
-                        อัปโหลดไฟล์สมัคร <span class="text-red-500">*</span>
+                        อัปโหลดไฟล์ใบสมัคร <span class="text-red-500">*</span>
                     </p>
                     <label for="application_document" class="flex flex-col items-center justify-center gap-2 w-full h-48 cursor-pointer rounded-xl border-2 border-dashed border-gray-300 bg-gray-50 text-gray-600 p-4 hover:border-emerald-500 hover:bg-emerald-50 transition">
                         <p class="text-sm font-medium">คลิกเพื่ออัปโหลดไฟล์</p>
@@ -121,16 +163,29 @@
                            class="text-emerald-700 font-medium underline hover:text-emerald-900">
                         </a>
 
-                        <button type="button"
-                                id="remove-file"
-                                class="text-red-500 hover:text-red-700 text-xs">
-                            ลบไฟล์
-                        </button>
                     </div>
 
                     <div class="w-full h-[500px] border rounded-xl overflow-hidden shadow-sm bg-gray-100">
                         <iframe id="preview" class="w-full h-full"></iframe>
                     </div>
+                </div>
+                <div class="w-full flex flex-col gap-4">
+                    <label class="text-sm font-medium text-gray-700">
+                        เอกสารเพิ่มเติม
+                    </label>
+
+                    <div id="dynamic-fields" class="flex flex-col gap-3"></div>
+
+                    <button
+                        type="button"
+                        id="add-field"
+                        class="flex items-center gap-2 w-fit px-2 py-1 text-sm font-medium
+               bg-emerald-50 text-emerald-700 rounded-lg
+               hover:bg-emerald-100 transition">
+
+                        <span class="text-lg">＋</span>
+                        เพิ่มช่องเอกสารเพิ่มเติม
+                    </button>
                 </div>
                 <button
                     class="py-2 px-5 rounded text-center text-white bg-[#226e64] hover:scale-105 cursor-pointer transition-all"
