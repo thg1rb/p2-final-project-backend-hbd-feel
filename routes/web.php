@@ -10,6 +10,7 @@ use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Auth\SocialAuthController;
 use App\Http\Controllers\AwardRegistrationController;
+use App\Http\Controllers\EndEventController;
 use App\Http\Controllers\MinioController;
 
 Route::get('/', [MainDashboardController::class, 'index'])->middleware(['auth', 'verified'])->name('main');
@@ -79,5 +80,9 @@ Route::get('/report/edit/{id}', [AwardReportController::class, 'edit'])->name('r
 Route::put('report/{application}', [AwardReportController::class, 'update'])->name('report.update');
 
 Route::get('/file-preview', [MinioController::class, 'getFile'])->name('file.preview');
+
+Route::get('/end-event/sign', [EndEventController::class, 'index'])->name('end-event.index');
+Route::post('/end-event/upload-event', [EndEventController::class, 'uploadEvent'])->name('end-event.upload');
+Route::get('/end-event/export-pdf', [EndEventController::class, 'exportPdf'])->name('end-event.pdf');
 
 require __DIR__ . '/auth.php';

@@ -2,6 +2,7 @@
 
 namespace Database\Factories;
 
+use App\Enums\CampusType;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
@@ -32,6 +33,7 @@ class AwardFactory extends Factory
             'name' => $this->faker->words(3, true),
             'form_path' => "form_1.pdf",
             'requirements' => $requirements,
+            'campus' => $this->faker->randomElement(CampusType::cases())->value,
         ];
     }
 }
