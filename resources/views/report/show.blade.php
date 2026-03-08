@@ -47,6 +47,8 @@
 
             <div class="flex-1 flex flex-col gap-6">
                 <x-progression :application="$application" :approvals="$approvals" :event="$event" />
+                @if ($application->level->value === RoleLevel::DEAN)
+                {{-- TODO: ApproveSection --}}
             </div>
         </div>
     </div>

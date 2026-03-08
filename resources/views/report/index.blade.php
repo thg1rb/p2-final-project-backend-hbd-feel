@@ -1,4 +1,8 @@
 {{-- @var \App\Models\Application $application --}}
+<?php 
+use App\Enums\RoleLevel; 
+use App\Enums\Status;
+?>
 <x-app-layout>
     <div class="p-10">
         <a class="flex gap-2 mb-10" href="{{ route('main') }}">
@@ -100,22 +104,23 @@
 
                                         <td class="p-4">
                                             @if ($application->status->value === \App\Enums\ApplicationStatus::REJECTED->value)
-                                                {{-- 1. ถ้าถูกปฏิเสธ ไม่ว่าจะเลเวลไหน ให้จบที่นี่ --}}
                                                 <div
                                                     class="rounded-full border border-red-400 bg-red-100 px-3 py-1 text-red-500 text-sm w-fit">
                                                     ปฏิเสธ
                                                 </div>
                                             @elseif (
                                                 $application->status->value === \App\Enums\ApplicationStatus::APPROVED->value &&
-                                                    $application->level->value === 5 &&
-                                                    !$event)
-                                                {{-- 2. ถ้าอนุมัติเรียบร้อย (ถึงเลเวล 5 แล้ว) --}}
+                                                    $application->level->value >= 4)
+                                                <div
+                                                    class="rounded-full border border-orange-400 bg-orange-50 px-3 py-1 text-orange-500 text-sm w-fit">
+                                                    กำลังดำเนินการ
+                                                </div>
+                                            @elseif ($application->level->value === RoleLevel::BOARD && $event->status === Status::CLOSED)
                                                 <div
                                                     class="rounded-full border border-primary bg-green-50 px-3 py-1 text-primary text-sm w-fit">
                                                     อนุมัติ
                                                 </div>
                                             @else
-                                                {{-- 3. กรณีอื่นๆ (ยังไม่ถูก Reject และยังไม่ถึงขั้นอนุมัติสุดท้าย) --}}
                                                 <div
                                                     class="rounded-full border border-amber-400 bg-amber-100 px-3 py-1 text-amber-500 text-sm w-fit">
                                                     รอพิจารณา
