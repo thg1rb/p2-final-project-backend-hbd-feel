@@ -1,6 +1,7 @@
 {{-- @var \App\Models\Application $application --}}
-<?php 
-use App\Enums\RoleLevel; 
+<?php
+use App\Enums\ApprovalStatus;
+use App\Enums\RoleLevel;
 use App\Enums\Status;
 ?>
 <x-app-layout>
@@ -103,14 +104,14 @@ use App\Enums\Status;
                                         </td>
 
                                         <td class="p-4">
-                                            @if ($application->status->value === \App\Enums\ApplicationStatus::REJECTED->value)
+                                            @if ($application->status->value === ApprovalStatus::REJECTED->value)
                                                 <div
                                                     class="rounded-full border border-red-400 bg-red-100 px-3 py-1 text-red-500 text-sm w-fit">
                                                     ปฏิเสธ
                                                 </div>
                                             @elseif (
-                                                $application->status->value === \App\Enums\ApplicationStatus::APPROVED->value &&
-                                                    $application->level->value >= 4)
+                                                $application->status->value === ApprovalStatus::APPROVED->value &&
+                                                    $application->level->value >= RoleLevel::NISIT_DEV->value)
                                                 <div
                                                     class="rounded-full border border-orange-400 bg-orange-50 px-3 py-1 text-orange-500 text-sm w-fit">
                                                     กำลังดำเนินการ
