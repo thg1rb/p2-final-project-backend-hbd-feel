@@ -42,6 +42,7 @@ class ApplicationController extends Controller
         ])
             ->visibleFor($user)
             ->whereEventStatus(Status::OPENED->value, $user)
+            ->whereCampus($user->campus)
             ->search($request->input('search'))
             ->when(
                 $request->filled('status'),
@@ -71,6 +72,7 @@ class ApplicationController extends Controller
         ])
             ->visibleFor($user)
             ->whereEventStatus(Status::OPENED->value, $user)
+            ->whereCampus($user->campus)
             ->search($request->input('search'))
             ->when(
                 $request->filled('status'),
@@ -99,7 +101,7 @@ class ApplicationController extends Controller
         $user = $request->user();
         $level = $user->role->level()->value;
 
-        $baseQuery = Application::visibleFor($user)->whereEventStatus(Status::OPENED->value, $user);
+        $baseQuery = Application::visibleFor($user)->whereEventStatus(Status::OPENED->value, $user)->whereCampus($user->campus);
 
         return response()->json([
             'pending' => (clone $baseQuery)->filterByStatus('PENDING', $level)->count(),
@@ -114,11 +116,13 @@ class ApplicationController extends Controller
 
         $totalInprogressRemaining = Application::visibleFor($user)
             ->whereEventStatus(Status::OPENED->value, $user)
+            ->whereCampus($user->campus)
             ->where('applications.level', '<', 6)
             ->count();
 
         $totalRemaining = Application::visibleFor($user)
             ->whereEventStatus(Status::OPENED->value, $user)
+            ->whereCampus($user->campus)
             ->count();
 
         Log::info($totalRemaining);

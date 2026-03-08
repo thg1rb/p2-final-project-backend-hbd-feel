@@ -42,6 +42,11 @@ class Application extends Model
         return $query->whereHas('event', fn($q) => $q->where('status', $status));
     }
 
+    public function scopeWhereCampus($query, string $campus)
+    {
+        return $query->whereHas('event', fn($q) => $q->where('campus', $campus));
+    }
+
     public function scopeRoleLevelFilter($query, RoleLevel $roleLevel)
     {
         return $query->where(function ($q) use ($roleLevel) {
