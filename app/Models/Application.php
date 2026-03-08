@@ -82,8 +82,6 @@ class Application extends Model
 
             UserRole::BOARD => $query->roleLevelFilter(RoleLevel::NISIT_DEV),
 
-            UserRole::CHANCELLOR => $query->where('status', '!=', 'REJECTED'),
-
             default => $query,
         };
     }
