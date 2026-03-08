@@ -61,7 +61,7 @@
                         class="mt-1 block w-full rounded-md border-gray-300 shadow-sm sm:text-sm"
                     >
                         @foreach($roles as $r)
-                            @if($r->value != 'ADMIN') @endif
+                            @if($r->value != 'NISIT_DEV') @endif
                             <option value="{{$r->value}}">{{$r::label($r)}}</option>
                         @endforeach
                     </select>

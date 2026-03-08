@@ -64,7 +64,7 @@ class UserController extends Controller
             'email' => ['required', 'string', 'email', 'max:255', 'unique:users'],
             'username' => ['required', 'string', 'max:255', 'unique:users'],
             'password' => ['required', 'string', 'min:8'],
-            'role' => [Rule::notIn([UserRole::ADMIN->value])],
+            'role' => [Rule::notIn([UserRole::NISIT_DEV->value])],
         ], [
             'firstName.required' => 'กรอกชื่อจริง',
             'lastName.required' => 'กรอกนามสกุล',

@@ -38,6 +38,7 @@ class AuthenticateController extends Controller
 
     private function userData($user) {
         return [
+            'id' => $user->id,
             'name' => $user->firstName . " " . $user->lastName,
             'firstName' => $user->firstName,
             'lastName' => $user->lastName,

@@ -31,8 +31,8 @@
             <div class="hidden sm:flex sm:items-center sm:ms-6">
                 <div class="flex gap-3 justify-center items-center">
                     <p class="bg-[#2e3336] p-3 rounded-full text-white text-sm">
-                        @if (Auth::check() && Auth::user()->role === App\Enums\UserRole::ADMIN)
-                            ผู้ดูแลระบบ
+                        @if (Auth::check() && Auth::user()->role === App\Enums\UserRole::NISIT_DEV)
+                            กองพัฒนานิสิต
                         @endif
                     </p>
                     <p class="">{{ Auth::user()?->username }}</p>
