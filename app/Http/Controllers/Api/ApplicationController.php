@@ -18,6 +18,7 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use JsonException;
 use App\Models\User;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 
 class ApplicationController extends Controller
@@ -120,6 +121,8 @@ class ApplicationController extends Controller
             ->whereEventStatus(Status::OPENED->value, $user)
             ->count();
 
+        Log::info($totalRemaining);
+
         return response()->json([
             'total' => $totalRemaining,
             'totalInprogress' => $totalInprogressRemaining
@@ -143,7 +146,9 @@ class ApplicationController extends Controller
     {
         return DB::transaction(function () use ($request) {
 
-            $event = Event::where('status', Status::OPENED)->first();
+            $event = Event::where('status', Status::OPENED)
+                ->where('campus', Auth::user()->campus)
+                ->first();
 
             if (!$event) {
                 return response()->json([
@@ -151,7 +156,7 @@ class ApplicationController extends Controller
                 ], 400);
             }
 
-            $studentId = auth()->user()->student_id;
+            $studentId = Auth::user()->student_id;
             $alreadyApplied = Application::where('student_id', $studentId)
                 ->where('event_id', $event->id)
                 ->exists();

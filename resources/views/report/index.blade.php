@@ -48,9 +48,10 @@
                             <select name="type" id=""
                                 class="border border-gray-300  rounded-xl w-full cursor-pointer focus:outline-primary focus:border-gray-300 focus:ring-offset-0 focus:ring-0 flex-1">
                                 <option value="">ทั้งหมด</option>
-                                <option value="Extracurricular Activities">ด้านกิจกรรมเสริมหลักสูตร</option>
-                                <option value="Creativity & Innovation">ด้านความคิดสร้างสรรค์และนวัตกรรม</option>
-                                <option value="Good Conduct">ด้านความประพฤติดี</option>
+                                <option value="ด้านกิจกรรมเสริมหลักสูตร">ด้านกิจกรรมเสริมหลักสูตร</option>
+                                <option value="ด้านความคิดสร้างสรรค์และนวัตกรรม">ด้านความคิดสร้างสรรค์และนวัตกรรม
+                                </option>
+                                <option value="ด้านความประพฤติดี">ด้านความประพฤติดี</option>
                             </select>
                         </div>
                         <button type="submit"
@@ -162,7 +163,7 @@
                     </div>
                 </div>
             </div>
-            <div class="bg-white p-8 border rounded-xl flex flex-col gap-8">
+            {{-- <div class="bg-white p-8 border rounded-xl flex flex-col gap-8">
                 <p>สรุปสถิติรางวัล
                     @if ($targetYear && $targetSemester)
                         ภาคการศึกษา {{ $targetYear }}/{{ $targetSemester }}
@@ -199,6 +200,6 @@
                     </div>
                 </div>
             </div>
+            </div> --}}
         </div>
-    </div>
 </x-app-layout>

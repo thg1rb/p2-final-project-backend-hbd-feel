@@ -13,6 +13,8 @@
     ];
     $hasRejected = false;
 
+    Log::info($approvals->toArray());
+
 @endphp
 
 <div class="flex flex-col gap-6 rounded-xl border border-gray-300 bg-white p-5 shadow-sm">

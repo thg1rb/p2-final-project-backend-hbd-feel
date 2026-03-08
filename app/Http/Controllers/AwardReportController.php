@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Enums\AwardType;
 use App\Models\Application;
 use App\Models\Approval;
 use App\Models\Award;
@@ -32,6 +33,8 @@ class AwardReportController extends Controller
             });
         }
 
+        Log::info("AWARD TYPE: " . $awardType);
+
         if ($awardType != "") {
             $query->whereHas('award', function ($q) use ($awardType) {
                 $q->where('name', $awardType);
@@ -55,7 +58,7 @@ class AwardReportController extends Controller
             return $this->exportCsv($query->get());
         }
 
-        $applications = $query->paginate(5)->appends($request->all());
+        $applications = $query->paginate(10)->appends($request->all());
 
         $allYears = Event::distinct()->orderBy('academic_year', 'desc')->pluck('academic_year');
         $allSemesters = Event::distinct()->orderBy('semester', 'asc')->pluck('semester');
