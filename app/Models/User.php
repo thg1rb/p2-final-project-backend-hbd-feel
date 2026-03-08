@@ -61,12 +61,12 @@ class User extends Authenticatable
 
     public function isAdmin(): bool
     {
-        return $this->role == UserRole::ADMIN;
+        return $this->role == UserRole::NISIT_DEV;
     }
 
     public function isUser(): bool
     {
-        return $this->role != UserRole::ADMIN;
+        return $this->role != UserRole::NISIT_DEV;
     }
 
     public function getRedirectRoute(): string

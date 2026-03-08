@@ -28,7 +28,7 @@ class SocialAuthController extends Controller
 
         $from = session('oauth_from', '');
 
-        if ((!$user && $from != "svelte") || $user && $user->role != UserRole::ADMIN && $from != "svelte") {
+        if ((!$user && $from != "svelte") || $user && $user->role != UserRole::NISIT_DEV && $from != "svelte") {
             return view('auth.register-disabled');
         } else if (!$user && $from == "svelte") {
             return redirect("http://localhost:3000/oauth");

@@ -19,7 +19,7 @@ class EventUserSeeder extends Seeder
         $events = Event::all();
 
         foreach ($users as $user) {
-            if ($user->role === "ADMIN") {
+            if ($user->role === "NISIT_DEV") {
                 continue;
             }
 
