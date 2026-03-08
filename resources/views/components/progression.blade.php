@@ -8,7 +8,7 @@
         'DEAN' => 'คณบดี',
         'NISIT_DEV' => 'หน่วยพัฒนานิสิต',
         'BOARD' => 'คณะกรรมการ',
-        'CHANCELLOR' => 'อธิการบดี',
+        'CHANCELLOR' => 'อธิการบดี'
     ];
     $hasRejected = false;
 
