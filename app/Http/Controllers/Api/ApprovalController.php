@@ -66,7 +66,7 @@ class ApprovalController extends Controller
             abort(403, 'User has already approved this application');
         }
 
-        $nextStatus = $this->getNextStatus($application->level, $user->role, $request->status, $application->id, true);
+        $nextStatus = $this->getNextStatus($application->level, $user->role, $request->status);
         $application->update($nextStatus);
 
         Approval::create($request->validated());
@@ -97,14 +97,9 @@ class ApprovalController extends Controller
             ->exists();
     }
 
-    private function getNextStatus(RoleLevel $currentLevel, UserRole $userRole, string $approvalStatusValue, string $applicationId, bool $includeCurrentVote = false): array
+    private function getNextStatus(RoleLevel $currentLevel, UserRole $userRole, string $approvalStatusValue): array
     {
         $approvalStatus = ApprovalStatus::from($approvalStatusValue);
-
-        if ($userRole === UserRole::BOARD && $currentLevel === RoleLevel::NISIT_DEV) {
-            return $this->calculateBoardStatus($currentLevel, $applicationId, $approvalStatus, $includeCurrentVote);
-        }
-
         $nextLevel = RoleLevel::from($currentLevel->value + 1);
 
         if ($approvalStatus === ApprovalStatus::REJECTED) {
@@ -116,62 +111,6 @@ class ApprovalController extends Controller
 
         return [
             'level' => $nextLevel,
-            'status' => ApprovalStatus::APPROVED,
-        ];
-    }
-
-    private function calculateBoardStatus(RoleLevel $currentLevel, string $applicationId, ApprovalStatus $currentVoteStatus, bool $includeCurrentVote): array
-    {
-        $totalBoardUsers = User::where('role', UserRole::BOARD)->count();
-
-        if ($totalBoardUsers === 0) {
-            return [
-                'level' => $currentLevel,
-                'status' => ApprovalStatus::APPROVED,
-            ];
-        }
-
-        $boardApprovals = Approval::where('application_id', $applicationId)
-            ->whereHas('user', function ($query) {
-                $query->where('role', UserRole::BOARD);
-            })->get();
-
-        $approvedCount = $boardApprovals->where('status', 'APPROVED')->count();
-        $rejectedCount = $boardApprovals->where('status', 'REJECTED')->count();
-
-        if ($includeCurrentVote) {
-            if ($currentVoteStatus === ApprovalStatus::APPROVED) {
-                $approvedCount++;
-            } else {
-                $rejectedCount++;
-            }
-        }
-
-        $threshold = $totalBoardUsers / 2;
-
-        if ($approvedCount > $threshold) {
-            return [
-                'level' => RoleLevel::BOARD,
-                'status' => ApprovalStatus::APPROVED,
-            ];
-        }
-
-        if ($rejectedCount > $threshold) {
-            return [
-                'level' => RoleLevel::NISIT_DEV,
-                'status' => ApprovalStatus::REJECTED,
-            ];
-        }
-
-        if ($approvedCount === $rejectedCount && ($approvedCount > 0 || $rejectedCount > 0)) {
-            return [
-                'level' => RoleLevel::NISIT_DEV,
-                'status' => ApprovalStatus::REJECTED,
-            ];
-        }
-
-        return [
-            'level' => $currentLevel,
             'status' => ApprovalStatus::APPROVED,
         ];
     }

@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\ApplicationController;
+use App\Http\Controllers\ApprovalController;
 use App\Http\Controllers\AwardController;
 use App\Http\Controllers\AwardReportController;
 use App\Http\Controllers\EventController;
@@ -84,5 +85,9 @@ Route::get('/file-preview', [MinioController::class, 'getFile'])->name('file.pre
 Route::get('/end-event/sign', [EndEventController::class, 'index'])->name('end-event.index');
 Route::post('/end-event/upload-event', [EndEventController::class, 'uploadEvent'])->name('end-event.upload');
 Route::get('/end-event/export-pdf', [EndEventController::class, 'exportPdf'])->name('end-event.pdf');
+
+Route::middleware('auth')->group(function () {
+    Route::post('/approvals', [ApprovalController::class, 'store'])->name('approvals.store');
+});
 
 require __DIR__ . '/auth.php';
