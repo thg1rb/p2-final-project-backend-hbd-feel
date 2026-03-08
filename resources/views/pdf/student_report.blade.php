@@ -103,7 +103,7 @@
     <div class="signature">
         ประกาศ ณ วันที่ {{ $today->format('j') }} {{ $today->locale('th')->monthName }} พ.ศ.
         {{ $today->year + 543 }}<br><br><br>
-        ({{ $userName }})<br>
+        ({{ $signerName }})<br>
         อธิการบดีมหาวิทยาลัยเกษตรศาสตร์
     </div>
 
