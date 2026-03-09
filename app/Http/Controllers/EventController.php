@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Requests\EventRequest;
 use App\Models\Event;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Redirect;
 
@@ -17,6 +18,9 @@ class EventController extends Controller
     {
         Gate::authorize('view-any', Event::class);
         $query = Event::query();
+
+        // Campus Filter - users only see events from their own campus
+        $query->where('campus', Auth::user()->campus);
 
         // Search (Input) Filter
         if ($request->filled('search')) {

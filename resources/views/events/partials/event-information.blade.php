@@ -97,6 +97,9 @@
                 @error('status') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
             </div>
 
+            <input type="hidden" name="campus" value="{{ old('campus', auth()->user()->campus) }}">
+            @error('campus') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
+
             <div class="flex flex-col">
                 <label for="academic_year">ปีการศึกษา <span class="text-red-500">*</span></label>
                 <select
