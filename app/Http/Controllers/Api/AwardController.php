@@ -13,8 +13,12 @@ class AwardController extends Controller
      */
     public function index()
     {
-        //
-        return response()->json(Award::all(['id', 'name','form_path','requirements']));
+        $user = auth()->user();
+
+        $awards = Award::where('campus', $user->campus)
+            ->get(['id', 'name', 'form_path', 'requirements']);
+
+        return response()->json($awards);
     }
 
     /**

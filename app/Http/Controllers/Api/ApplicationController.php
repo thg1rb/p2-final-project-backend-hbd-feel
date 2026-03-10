@@ -161,6 +161,7 @@ class ApplicationController extends Controller
             }
 
             $studentId = Auth::user()->student_id;
+
             $alreadyApplied = Application::where('student_id', $studentId)
                 ->where('event_id', $event->id)
                 ->exists();
@@ -173,11 +174,11 @@ class ApplicationController extends Controller
             }
 
             $award = Award::findOrFail($request->award_id);
+
             $requirements = $award->requirements ?? [];
 
             $rules = [
                 'award_id' => ['required', 'exists:awards,id'],
-                //                'event_id' => ['required', 'exists:events,id'],
                 'year'     => ['required', 'integer'],
                 'grade'    => ['required', 'numeric'],
                 'path'     => ['required', 'file', 'mimes:pdf,jpg,png', 'max:10240'],
@@ -187,30 +188,42 @@ class ApplicationController extends Controller
             foreach ($requirements as $req) {
                 $key = $req['id'];
                 $rules["documents.$key"] = $req['required']
-                    ? ['required', 'file', 'mimes:pdf,jpg,png', 'max:5120']
-                    : ['nullable', 'file', 'mimes:pdf,jpg,png', 'max:5120'];
+                    ? ['required', 'file', 'mimes:pdf,jpg,png', 'max:10240']
+                    : ['nullable', 'file', 'mimes:pdf,jpg,png', 'max:10240'];
             }
 
             $validated = $request->validate($rules);
 
             $applicationFile = $request->file('path');
+
             $appFileName = Str::uuid() . '.' . $applicationFile->getClientOriginalExtension();
-            $mainPath = Storage::disk('s3')->putFileAs('applications', $applicationFile, $appFileName);
+
+            $mainPath = Storage::disk('s3')->putFileAs(
+                'applications',
+                $applicationFile,
+                $appFileName
+            );
 
             if (!$mainPath) {
-                return response()->json(['error' => 'Could not upload main file.'], 500);
+                return response()->json([
+                    'error' => 'Could not upload main file.'
+                ], 500);
             }
 
             $storedDocuments = [];
+
             foreach ($requirements as $req) {
+
                 $key = $req['id'];
 
                 if ($request->hasFile("documents.$key")) {
+
                     $file = $request->file("documents.$key");
+
                     $fileName = Str::uuid() . '.' . $file->getClientOriginalExtension();
 
                     $storedPath = Storage::disk('s3')->putFileAs(
-                        "documents",
+                        'documents',
                         $file,
                         $fileName
                     );

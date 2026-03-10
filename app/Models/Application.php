@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\ApplicationStatus;
 use App\Enums\ApprovalStatus;
 use App\Enums\RoleLevel;
 use App\Enums\UserRole;
@@ -30,7 +31,7 @@ class Application extends Model
     protected $casts = [
         'documents' => 'array',
         'level' => RoleLevel::class,
-        'status' => ApprovalStatus::class,
+        'status' => ApplicationStatus::class,
     ];
 
     public function scopeWhereEventStatus($query, string $status, ?User $user = null)
