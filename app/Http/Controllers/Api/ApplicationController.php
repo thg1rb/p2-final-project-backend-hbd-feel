@@ -93,9 +93,9 @@ class ApplicationController extends Controller
 
     public function getApplicationById($id)
     {
-        $applications = Application::with(['user', 'event', 'award', 'user.faculty', 'user.department'])->findOrFail($id);
+        $application = Application::with(['user', 'event', 'award', 'user.faculty', 'user.department'])->findOrFail($id);
 
-        return response()->json($applications);
+        return response()->json($application);
     }
 
     public function getApplicationCountByStatus(Request $request): JsonResponse
@@ -314,4 +314,175 @@ class ApplicationController extends Controller
             'categories' => $categories
         ]);
     }
+
+    public function update(Request $request, $id): JsonResponse
+    {
+        return DB::transaction(function () use ($request, $id) {
+            $user = $request->user();
+
+            if (!$user) {
+                return response()->json(['message' => 'Unauthenticated'], 401);
+            }
+
+            $application = Application::with('event')->findOrFail($id);
+
+            // Check if user is authorized (owns the application or is admin)
+            $isOwner = $application->student_id === $user->student_id;
+            $isAdmin = $user->role === UserRole::ADMIN;
+
+            if (!$isOwner && !$isAdmin) {
+                return response()->json(['message' => 'Unauthorized'], 403);
+            }
+
+            // Check if application can be edited (not fully approved)
+            if ($application->status === ApplicationStatus::APPROVED && $application->level >= 6) {
+                return response()->json(['message' => 'Cannot edit approved application'], 400);
+            }
+
+            // Check if current date is within event date range
+            $now = now();
+            if (!$application->event
+                || !$application->event->start_date
+                || !$application->event->end_date
+                || $now->lt($application->event->start_date)
+                || $now->gt($application->event->end_date)
+            ) {
+                return response()->json(['message' => 'Cannot edit application outside event date range'], 400);
+            }
+
+            $award = Award::findOrFail($application->award_id);
+            $requirements = $award->requirements ?? [];
+
+            $rules = [
+                'year'     => ['required', 'integer'],
+                'grade'    => ['required', 'numeric'],
+                'path'     => ['nullable', 'file', 'mimes:pdf,jpg,png', 'max:10240'],
+                'documents' => ['nullable', 'array'],
+            ];
+
+            foreach ($requirements as $req) {
+                $key = $req['id'];
+                $rules["documents.$key"] = ['nullable', 'file', 'mimes:pdf,jpg,png', 'max:5120'];
+            }
+
+            $validated = $request->validate($rules);
+
+            // Update year and grade
+            $application->year = $validated['year'];
+            $application->grade = $validated['grade'];
+
+            // Handle main file upload
+            if ($request->hasFile('path')) {
+                $applicationFile = $request->file('path');
+                $appFileName = Str::uuid() . '.' . $applicationFile->getClientOriginalExtension();
+
+                // Delete old file if exists
+                if ($application->path) {
+                    Storage::disk('s3')->delete($application->path);
+                }
+
+                $mainPath = Storage::disk('s3')->putFileAs('applications', $applicationFile, $appFileName);
+
+                if (!$mainPath) {
+                    return response()->json(['error' => 'Could not upload main file.'], 500);
+                }
+
+                $application->path = $mainPath;
+            }
+
+            // Handle requirement documents
+            $storedDocuments = $application->documents ?? [];
+
+            foreach ($requirements as $req) {
+                $key = $req['id'];
+
+                if ($request->hasFile("documents.$key")) {
+                    $file = $request->file("documents.$key");
+                    $fileName = Str::uuid() . '.' . $file->getClientOriginalExtension();
+
+                    // Delete old file if exists
+                    if (isset($storedDocuments[$key]['file_path'])) {
+                        Storage::disk('s3')->delete($storedDocuments[$key]['file_path']);
+                    }
+
+                    $storedPath = Storage::disk('s3')->putFileAs(
+                        "documents",
+                        $file,
+                        $fileName
+                    );
+
+                    $storedDocuments[$key] = [
+                        'file_path' => $storedPath,
+                    ];
+                }
+            }
+
+            $application->documents = $storedDocuments;
+            $application->save();
+
+            return response()->json([
+                'message' => 'Application updated successfully',
+                'data'    => $application->load(['user', 'event', 'award'])
+            ], 200);
+        });
+    }
+
+    public function destroy(Request $request, $id): JsonResponse
+{
+    try {
+        return DB::transaction(function () use ($id, $request) {
+            $user = $request->user();
+
+            if (!$user) {
+                return response()->json(['message' => 'Unauthenticated'], 401);
+            }
+
+            // ใช้ find ธรรมดาแทน findOrFail เพื่อคุม Error เองได้ง่ายขึ้น
+            $application = Application::find($id);
+            if (!$application) {
+                return response()->json(['message' => 'Application not found'], 404);
+            }
+
+            // ตรวจสอบสิทธิ์
+            $isOwner = $application->student_id === $user->student_id;
+            $isAdmin = $user->role === UserRole::ADMIN; // ระวัง: ถ้าไม่มี UserRole Class จะพังตรงนี้
+
+            if (!$isOwner && !$isAdmin) {
+                return response()->json(['message' => 'Unauthorized'], 403);
+            }
+
+            // ลบไฟล์หลัก
+            if ($application->path) {
+                Storage::disk('s3')->delete($application->path);
+            }
+
+            // ลบไฟล์แนบอื่นๆ
+            $documents = is_array($application->documents)
+                ? $application->documents
+                : json_decode($application->documents, true) ?? [];
+            
+            foreach ($documents as $doc) {
+                if (isset($doc['file_path'])) {
+                    Storage::disk('s3')->delete($doc['file_path']);
+                }
+            }
+
+            // ลบข้อมูลในฐานข้อมูล
+            $application->delete();
+
+            return response()->json([
+                'message' => 'Application deleted successfully'
+            ], 200);
+        });
+
+    } catch (\Exception $e) {
+        // ดัก Error ทุกอย่างแล้วพ่นออกมาดู จะได้รู้ว่าพังเพราะอะไร!
+        return response()->json([
+            'message' => 'Internal Server Error',
+            'error_detail' => $e->getMessage(),
+            'file' => $e->getFile(),
+            'line' => $e->getLine()
+        ], 500);
+    }
+}
 }
