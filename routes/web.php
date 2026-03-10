@@ -86,7 +86,7 @@ Route::get('/end-event/sign', [EndEventController::class, 'index'])->name('end-e
 Route::post('/end-event/upload-event', [EndEventController::class, 'uploadEvent'])->name('end-event.upload');
 Route::get('/end-event/export-pdf', [EndEventController::class, 'exportPdf'])->name('end-event.pdf');
 Route::get('/award-result', function () {
-    return redirect('http://localhost:3000/award-result');
+    return redirect(env('FRONTEND_URL') . '/award-result');
 })->name("award-result.index");
 
 Route::middleware('auth')->group(function () {
