@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Enums\ApplicationStatus;
+use App\Enums\ApprovalStatus;
 use App\Enums\Status;
 use App\Enums\UserRole;
 use App\Http\Controllers\Controller;
@@ -13,6 +14,7 @@ use App\Models\Event;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use App\Models\Award;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
@@ -250,5 +252,66 @@ class ApplicationController extends Controller
                 'data'    => $application->load(['user', 'event', 'award'])
             ], 201);
         });
+    }
+    public function getAwardWinnersByYear(Request $request)
+    {
+        $year = $request->query('year');
+        $semester = $request->query('semester');
+        $campus = $request->query('campus');
+
+        $event = Event::where('academic_year', $year)
+            ->where('semester', $semester)
+            ->where('campus', $campus)
+            ->where('status', Status::CLOSED)
+            ->first();
+
+        $pdfPath = $event?->path;
+
+        $applications = Application::with([
+            'award:id,name,campus',
+            'user:id,student_id,firstName,lastName,faculty_id',
+            'user.faculty:id,name',
+            'event:id,academic_year,semester,campus,status'
+        ])
+            ->whereHas('event', function ($q) use ($year, $semester, $campus) {
+                $q->where('academic_year', $year)
+                    ->where('semester', $semester)
+                    ->where('campus', $campus)
+                    ->where('status', Status::CLOSED);
+            })
+            ->get();
+
+        $categories = $applications
+            ->groupBy(fn($app) => $app->award->name)
+            ->map(function ($apps, $awardName) {
+                return [
+                    'name' => $awardName,
+                    'students' => $apps->map(fn($app) => [
+                        'name' => trim(($app->user?->firstName ?? '') . ' ' . ($app->user?->lastName ?? '')),
+                        'faculty' => $app->user?->faculty?->name ?? '-'
+                    ])
+                ];
+            })
+            ->values();
+
+        return response()->json([
+            'year' => $year,
+            'semester' => $semester,
+            'campus' => $campus,
+
+            'pdf_path' => $pdfPath,
+
+            'years' => Event::select('academic_year')
+                ->distinct()
+                ->orderByDesc('academic_year')
+                ->pluck('academic_year'),
+
+            'semesters' => Event::where('academic_year', $year)
+                ->select('semester')
+                ->distinct()
+                ->pluck('semester'),
+
+            'categories' => $categories
+        ]);
     }
 }
