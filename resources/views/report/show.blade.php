@@ -1,8 +1,6 @@
 @php
     use App\Enums\RoleLevel;
     use App\Enums\ApprovalStatus;
-
-    Log::info('LOG Application Data: ', $application->toArray());
 @endphp
 <x-app-layout>
     <div class="bg-gray-50 p-10 min-h-screen">

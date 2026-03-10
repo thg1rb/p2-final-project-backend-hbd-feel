@@ -18,7 +18,7 @@
             dateFormat: "Y-m-d", // Saves as AD (e.g., 2024-01-01)
             altInput: true,
             altFormat: "d F Y",
-            minDate: "today",
+            minDate: {{ $isCreate ? '"today"' : 'null' }},
 
             onReady: function(selectedDates, dateStr, instance) {
                 updateInputField(instance);
@@ -68,8 +68,18 @@
 
         // Initialize both date pickers
         document.addEventListener('DOMContentLoaded', function() {
-            flatpickr("#start_date", flatpickrConfig);
-            flatpickr("#end_date", flatpickrConfig);
+            const startInput = document.getElementById("start_date");
+            const endInput = document.getElementById("end_date");
+
+            flatpickr("#start_date", {
+                ...flatpickrConfig,
+                defaultDate: startInput.value || null,
+            });
+
+            flatpickr("#end_date", {
+                ...flatpickrConfig,
+                defaultDate: endInput.value || null,
+            });
         });
     </script>
 @endif
