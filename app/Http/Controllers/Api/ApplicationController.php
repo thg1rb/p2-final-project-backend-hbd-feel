@@ -136,8 +136,8 @@ class ApplicationController extends Controller
     public function getApplicationByStudentId($id)
     {
         $applications = Application::with(['user', 'event', 'award'])->where('student_id', $id)->latest()->get();
-        $currEvent = Event::get()->where('status', 'OPENED')->first();
         $user = User::with(['faculty', 'department'])->get()->where('student_id', $id)->first();
+        $currEvent = Event::get()->where('status', 'OPENED')->where('campus', $user->campus)->first();
 
         //        return response()->json($applications);
         return new ApplicationIndexResource([
