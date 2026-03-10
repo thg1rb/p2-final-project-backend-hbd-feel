@@ -72,7 +72,6 @@ class AuthenticateController extends Controller
             'password' => ['required', \Illuminate\Validation\Rules\Password::defaults(), 'confirmed'],
         ];
 
-        // Only require old password if NOT first login
         if ($user->email_verified_at) {
             $rules['current_password'] = ['required', 'current_password'];
         }
