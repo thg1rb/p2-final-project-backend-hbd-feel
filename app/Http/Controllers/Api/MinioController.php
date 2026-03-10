@@ -51,4 +51,22 @@ class MinioController extends Controller
             ], 500);
         }
     }
+    public function download(Request $request)
+    {
+        $path = $request->query('path');
+
+        if (!$path) {
+            return response()->json(['message' => 'Path is required'], 400);
+        }
+
+        try {
+            $fileContent = Storage::disk('s3')->get($path);
+
+            return response($fileContent, 200)
+                ->header('Content-Type', 'application/pdf')
+                ->header('Content-Disposition', 'attachment; filename="' . basename($path) . '"');
+        } catch (\Exception $e) {
+            return response()->json(['error' => $e->getMessage()], 500);
+        }
+    }
 }

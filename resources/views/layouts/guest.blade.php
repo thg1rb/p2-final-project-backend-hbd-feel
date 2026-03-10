@@ -30,6 +30,7 @@
         <div class="m-2 flex flex-col justify-center items-center">
             <p class="text-[36px] text-primary font-bold">ระบบนิสิตดีเด่น</p>
             <p>เข้าสู่ระบบเพื่อสมัครหรือพิจารณานิสิตดีเด่น</p>
+            <a href="{{ route("award-result.index") }}" target="_blank" class="text-green-600 underline">หรือคลิกเพื่อดูรายชื่อนิสิตที่ได้รับรางวัล</a>
         </div>
 
         <div class="w-full sm:max-w-md mt-6 px-6 py-4 bg-white shadow-md overflow-hidden sm:rounded-lg">

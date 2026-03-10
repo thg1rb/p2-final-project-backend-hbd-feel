@@ -11,8 +11,10 @@ use App\Http\Controllers\Api\EventController;
 
 Route::get('/application/{id}', [ApplicationController::class, 'getApplicationById']);
 Route::get('/application/student/{id}', [ApplicationController::class, 'getApplicationByStudentId']);
+Route::get('/applications/result', [ApplicationController::class, 'getAwardWinnersByYear']);
 
 Route::get('/minio/download', [MinioController::class, 'getPreviewUrl']);
+Route::get('/minio/download-pdf', [MinioController::class, 'download']);
 Route::post('/minio/upload', [MinioController::class, 'uploadFile']);
 
 
@@ -24,12 +26,12 @@ Route::post('/login', [AuthenticateController::class, 'login'])->name('user.logi
 
 
 Route::middleware('auth:sanctum')->group(function () {
+    Route::apiResource('/awards', AwardController::class);
     Route::post('/applications', [ApplicationController::class, 'store']);
     Route::get('/applications', [ApplicationController::class, 'getAllApplications']);
     Route::get('/applications/count', [ApplicationController::class, 'getApplicationCountByStatus']);
     Route::get('/applications/count/inprogress', [ApplicationController::class, 'getApplicationCountInprogress']);
     Route::get('/applications/all', [ApplicationController::class, 'getAllApplicationsWithoutPaginate']);
-
 });
 
 
@@ -46,7 +48,5 @@ Route::middleware(['throttle:api'])->group(function () {
     Route::post('/auth/forgot-password', [PasswordResetController::class, 'sendResetLink']);
     Route::post('/auth/reset-password', [PasswordResetController::class, 'resetPassword']);
 });
-
-Route::apiResource('/awards', AwardController::class);
 
 Route::post('/event/end-event/', [EventController::class, 'endEvent'])->name('event.end');
