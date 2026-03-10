@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\API\Auth;
 
+use App\Enums\UserRole;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Auth\LoginRequest;
 use App\Http\Requests\ProfileUpdateRequest;
@@ -21,6 +22,9 @@ class AuthenticateController extends Controller
                 if (!$user) {
                     throw ValidationException::withMessages(["credential" => "User not found"]);
                 }
+            }
+            if ($user->role == UserRole::NISIT_DEV) {
+                throw ValidationException::withMessages(["credential" => "User not authorized to access this application"]);
             }
             $token = $user->createToken('auth_token', [$user->role])->plainTextToken;
 //
