@@ -3,6 +3,7 @@
 use App\Http\Controllers\Api\ApplicationController;
 use App\Http\Controllers\Api\ApprovalController;
 use App\Http\Controllers\Api\Auth\AuthenticateController;
+use App\Http\Controllers\Api\Auth\PasswordResetController;
 use App\Http\Controllers\Api\MinioController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\AwardController;
@@ -26,14 +27,24 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/applications', [ApplicationController::class, 'store']);
     Route::get('/applications', [ApplicationController::class, 'getAllApplications']);
     Route::get('/applications/count', [ApplicationController::class, 'getApplicationCountByStatus']);
-    Route::get('/me', [AuthenticateController::class, 'me']);
     Route::get('/applications/count/inprogress', [ApplicationController::class, 'getApplicationCountInprogress']);
     Route::get('/applications/all', [ApplicationController::class, 'getAllApplicationsWithoutPaginate']);
+
 });
 
 
-Route::middleware(['throttle:api', 'auth:sanctum'])->as('api.')->group(function () {
+
+
+Route::middleware(['throttle:api', 'auth:sanctum'])->as('api.auth.')->group(function () {
+    Route::get('/me', [AuthenticateController::class, 'me']);
+    Route::post('/auth/change-password', [AuthenticateController::class, 'changePassword']);
+    Route::post('/auth/update-user-details', [AuthenticateController::class, 'changeUserDetails']);
     Route::delete('revoke', [AuthenticateController::class, 'revoke'])->name('user.revoke');
+});
+
+Route::middleware(['throttle:api'])->group(function () {
+    Route::post('/auth/forgot-password', [PasswordResetController::class, 'sendResetLink']);
+    Route::post('/auth/reset-password', [PasswordResetController::class, 'resetPassword']);
 });
 
 Route::apiResource('/awards', AwardController::class);

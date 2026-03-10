@@ -27,8 +27,8 @@ return new class extends Migration
             $table->integer('year');
             $table->double('grade');
 
-            $table->tinyInteger('level')->default(RoleLevel::NISIT->value);;
-            $table->enum('status', array_map(fn ($case) => $case->value, ApprovalStatus::cases()))->default('APPROVED');
+            $table->tinyInteger('level')->default(RoleLevel::NISIT->value);
+            $table->enum('status', array_map(fn($case) => $case->value, ApprovalStatus::cases()))->default('APPROVED');
 
             $table->timestamps();
         });

@@ -24,6 +24,7 @@ class Application extends Model
         'year',
         'level',
         'status',
+        'campus',
     ];
 
     protected $casts = [
@@ -41,6 +42,11 @@ class Application extends Model
         return $query->whereHas('event', fn($q) => $q->where('status', $status));
     }
 
+    public function scopeWhereCampus($query, string $campus)
+    {
+        return $query->whereHas('event', fn($q) => $q->where('campus', $campus));
+    }
+
     public function scopeRoleLevelFilter($query, RoleLevel $roleLevel)
     {
         return $query->where(function ($q) use ($roleLevel) {
@@ -54,8 +60,6 @@ class Application extends Model
 
     public function scopeVisibleFor($query, User $user)
     {
-        // $level = $user->role->level()->value;
-
         return match ($user->role) {
             UserRole::NISIT => $query->whereHas(
                 'user',
@@ -79,11 +83,9 @@ class Application extends Model
                     fn($q) => $q->where('faculty_id', $user->faculty_id)
                 ),
 
-            UserRole::ADMIN => $query->roleLevelFilter(RoleLevel::DEAN),
+            UserRole::NISIT_DEV => $query->roleLevelFilter(RoleLevel::DEAN),
 
-            UserRole::BOARD => $query->roleLevelFilter(RoleLevel::ADMIN),
-
-            UserRole::CHANCELLOR => $query->where('status', '!=', 'REJECTED'),
+            UserRole::BOARD => $query->roleLevelFilter(RoleLevel::NISIT_DEV),
 
             default => $query,
         };

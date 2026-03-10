@@ -28,16 +28,19 @@ class SocialAuthController extends Controller
 
         $from = session('oauth_from', '');
 
-        if ((!$user && $from != "svelte") || $user && $user->role != UserRole::ADMIN && $from != "svelte") {
+        if ((!$user && $from != "svelte") || $user && $user->role != UserRole::NISIT_DEV && $from != "svelte") {
             return view('auth.register-disabled');
         } else if (!$user && $from == "svelte") {
             return redirect("http://localhost:3000/oauth");
         }
 
-        $user->markEmailAsVerified();
+
 
         if ($from == 'svelte') {
             $token = $user->createToken('svelte-app')->plainTextToken;
+            if (!$user->email_verified_at) {
+                return redirect("http://localhost:3000/oauth?token={$token}&activate=true");
+            }
             return redirect("http://localhost:3000/oauth?token={$token}");
         }
 

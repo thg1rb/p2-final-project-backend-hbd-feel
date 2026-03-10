@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\ApplicationController;
+use App\Http\Controllers\ApprovalController;
 use App\Http\Controllers\AwardController;
 use App\Http\Controllers\AwardReportController;
 use App\Http\Controllers\EventController;
@@ -10,6 +11,7 @@ use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Auth\SocialAuthController;
 use App\Http\Controllers\AwardRegistrationController;
+use App\Http\Controllers\EndEventController;
 use App\Http\Controllers\MinioController;
 
 Route::get('/', [MainDashboardController::class, 'index'])->middleware(['auth', 'verified'])->name('main');
@@ -79,5 +81,13 @@ Route::get('/report/edit/{id}', [AwardReportController::class, 'edit'])->name('r
 Route::put('report/{application}', [AwardReportController::class, 'update'])->name('report.update');
 
 Route::get('/file-preview', [MinioController::class, 'getFile'])->name('file.preview');
+
+Route::get('/end-event/sign', [EndEventController::class, 'index'])->name('end-event.index');
+Route::post('/end-event/upload-event', [EndEventController::class, 'uploadEvent'])->name('end-event.upload');
+Route::get('/end-event/export-pdf', [EndEventController::class, 'exportPdf'])->name('end-event.pdf');
+
+Route::middleware('auth')->group(function () {
+    Route::post('/approvals', [ApprovalController::class, 'store'])->name('approvals.store');
+});
 
 require __DIR__ . '/auth.php';

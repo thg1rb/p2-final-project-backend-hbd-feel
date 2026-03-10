@@ -24,9 +24,11 @@
                         class="rounded-xl w-full border border-gray-400 cursor-pointer focus:border-primary focus:outline-none focus:ring-primary text-sm">
                         <option value="" disabled selected>-- เลือกประเภทรางวัล --</option>
                         @foreach ($awards as $award)
-                            <option value="{{ $award->id }}">
-                                {{ $award->name }}
-                            </option>
+                            @if ($award->campus == $application->user->campus)
+                                <option value="{{ $award->id }}">
+                                    {{ $award->name }}
+                                </option>
+                            @endif
                         @endforeach
                     </select>
                     <div class="flex justify-end items-center gap-5 mt-5">

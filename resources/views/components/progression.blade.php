@@ -1,17 +1,19 @@
 @props(['application'])
 @props(['approvals'])
+@props(['event'])
 @php
-    $workflowOrder = ['DEPT_HEAD', 'ASSO_DEAN', 'DEAN', 'NISIT_DEV', 'BOARD', 'BOARD_HEAD', 'CHANCELLOR'];
+    $workflowOrder = ['DEPT_HEAD', 'ASSO_DEAN', 'DEAN', 'NISIT_DEV', 'BOARD', 'CHANCELLOR'];
     $roleNames = [
         'DEPT_HEAD' => 'หัวหน้าภาควิชา',
         'ASSO_DEAN' => 'รองคณบดี',
         'DEAN' => 'คณบดี',
         'NISIT_DEV' => 'หน่วยพัฒนานิสิต',
         'BOARD' => 'คณะกรรมการ',
-        'BOARD_HEAD' => 'ประธานคณะกรรมการ',
-        'CHANCELLOR' => 'อธิการบดี',
+        'CHANCELLOR' => 'อธิการบดี'
     ];
     $hasRejected = false;
+
+    Log::info($approvals->toArray());
 
 @endphp
 
@@ -26,7 +28,6 @@
             @php
                 $approval = $approvals->first(fn($a) => $a->user->role->value === $role);
                 $isLast = $loop->last;
-                Log::info($approval);
 
                 if ($hasRejected) {
                     $status = 'NOT_STARTED';
@@ -38,6 +39,10 @@
                     }
                 } else {
                     $status = $index === count($approvals) ? 'PENDING' : 'NOT_STARTED';
+                }
+
+                if ($event == null) {
+                    $status = 'APPROVED';
                 }
 
                 $styles = match ($status) {
@@ -88,6 +93,10 @@
                         @if ($approval->reason)
                             <p class="text-xs text-gray-600 mt-1 italic">"{{ $approval->reason }}"</p>
                         @endif
+                    @elseif ($event == null)
+                        <p class="text-xs text-gray-600 mt-1 italic">
+                            ดำเนินการลงนามใบสมัครนิสิตดีเด่นสำเร็จ
+                        </p>
                     @else
                         <p class="text-sm text-gray-400 italic">ยังไม่มีการดำเนินการ</p>
                     @endif

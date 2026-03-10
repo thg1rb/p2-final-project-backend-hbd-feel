@@ -1,4 +1,9 @@
 {{-- @var \App\Models\Application $application --}}
+<?php
+use App\Enums\ApprovalStatus;
+use App\Enums\RoleLevel;
+use App\Enums\Status;
+?>
 <x-app-layout>
     <div class="p-10">
         <a class="flex gap-2 mb-10" href="{{ route('main') }}">
@@ -48,9 +53,10 @@
                             <select name="type" id=""
                                 class="border border-gray-300  rounded-xl w-full cursor-pointer focus:outline-primary focus:border-gray-300 focus:ring-offset-0 focus:ring-0 flex-1">
                                 <option value="">ทั้งหมด</option>
-                                <option value="Extracurricular Activities">ด้านกิจกรรมเสริมหลักสูตร</option>
-                                <option value="Creativity & Innovation">ด้านความคิดสร้างสรรค์และนวัตกรรม</option>
-                                <option value="Good Conduct">ด้านความประพฤติดี</option>
+                                <option value="ด้านกิจกรรมเสริมหลักสูตร">ด้านกิจกรรมเสริมหลักสูตร</option>
+                                <option value="ด้านความคิดสร้างสรรค์และนวัตกรรม">ด้านความคิดสร้างสรรค์และนวัตกรรม
+                                </option>
+                                <option value="ด้านความประพฤติดี">ด้านความประพฤติดี</option>
                             </select>
                         </div>
                         <button type="submit"
@@ -98,20 +104,27 @@
                                         </td>
 
                                         <td class="p-4">
-                                            @if ($application->status->value === \App\Enums\ApplicationStatus::REJECTED->value)
+                                            @if ($application->status->value === ApprovalStatus::REJECTED->value)
                                                 <div
                                                     class="rounded-full border border-red-400 bg-red-100 px-3 py-1 text-red-500 text-sm w-fit">
                                                     ปฏิเสธ
                                                 </div>
-                                            @elseif ($application->status->value !== \App\Enums\ApplicationStatus::REJECTED->value && $application->level !== 6)
+                                            @elseif (
+                                                $application->status->value === ApprovalStatus::APPROVED->value &&
+                                                    $application->level->value >= RoleLevel::NISIT_DEV->value)
+                                                <div
+                                                    class="rounded-full border border-orange-400 bg-orange-50 px-3 py-1 text-orange-500 text-sm w-fit">
+                                                    กำลังดำเนินการ
+                                                </div>
+                                            @elseif ($application->level->value === RoleLevel::BOARD && $event->status === Status::CLOSED)
+                                                <div
+                                                    class="rounded-full border border-primary bg-green-50 px-3 py-1 text-primary text-sm w-fit">
+                                                    อนุมัติ
+                                                </div>
+                                            @else
                                                 <div
                                                     class="rounded-full border border-amber-400 bg-amber-100 px-3 py-1 text-amber-500 text-sm w-fit">
                                                     รอพิจารณา
-                                                </div>
-                                            @elseif ($application->status - value !== \App\Enums\ApplicationStatus::APPROVED->value && $application->level === 6)
-                                                <div
-                                                    class="rounded-full border border-blue-500 bg-blue-50 px-3 py-1 text-blue-600 text-sm w-fit">
-                                                    อนุมัติ
                                                 </div>
                                             @endif
                                         </td>
@@ -162,7 +175,7 @@
                     </div>
                 </div>
             </div>
-            <div class="bg-white p-8 border rounded-xl flex flex-col gap-8">
+            {{-- <div class="bg-white p-8 border rounded-xl flex flex-col gap-8">
                 <p>สรุปสถิติรางวัล
                     @if ($targetYear && $targetSemester)
                         ภาคการศึกษา {{ $targetYear }}/{{ $targetSemester }}
@@ -199,6 +212,6 @@
                     </div>
                 </div>
             </div>
+            </div> --}}
         </div>
-    </div>
 </x-app-layout>

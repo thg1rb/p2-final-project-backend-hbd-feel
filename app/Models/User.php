@@ -4,6 +4,7 @@ namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 use App\Enums\UserRole;
+use App\Notifications\ApiResetPasswordNotification;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -30,7 +31,8 @@ class User extends Authenticatable
         'password',
         'role',
         'faculty_id',
-        'department_id'
+        'department_id',
+        'campus'
     ];
 
     /**
@@ -59,12 +61,12 @@ class User extends Authenticatable
 
     public function isAdmin(): bool
     {
-        return $this->role == UserRole::ADMIN;
+        return $this->role == UserRole::NISIT_DEV;
     }
 
     public function isUser(): bool
     {
-        return $this->role != UserRole::ADMIN;
+        return $this->role != UserRole::NISIT_DEV;
     }
 
     public function getRedirectRoute(): string
@@ -110,5 +112,10 @@ class User extends Authenticatable
     public function approvals(): HasMany
     {
         return $this->hasMany(Approval::class);
+    }
+
+    public function sendPasswordResetNotification($token)
+    {
+        $this->notify(new ApiResetPasswordNotification($token));
     }
 }

@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\CampusType;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -16,6 +17,7 @@ class Award extends Model
         'name',
         'form_path',
         'requirements',
+        'campus',
     ];
 
     protected $casts = [

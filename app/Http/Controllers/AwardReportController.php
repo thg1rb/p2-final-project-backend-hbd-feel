@@ -2,12 +2,15 @@
 
 namespace App\Http\Controllers;
 
+use App\Enums\AwardType;
+use App\Enums\Status;
 use App\Models\Application;
 use App\Models\Approval;
 use App\Models\Award;
 use App\Models\Event;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Log;
 
@@ -32,6 +35,8 @@ class AwardReportController extends Controller
             });
         }
 
+        Log::info("AWARD TYPE: " . $awardType);
+
         if ($awardType != "") {
             $query->whereHas('award', function ($q) use ($awardType) {
                 $q->where('name', $awardType);
@@ -55,7 +60,7 @@ class AwardReportController extends Controller
             return $this->exportCsv($query->get());
         }
 
-        $applications = $query->paginate(5)->appends($request->all());
+        $applications = $query->paginate(10)->appends($request->all());
 
         $allYears = Event::distinct()->orderBy('academic_year', 'desc')->pluck('academic_year');
         $allSemesters = Event::distinct()->orderBy('semester', 'asc')->pluck('semester');
@@ -80,13 +85,18 @@ class AwardReportController extends Controller
             ->groupBy('name')
             ->map(fn($group) => $group->sum('applications_count'));
 
+        $event = Event::where('status', Status::OPENED)
+            ->where('campus', Auth::user()->campus)
+            ->first();
+
         return view("report.index", [
             'applications' => $applications,
             'allYears' => $allYears,
             'allSemesters' => $allSemesters,
             'targetSemester' => $targetSemester,
             'targetYear' => $targetYear,
-            'awardStats' => $awardStats
+            'awardStats' => $awardStats,
+            'event' => $event,
         ]);
     }
 
@@ -133,9 +143,13 @@ class AwardReportController extends Controller
             ->orderBy('created_at', 'asc')
             ->get();
 
+        $event = Event::where('status', Status::OPENED)
+            ->where('campus', Auth::user()->campus)
+            ->first();
+
         $headDeptApproval = $approvals->firstWhere('user.role', 'DEPT_HEAD');
 
-        return view('report.show', compact('application', 'approvals', 'headDeptApproval'));
+        return view('report.show', compact('application', 'approvals', 'headDeptApproval', 'event'));
     }
 
     public function edit($id)

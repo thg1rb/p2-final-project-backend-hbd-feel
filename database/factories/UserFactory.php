@@ -2,6 +2,7 @@
 
 namespace Database\Factories;
 
+use App\Enums\CampusType;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
@@ -43,6 +44,7 @@ class UserFactory extends Factory
             'role' => fake()->randomElement(['NISIT']),
             'password' => static::$password ??= Hash::make('password'),
             'remember_token' => Str::random(10),
+            'campus' => CampusType::BANGKHEN,
 
             'faculty_id' => $department->faculty_id,
             'department_id' => $department->id,
@@ -54,7 +56,7 @@ class UserFactory extends Factory
      */
     public function unverified(): static
     {
-        return $this->state(fn (array $attributes) => [
+        return $this->state(fn(array $attributes) => [
             'email_verified_at' => null,
         ]);
     }

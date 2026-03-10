@@ -18,6 +18,7 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use JsonException;
 use App\Models\User;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 
 class ApplicationController extends Controller
@@ -41,6 +42,7 @@ class ApplicationController extends Controller
         ])
             ->visibleFor($user)
             ->whereEventStatus(Status::OPENED->value, $user)
+            ->whereCampus($user->campus)
             ->search($request->input('search'))
             ->when(
                 $request->filled('status'),
@@ -70,6 +72,7 @@ class ApplicationController extends Controller
         ])
             ->visibleFor($user)
             ->whereEventStatus(Status::OPENED->value, $user)
+            ->whereCampus($user->campus)
             ->search($request->input('search'))
             ->when(
                 $request->filled('status'),
@@ -98,7 +101,7 @@ class ApplicationController extends Controller
         $user = $request->user();
         $level = $user->role->level()->value;
 
-        $baseQuery = Application::visibleFor($user)->whereEventStatus(Status::OPENED->value, $user);
+        $baseQuery = Application::visibleFor($user)->whereEventStatus(Status::OPENED->value, $user)->whereCampus($user->campus);
 
         return response()->json([
             'pending' => (clone $baseQuery)->filterByStatus('PENDING', $level)->count(),
@@ -113,12 +116,16 @@ class ApplicationController extends Controller
 
         $totalInprogressRemaining = Application::visibleFor($user)
             ->whereEventStatus(Status::OPENED->value, $user)
+            ->whereCampus($user->campus)
             ->where('applications.level', '<', 6)
             ->count();
 
         $totalRemaining = Application::visibleFor($user)
             ->whereEventStatus(Status::OPENED->value, $user)
+            ->whereCampus($user->campus)
             ->count();
+
+        Log::info($totalRemaining);
 
         return response()->json([
             'total' => $totalRemaining,
@@ -143,7 +150,9 @@ class ApplicationController extends Controller
     {
         return DB::transaction(function () use ($request) {
 
-            $event = Event::where('status', Status::OPENED)->first();
+            $event = Event::where('status', Status::OPENED)
+                ->where('campus', Auth::user()->campus)
+                ->first();
 
             if (!$event) {
                 return response()->json([
@@ -151,7 +160,7 @@ class ApplicationController extends Controller
                 ], 400);
             }
 
-            $studentId = auth()->user()->student_id;
+            $studentId = Auth::user()->student_id;
             $alreadyApplied = Application::where('student_id', $studentId)
                 ->where('event_id', $event->id)
                 ->exists();
