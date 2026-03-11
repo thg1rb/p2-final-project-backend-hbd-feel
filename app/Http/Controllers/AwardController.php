@@ -68,7 +68,7 @@ class AwardController extends Controller
         $file = $request->file('application_document');
         $uploadRequest = new Request();
         $uploadRequest->merge([
-            'folder' => auth()->user()->campus,
+            'folder' => auth()->user()->campus->value,
         ]);
 
         $uploadRequest->files->set('file', $file);
@@ -90,7 +90,7 @@ class AwardController extends Controller
         $award->requirements = $requirements;
         $award->save();
 
-        $eventId = Event::query()->where(["campus" => auth()->user()->campus, "status" => "OPENED"])->first()->id;
+        $eventId = Event::query()->where(["campus" => auth()->user()->campus->value, "status" => "OPENED"])->first()->id;
         $award->events()->attach($eventId);
 
         return redirect()->route('awards.index');
@@ -138,7 +138,7 @@ class AwardController extends Controller
             Storage::disk('s3')->delete($award->form_path);
             $uploadRequest = new Request();
             $uploadRequest->merge([
-                'folder' => auth()->user()->campus,
+                'folder' => auth()->user()->campus->value,
             ]);
 
             $uploadRequest->files->set('file', $file);
