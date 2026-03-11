@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Enums\UserRole;
 use App\Models\User;
+use App\Models\Faculty;
+use App\Models\Department;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Hash;
@@ -18,26 +20,27 @@ class UserController extends Controller
     {
         Gate::authorize('viewAny', User::class);
          $users = User::query()
-             ->when($request->role, function($query, $role) {
+            ->where('campus', auth()->user()->campus)
+            ->when($request->role, function($query, $role) {
                  return $query->where('role', $role);
-             })
-             ->when($request->search, function ($query, $search) {
-                 $query->where(function ($q) use ($search) {
-                     $q->where('firstName', 'like', "%{$search}%")
-                         ->orWhere('lastName', 'like', "%{$search}%")
-                         ->orWhere('email', 'like', "%{$search}%")
-                         ->orWhere('username', 'like', "%{$search}%");
-                 });
-             })
-             ->paginate(15)
-             ->withQueryString();
+            })
+            ->when($request->search, function ($query, $search) {
+                $query->where(function ($q) use ($search) {
+                    $q->where('firstName', 'like', "%{$search}%")
+                        ->orWhere('lastName', 'like', "%{$search}%")
+                        ->orWhere('email', 'like', "%{$search}%")
+                        ->orWhere('username', 'like', "%{$search}%");
+                });
+            })
+            ->paginate(15)
+            ->withQueryString();
 
-         return view('users.index',
-             [
-                'users' => $users,
-                 'roles' => UserRole::cases(),
-             ]
-         );
+        return view('users.index',
+            [
+            'users' => $users,
+                'roles' => UserRole::cases(),
+            ]
+        );
     }
 
     /**
@@ -49,6 +52,8 @@ class UserController extends Controller
         return view('users.create',
             [
                 'roles' => UserRole::cases(),
+                'faculties' => Faculty::all(),
+                'departments' => Department::all(),
             ]);
     }
 
@@ -58,19 +63,49 @@ class UserController extends Controller
     public function store(Request $request)
     {
         Gate::authorize('create', User::class);
-        $request->validate([
+        $role = $request->input('role');
+
+        // Build validation rules based on role
+        $validationRules = [
             'firstName' => ['required', 'string', 'max:255'],
             'lastName' => ['required', 'string', 'max:255'],
             'email' => ['required', 'string', 'email', 'max:255', 'unique:users'],
             'username' => ['required', 'string', 'max:255', 'unique:users'],
             'password' => ['required', 'string', 'min:8'],
-            'role' => [Rule::notIn([UserRole::NISIT_DEV->value])],
-        ], [
+            'role' => ['required'],
+        ];
+
+        // Add role-specific validation rules
+        switch ($role) {
+            case 'NISIT': // นิสิต
+                $validationRules['student_id'] = ['required', 'string', 'max:50', 'unique:users,student_id'];
+                $validationRules['faculty'] = ['required', 'exists:faculties,id'];
+                $validationRules['department'] = ['required', 'exists:departments,id'];
+                break;
+            case 'DEPT_HEAD': // หัวหน้าภาค
+                $validationRules['faculty'] = ['required', 'exists:faculties,id'];
+                $validationRules['department'] = ['required', 'exists:departments,id'];
+                break;
+            case 'ASSO_DEAN': // รองคณบดี
+            case 'DEAN': // คณบดี
+                $validationRules['faculty'] = ['required', 'exists:faculties,id'];
+                break;
+            case 'BOARD': // คณะกรรมการ
+            case 'NISIT_DEV': // กองพัฒนานิสิต
+                // No faculty or department required
+                break;
+        }
+
+        $request->validate($validationRules, [
             'firstName.required' => 'กรอกชื่อจริง',
             'lastName.required' => 'กรอกนามสกุล',
             'email.required' => 'กรอกอีเมล',
             'username.required' => 'กรอกชื่อผู้ใช้',
-            'password.required' => 'กรอกรหัสผ่าน'
+            'password.required' => 'กรอกรหัสผ่าน',
+            'student_id.required' => 'กรอกรหัสนิสิต',
+            'faculty.required' => 'เลือกคณะ',
+            'department.required' => 'เลือกภาควิชา',
+            'student_id.unique' => 'รหัสนิสิตนี้ถูกใช้แล้ว',
         ]);
 
         $firstName = $request->input('firstName');
@@ -78,7 +113,10 @@ class UserController extends Controller
         $username = $request->input('username');
         $email = $request->input('email');
         $password = $request->input('password');
-        $role = $request->input('role');
+        $faculty_id = $request->input('faculty');
+        $department_id = $request->input('department');
+        $student_id = $request->input('student_id');
+        $campus = auth()->user()->campus;
 
         if (empty($role) || empty($firstName) || empty($lastName) || empty($email) || empty($password)) {
             abort(400);
@@ -91,6 +129,10 @@ class UserController extends Controller
         $user->email = $email;
         $user->password = bcrypt($password);
         $user->role = $role;
+        $user->faculty_id = $faculty_id ?: null;
+        $user->department_id = $department_id ?: null;
+        $user->student_id = $student_id ?: null;
+        $user->campus = $campus ?: null;
         $user->save();
         return redirect()->route('users.index');
     }
