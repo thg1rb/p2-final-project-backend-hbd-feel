@@ -11,7 +11,12 @@ class Department extends Model
     use HasFactory;
 
     protected $fillable = [
-        'name'
+        'name',
+        'faculty_id'
+    ];
+
+    protected $casts = [
+        'campus' => \App\Enums\CampusType::class,
     ];
 
     public function user()
@@ -21,6 +26,6 @@ class Department extends Model
 
     public function faculty()
     {
-        return $this->belongsTo(Department::class);
+        return $this->belongsTo(Faculty::class);
     }
 }

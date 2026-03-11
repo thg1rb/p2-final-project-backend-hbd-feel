@@ -2,7 +2,9 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
+use App\Enums\CampusType;
+use App\Models\Department;
+use App\Models\Faculty;
 use Illuminate\Database\Seeder;
 
 class DepartmentSeeder extends Seeder
@@ -50,16 +52,21 @@ class DepartmentSeeder extends Seeder
             ],
         ];
 
-        foreach ($data as $facultyName => $departments) {
-            $faculty = \App\Models\Faculty::create([
-                'name' => $facultyName
-            ]);
+        foreach (CampusType::cases() as $campus) {
 
-            foreach ($departments as $deptName) {
-                \App\Models\Department::create([
-                    'name' => 'ภาควิชา' . $deptName,
-                    'faculty_id' => $faculty->id
+            // วนลูปสร้างคณะในแต่ละวิทยาเขต
+            foreach ($data as $facultyName => $departments) {
+                $faculty = Faculty::create([
+                    'name' => $facultyName,
+                    'campus' => $campus->value,
                 ]);
+
+                foreach ($departments as $deptName) {
+                    Department::create([
+                        'name' => 'ภาควิชา' . $deptName,
+                        'faculty_id' => $faculty->id
+                    ]);
+                }
             }
         }
     }
