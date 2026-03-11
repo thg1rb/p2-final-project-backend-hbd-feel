@@ -1,21 +1,21 @@
-apiVersion: networking.k8s.io/v1
-kind: Ingress
-metadata:
-  name: laravel-ingress
-#  annotations:
-#    nginx.ingress.kubernetes.io/rewrite-target: /
-  annotations:
-    nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
-spec:
-  ingressClassName: nginx
-  rules:
-    - host: placeholder.k8s.dev
-      http:
-        paths:
-          - path: /
-            pathType: Prefix
-            backend:
-              service:
-                name: laravel-service
-                port:
-                  number: 80
+# apiVersion: networking.k8s.io/v1
+# kind: Ingress
+# metadata:
+#   name: laravel-ingress
+# #  annotations:
+# #    nginx.ingress.kubernetes.io/rewrite-target: /
+#   annotations:
+#     nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
+# spec:
+#   ingressClassName: nginx
+#   rules:
+#     - host: placeholder.k8s.dev
+#       http:
+#         paths:
+#           - path: /
+#             pathType: Prefix
+#             backend:
+#               service:
+#                 name: laravel-service
+#                 port:
+#                   number: 80

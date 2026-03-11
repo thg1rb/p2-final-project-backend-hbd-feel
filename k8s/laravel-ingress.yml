@@ -1,14 +1,15 @@
----
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: laravel-ingress
+#  annotations:
+#    nginx.ingress.kubernetes.io/rewrite-target: /
   annotations:
-    nginx.ingress.kubernetes.io/rewrite-target: /
+    nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
 spec:
-  ingressClassName: nginx # ต้องมี Ingress Controller ใน K8s ก่อนนะครับ
+  ingressClassName: nginx
   rules:
-    - host: laravel.local # URL ที่คุณต้องการ
+    - host: placeholder.k8s.dev
       http:
         paths:
           - path: /
