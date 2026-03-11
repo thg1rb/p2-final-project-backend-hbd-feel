@@ -23,6 +23,6 @@ spec:
             - name: MYSQL_DATABASE
               value: nisit-reward
             - name: MYSQL_USER
-              value: laravel
+              value: sail
             - name: MYSQL_PASSWORD
-              value: secret
+              value: password
