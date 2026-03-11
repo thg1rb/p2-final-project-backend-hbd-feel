@@ -435,12 +435,10 @@ class ApplicationController extends Controller
                 return response()->json(['message' => 'Unauthorized'], 403);
             }
 
-            // ลบไฟล์หลัก
             if ($application->path) {
                 Storage::disk('s3')->delete($application->path);
             }
 
-            // ลบไฟล์แนบอื่นๆ
             $documents = is_array($application->documents)
                 ? $application->documents
                 : json_decode($application->documents, true) ?? [];
@@ -451,7 +449,6 @@ class ApplicationController extends Controller
                 }
             }
 
-            // ลบข้อมูลในฐานข้อมูล
             $application->delete();
 
             return response()->json([
@@ -460,7 +457,6 @@ class ApplicationController extends Controller
         });
 
     } catch (\Exception $e) {
-        // ดัก Error ทุกอย่างแล้วพ่นออกมาดู จะได้รู้ว่าพังเพราะอะไร!
         return response()->json([
             'message' => 'Internal Server Error',
             'error_detail' => $e->getMessage(),
