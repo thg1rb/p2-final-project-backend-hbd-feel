@@ -85,6 +85,20 @@ services:
         command: server /data --console-address ":9001"
         networks:
             - sail
+    minio-init:
+        image: minio/mc
+        depends_on:
+            - minio
+        networks:
+            - sail
+        entrypoint: >
+            /bin/sh -c "
+            sleep 5;
+            mc alias set minio http://minio:9000 ${MINIO_ACCESS_KEY} ${MINIO_SECRET_KEY};
+            mc mb minio/${AWS_BUCKET} --ignore-existing;
+            mc anonymous set public minio/${AWS_BUCKET};
+            exit 0;
+            "
 networks:
     sail:
         driver: bridge
