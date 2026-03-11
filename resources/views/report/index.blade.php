@@ -17,7 +17,8 @@ use App\Enums\Status;
             </div>
             <div class="bg-white p-8 border rounded-xl flex flex-col gap-8">
                 <form action="{{ route('report.award-report') }}">
-                    <p class="mb-3">เลือกปีการศึกษาและภาคการศึกษาหรือคัดกรองตามชื่อนิสิตหรือคัดกรองตามหมวดหมู่รางวัล
+                    <p class="mb-8 font-semibold">
+                        เลือกปีการศึกษาและภาคการศึกษาหรือคัดกรองตามชื่อนิสิตหรือคัดกรองตามหมวดหมู่รางวัล
                     </p>
                     <div class="flex gap-5 items-center">
                         <div class="flex flex-col gap-2 flex-1">
@@ -150,12 +151,7 @@ use App\Enums\Status;
                         <p class=" text-gray-400">ไม่พบข้อมูลที่คุณคัดกรอง</p>
                     </div>
                 @endif
-                <div class="flex justify-between">
-                    <a href="{{ route('report.award-report', array_merge(request()->query(), ['export' => 'csv'])) }}">
-                        <div class="bg-primary rounded-xl p-3 text-white hover:scale-95 active:scale-90 transition-all">
-                            นำข้อมูลออกเป็นไฟล์ CSV
-                        </div>
-                    </a>
+                <div class="flex justify-end">
                     <div class="flex gap-4 items-center">
                         @if ($applications->onFirstPage())
                             <x-icon name="arrow-head-left" class="stroke-gray-300"></x-icon>
@@ -175,43 +171,5 @@ use App\Enums\Status;
                     </div>
                 </div>
             </div>
-            {{-- <div class="bg-white p-8 border rounded-xl flex flex-col gap-8">
-                <p>สรุปสถิติรางวัล
-                    @if ($targetYear && $targetSemester)
-                        ภาคการศึกษา {{ $targetYear }}/{{ $targetSemester }}
-                    @elseif ($targetYear)
-                        ประจำปีการศึกษา {{ $targetYear }}
-                    @elseif ($targetSemester)
-                        ประจำภาคการศึกษาที่ {{ $targetSemester }} ของทุกปี
-                    @else
-                        ทั้งหมด
-                    @endif
-                </p>
-                <div class="flex gap-8">
-                    <div
-                        class="flex justify-center items-center flex-col border rounded-xl p-5 flex-1 bg-red-50 border-red-500">
-                        <p class="mb-1 text-red-500"><span
-                                class="font-bold text-4xl">{{ $awardStats->get('ด้านกิจกรรมเสริมหลักสูตร', 0) }}</span>
-                            รางวัล</p>
-                        <p>ด้านกิจกรรมเสริมหลักสูตร</p>
-                    </div>
-                    <div
-                        class="flex justify-center items-center flex-col border rounded-xl p-5 flex-1 bg-yellow-50 border-yellow-500">
-                        <p class="mb-1 text-yellow-500"><span
-                                class="font-bold text-4xl ">{{ $awardStats->get('ด้านความคิดสร้างสรรค์และนวัตกรรม', 0) }}</span>
-                            รางวัล
-                        </p>
-                        <p>ด้านความคิดสร้างสรรค์และนวัตกรรม</p>
-                    </div>
-                    <div
-                        class="flex justify-center items-center flex-col border rounded-xl p-5 flex-1 bg-green-50 border-primary">
-                        <p class="mb-1 text-primary"><span
-                                class="font-bold text-4xl ">{{ $awardStats->get('ด้านความประพฤติดี', 0) }}</span>
-                            รางวัล</p>
-                        <p>ด้านความประพฤติดี</p>
-                    </div>
-                </div>
-            </div>
-            </div> --}}
         </div>
 </x-app-layout>
