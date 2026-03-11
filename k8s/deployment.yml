@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
         - name: laravel
-          image: coconutdog5321/laravel-app:latest
+          image: tee5321/laravel-app:latest
           imagePullPolicy: Always
           ports:
             - containerPort: 80
