@@ -26,7 +26,7 @@ Route::post('/login', [AuthenticateController::class, 'login'])->name('user.logi
 
 
 Route::middleware('auth:sanctum')->group(function () {
-    Route::apiResource('/awards', AwardController::class);
+    Route::apiResource('/awards', AwardController::class)->names('api.awards');
     Route::post('/applications', [ApplicationController::class, 'store']);
     Route::get('/applications', [ApplicationController::class, 'getAllApplications']);
     Route::get('/applications/count', [ApplicationController::class, 'getApplicationCountByStatus']);
@@ -49,6 +49,6 @@ Route::middleware(['throttle:api'])->group(function () {
     Route::post('/auth/reset-password', [PasswordResetController::class, 'resetPassword']);
 });
 
-Route::apiResource('/awards', AwardController::class)->names('api.awards');
+//Route::apiResource('/awards', AwardController::class)->names('api.awards');
 
 Route::post('/event/end-event/', [EventController::class, 'endEvent'])->name('event.end');
