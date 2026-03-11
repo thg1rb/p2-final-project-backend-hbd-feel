@@ -30,7 +30,7 @@ class SocialAuthController extends Controller
 
         if ((!$user && $from != "svelte") || $user && $user->role != UserRole::NISIT_DEV && $from != "svelte") {
             return view('auth.register-disabled');
-        } else if (!$user && $from == "svelte") {
+        } else if ((!$user && $from == "svelte") || $user && $from == "svelte" && $user->role == UserRole::NISIT_DEV) {
             return redirect("http://localhost:3000/oauth");
         }
 

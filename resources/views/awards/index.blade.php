@@ -35,7 +35,7 @@
                     <thead class="divide-y border-b bg-gray-100">
                         <tr class="divide-x">
                             <th class="px-6 py-3 text-left cursor-pointer hover:bg-gray-200 transition">หมวดรางวัล</th>
-                            <th class="px-6 py-3 text-left cursor-pointer hover:bg-gray-200 transition">รางวัล</th>
+{{--                            <th class="px-6 py-3 text-left cursor-pointer hover:bg-gray-200 transition">รางวัล</th>--}}
                             <th class="px-2 py-3 text-center cursor-pointer hover:bg-gray-200 transition">ดำเนินการ</th>
                         </tr>
                     </thead>
@@ -43,9 +43,9 @@
                         @forelse($awards as $award)
                             <tr class="divide-x">
                                 <td class="px-6 py-3 text-left">{{ $award->name }}</td>
-                                <td class="px-6 py-3 text-left">
-                                    {{ NumberFormatter::create(app()->getLocale(), NumberFormatter::DECIMAL)->format($award->reward) }}
-                                </td>
+{{--                                <td class="px-6 py-3 text-left">--}}
+{{--                                    {{ NumberFormatter::create(app()->getLocale(), NumberFormatter::DECIMAL)->format($award->reward) }}--}}
+{{--                                </td>--}}
                                 <td class="px-2 py-3 text-center flex items-center justify-center gap-2">
                                     <a href="{{ route('awards.edit', $award) }}"
                                         class="py-1 px-3 bg-blue-200 hover:bg-blue-300 font-semibold text-blue-700 rounded-md cursor-pointer transition-all hover:scale-105">

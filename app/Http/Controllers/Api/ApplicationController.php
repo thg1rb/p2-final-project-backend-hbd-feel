@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Enums\ApplicationStatus;
+use App\Enums\ApprovalStatus;
 use App\Enums\Status;
 use App\Enums\UserRole;
 use App\Http\Controllers\Controller;
@@ -13,6 +14,7 @@ use App\Models\Event;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use App\Models\Award;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
@@ -136,8 +138,8 @@ class ApplicationController extends Controller
     public function getApplicationByStudentId($id)
     {
         $applications = Application::with(['user', 'event', 'award'])->where('student_id', $id)->latest()->get();
-        $currEvent = Event::get()->where('status', 'OPENED')->first();
         $user = User::with(['faculty', 'department'])->get()->where('student_id', $id)->first();
+        $currEvent = Event::get()->where('status', 'OPENED')->where('campus', $user->campus)->first();
 
         //        return response()->json($applications);
         return new ApplicationIndexResource([
@@ -161,6 +163,7 @@ class ApplicationController extends Controller
             }
 
             $studentId = Auth::user()->student_id;
+
             $alreadyApplied = Application::where('student_id', $studentId)
                 ->where('event_id', $event->id)
                 ->exists();
@@ -173,11 +176,11 @@ class ApplicationController extends Controller
             }
 
             $award = Award::findOrFail($request->award_id);
+
             $requirements = $award->requirements ?? [];
 
             $rules = [
                 'award_id' => ['required', 'exists:awards,id'],
-                //                'event_id' => ['required', 'exists:events,id'],
                 'year'     => ['required', 'integer'],
                 'grade'    => ['required', 'numeric'],
                 'path'     => ['required', 'file', 'mimes:pdf,jpg,png', 'max:10240'],
@@ -187,30 +190,42 @@ class ApplicationController extends Controller
             foreach ($requirements as $req) {
                 $key = $req['id'];
                 $rules["documents.$key"] = $req['required']
-                    ? ['required', 'file', 'mimes:pdf,jpg,png', 'max:5120']
-                    : ['nullable', 'file', 'mimes:pdf,jpg,png', 'max:5120'];
+                    ? ['required', 'file', 'mimes:pdf,jpg,png', 'max:10240']
+                    : ['nullable', 'file', 'mimes:pdf,jpg,png', 'max:10240'];
             }
 
             $validated = $request->validate($rules);
 
             $applicationFile = $request->file('path');
+
             $appFileName = Str::uuid() . '.' . $applicationFile->getClientOriginalExtension();
-            $mainPath = Storage::disk('s3')->putFileAs('applications', $applicationFile, $appFileName);
+
+            $mainPath = Storage::disk('s3')->putFileAs(
+                'applications',
+                $applicationFile,
+                $appFileName
+            );
 
             if (!$mainPath) {
-                return response()->json(['error' => 'Could not upload main file.'], 500);
+                return response()->json([
+                    'error' => 'Could not upload main file.'
+                ], 500);
             }
 
             $storedDocuments = [];
+
             foreach ($requirements as $req) {
+
                 $key = $req['id'];
 
                 if ($request->hasFile("documents.$key")) {
+
                     $file = $request->file("documents.$key");
+
                     $fileName = Str::uuid() . '.' . $file->getClientOriginalExtension();
 
                     $storedPath = Storage::disk('s3')->putFileAs(
-                        "documents",
+                        'documents',
                         $file,
                         $fileName
                     );
@@ -237,5 +252,66 @@ class ApplicationController extends Controller
                 'data'    => $application->load(['user', 'event', 'award'])
             ], 201);
         });
+    }
+    public function getAwardWinnersByYear(Request $request)
+    {
+        $year = $request->query('year');
+        $semester = $request->query('semester');
+        $campus = $request->query('campus');
+
+        $event = Event::where('academic_year', $year)
+            ->where('semester', $semester)
+            ->where('campus', $campus)
+            ->where('status', Status::CLOSED)
+            ->first();
+
+        $pdfPath = $event?->path;
+
+        $applications = Application::with([
+            'award:id,name,campus',
+            'user:id,student_id,firstName,lastName,faculty_id',
+            'user.faculty:id,name',
+            'event:id,academic_year,semester,campus,status'
+        ])
+            ->whereHas('event', function ($q) use ($year, $semester, $campus) {
+                $q->where('academic_year', $year)
+                    ->where('semester', $semester)
+                    ->where('campus', $campus)
+                    ->where('status', Status::CLOSED);
+            })
+            ->get();
+
+        $categories = $applications
+            ->groupBy(fn($app) => $app->award->name)
+            ->map(function ($apps, $awardName) {
+                return [
+                    'name' => $awardName,
+                    'students' => $apps->map(fn($app) => [
+                        'name' => trim(($app->user?->firstName ?? '') . ' ' . ($app->user?->lastName ?? '')),
+                        'faculty' => $app->user?->faculty?->name ?? '-'
+                    ])
+                ];
+            })
+            ->values();
+
+        return response()->json([
+            'year' => $year,
+            'semester' => $semester,
+            'campus' => $campus,
+
+            'pdf_path' => $pdfPath,
+
+            'years' => Event::select('academic_year')
+                ->distinct()
+                ->orderByDesc('academic_year')
+                ->pluck('academic_year'),
+
+            'semesters' => Event::where('academic_year', $year)
+                ->select('semester')
+                ->distinct()
+                ->pluck('semester'),
+
+            'categories' => $categories
+        ]);
     }
 }
