@@ -33,7 +33,7 @@
                     $status = 'NOT_STARTED';
                 } elseif ($approval) {
                     $isApproved = $approval->status->value === 'APPROVED';
-                    $status = $isApproved ? 'APPROVED' : 'REJECT';
+                    $status = $isApproved ? 'APPROVED' : 'REJECTED';
                     if (!$isApproved) {
                         $hasRejected = true;
                     }
@@ -41,7 +41,7 @@
                     $status = $index === count($approvals) ? 'PENDING' : 'NOT_STARTED';
                 }
 
-                if ($event == null) {
+                if ($event == null && !$hasRejected) {
                     $status = 'APPROVED';
                 }
 
@@ -58,7 +58,7 @@
                         'icon' => 'loading',
                         'text' => 'text-amber-500',
                     ],
-                    'REJECT' => [
+                    'REJECTED' => [
                         'border' => 'border-red-400',
                         'bg' => 'bg-red-400',
                         'icon' => 'X',
