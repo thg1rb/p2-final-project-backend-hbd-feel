@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Award;
+use App\Models\Event;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Storage;
@@ -12,12 +13,25 @@ class AwardController extends Controller
 {
     public function index(Request $request) {
         Gate::authorize('view-any', Award::class);
-        $query = Award::query()->where("awards.campus", auth()->getUser()->campus);
+        $event = Event::query()->where(["campus" => auth()->user()->campus, "status" => "OPENED"])->first();
+
+        if (!$event) {
+            return view('awards.index', ['awards' => [], 'event' => null]);
+        }
+
+        $query = Award::query()
+            ->with('events')
+            ->where('awards.campus', auth()->user()->campus)
+            ->whereHas('events', function ($q) {
+                $q->where('status', 'OPENED')
+                    ->where('campus', auth()->user()->campus);
+            });
+
         if ($request->filled('search')) {
             $query->where('name', 'like', '%' . $request->search . '%');
         }
         $awards = $query->paginate(10)->withQueryString();
-        return view('awards.index', ['awards' => $awards]);
+        return view('awards.index', ['awards' => $awards, 'event' => $event]);
     }
 
     public function create() {
@@ -75,6 +89,9 @@ class AwardController extends Controller
             ->toArray();
         $award->requirements = $requirements;
         $award->save();
+
+        $eventId = Event::query()->where(["campus" => auth()->user()->campus, "status" => "OPENED"])->first()->id;
+        $award->events()->attach($eventId);
 
         return redirect()->route('awards.index');
     }

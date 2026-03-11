@@ -11,8 +11,8 @@
                 <h1 class="font-bold text-2xl">จัดการหมวดรางวัล</h1>
                 <p class="text-gray-400">เพิ่ม แก้ไข หรือลบข้อมูลรางวัลในระบบ</p>
             </div>
-            <a href="{{ route('awards.create') }}"
-                class="px-[10px] py-[6px] w-full md:w-fit flex flex-row justify-center items-center gap-x-[10px] bg-primary text-white rounded-md transition-all hover:scale-105">
+            <a href="{{ $event ? route('awards.create') : "" }}"
+                class="{{$event ? "bg-primary text-white transition-all hover:scale-105" : "bg-gray-500 cursor-not-allowed"}} px-[10px] py-[6px] w-full md:w-fit flex flex-row justify-center items-center gap-x-[10px] rounded-md">
                 <x-icon name="plus" size="30" />
                 <p class="p-2">เพิ่มหมวดรางวัล</p>
             </a>
@@ -65,7 +65,7 @@
                         @empty
                             <tr class="divide-x">
                                 <td colspan="6" class="px-6 py-32 text-center text-slate-500">
-                                    ไม่พบหมวดรางวัล
+                                    {{$event ? "ไม่พบหมวดรางวัล" : "ไม่มีรอบรางวัลที่เปิดอยู่"}}
                                 </td>
                             </tr>
                         @endforelse
@@ -75,20 +75,20 @@
             <div class="w-full flex flex-row justify-end items-center">
                 <div class="flex flex-row items-center  gap-x-5">
                     {{-- Back Button --}}
-                    @if ($awards->onFirstPage())
+                    @if ($awards && $awards->onFirstPage())
                         <button disabled class="cursor-not-allowed">
                             <x-icon name="arrow-head-left" class="stroke-gray-300" />
                         </button>
-                    @else
+                    @elseif ($awards)
                         <a href="{{ $awards->previousPageUrl() }}">
                             <x-icon name="arrow-head-left" />
                         </a>
                     @endif
 
-                    <p class="border rounded-xl py-2 px-5">{{ $awards->currentPage() }}</p>
+                    <p class="border rounded-xl py-2 px-5">{{$awards ? $awards->currentPage() : "0" }}</p>
 
                     {{-- Next Button --}}
-                    @if ($awards->hasMorePages())
+                    @if ($awards && $awards->hasMorePages())
                         <a href="{{ $awards->nextPageUrl() }}">
                             <x-icon name="arrow-head-right"></x-icon>
                         </a>
