@@ -28,10 +28,12 @@ class SocialAuthController extends Controller
 
         $from = session('oauth_from', '');
 
+        $frontendURL = config('app.frontend_url');
+
         if ((!$user && $from != "svelte") || $user && $user->role != UserRole::NISIT_DEV && $from != "svelte") {
             return view('auth.register-disabled');
         } else if ((!$user && $from == "svelte") || $user && $from == "svelte" && $user->role == UserRole::NISIT_DEV) {
-            return redirect("http://localhost:3000/oauth");
+            return redirect("$frontendURL/oauth");
         }
 
 
@@ -39,9 +41,9 @@ class SocialAuthController extends Controller
         if ($from == 'svelte') {
             $token = $user->createToken('svelte-app')->plainTextToken;
             if (!$user->email_verified_at) {
-                return redirect("http://localhost:3000/oauth?token={$token}&activate=true");
+                return redirect("$frontendURL/oauth?token={$token}&activate=true");
             }
-            return redirect("http://localhost:3000/oauth?token={$token}");
+            return redirect("$frontendURL/oauth?token={$token}");
         }
 
         Auth::login($user);
