@@ -156,6 +156,8 @@ class UserController extends Controller
         return view('users.edit', [
             'user' => $user,
             'roles' => UserRole::cases(),
+            'faculties' => Faculty::all(),
+            'departments' => Department::all(),
         ]);
     }
 
@@ -165,13 +167,49 @@ class UserController extends Controller
     public function update(Request $request, User $user)
     {
         Gate::authorize('update', $user);
-        $validated = $request->validate([
-            'firstName' => 'required|string|max:50',
-            'lastName' => 'required|string|max:50',
-            'email' => 'required|email|unique:users,email,' . $user->id,
-            'username' => 'required|string|unique:users,username,' . $user->id,
-            'role' => 'required',
-            'password' => 'nullable|min:8|confirmed',
+        $role = $request->input('role');
+
+        // Build validation rules based on role
+        $validationRules = [
+            'firstName' => ['required', 'string', 'max:50'],
+            'lastName' => ['required', 'string', 'max:50'],
+            'email' => ['required', 'email', 'unique:users,email,' . $user->id],
+            'username' => ['required', 'string', 'unique:users,username,' . $user->id],
+            'password' => ['nullable', 'min:8', 'confirmed'],
+            'role' => ['required'],
+        ];
+
+        // Add role-specific validation rules
+        switch ($role) {
+            case 'NISIT': // นิสิต
+                $validationRules['student_id'] = ['required', 'string', 'max:50', 'unique:users,student_id,' . $user->id];
+                $validationRules['faculty'] = ['required', 'exists:faculties,id'];
+                $validationRules['department'] = ['required', 'exists:departments,id'];
+                break;
+            case 'DEPT_HEAD': // หัวหน้าภาค
+                $validationRules['faculty'] = ['required', 'exists:faculties,id'];
+                $validationRules['department'] = ['required', 'exists:departments,id'];
+                break;
+            case 'ASSO_DEAN': // รองคณบดี
+            case 'DEAN': // คณบดี
+                $validationRules['faculty'] = ['required', 'exists:faculties,id'];
+                break;
+            case 'BOARD': // คณะกรรมการ
+            case 'NISIT_DEV': // กองพัฒนานิสิต
+                // No faculty or department required
+                break;
+        }
+
+        $validated = $request->validate($validationRules, [
+            'firstName.required' => 'กรอกชื่อจริง',
+            'lastName.required' => 'กรอกนามสกุล',
+            'email.required' => 'กรอกอีเมล',
+            'username.required' => 'กรอกชื่อผู้ใช้',
+            'password.required' => 'กรอกรหัสผ่าน',
+            'student_id.required' => 'กรอกรหัสนิสิต',
+            'faculty.required' => 'เลือกคณะ',
+            'department.required' => 'เลือกภาควิชา',
+            'student_id.unique' => 'รหัสนิสิตนี้ถูกใช้แล้ว',
         ]);
 
         if ($request->filled('password')) {
@@ -180,7 +218,15 @@ class UserController extends Controller
             unset($validated['password']);
         }
 
-        $user->update($validated);
+        $user->firstName = $validated['firstName'];
+        $user->lastName = $validated['lastName'];
+        $user->email = $validated['email'];
+        $user->username = $validated['username'];
+        $user->role = $validated['role'];
+        $user->faculty_id = $request->input('faculty') ?: null;
+        $user->department_id = $request->input('department') ?: null;
+        $user->student_id = $request->input('student_id') ?: null;
+        $user->save();
 
         return redirect()->route('users.index')->with('success');
     }
