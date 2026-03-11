@@ -10,7 +10,12 @@ class Faculty extends Model
     /** @use HasFactory<\Database\Factories\FacultyFactory> */
     use HasFactory;
     protected $fillable = [
-        'name'
+        'name',
+        'campus'
+    ];
+
+    protected $casts = [
+        'campus' => \App\Enums\CampusType::class,
     ];
 
     public function user()

@@ -13,7 +13,9 @@ use App\Http\Middleware\ForcePasswordChange;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Auth\SocialAuthController;
 use App\Http\Controllers\AwardRegistrationController;
+use App\Http\Controllers\DepartmentController;
 use App\Http\Controllers\EndEventController;
+use App\Http\Controllers\FacultyController;
 use App\Http\Controllers\MinioController;
 
 Route::get('/', [MainDashboardController::class, 'index'])->middleware(['auth', 'verified', ForcePasswordChange::class])->name('main');
@@ -87,7 +89,6 @@ Route::get('/file-preview', [MinioController::class, 'getFile'])->name('file.pre
 Route::middleware(['auth', ForcePasswordChange::class])->group(function () {
     Route::post('/force-change-password', [ForceChangePasswordController::class, 'update'])->name('force-change-password');
     Route::get('/force-change-password', [ForceChangePasswordController::class, 'index'])->name('force-change-password');
-
 });
 
 
@@ -102,5 +103,8 @@ Route::get('/award-result', function () {
 Route::middleware(['auth', ForcePasswordChange::class])->group(function () {
     Route::post('/approvals', [ApprovalController::class, 'store'])->name('approvals.store');
 });
+
+Route::resource('faculties', FacultyController::class);
+Route::resource('departments', DepartmentController::class);
 
 require __DIR__ . '/auth.php';
