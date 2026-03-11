@@ -146,7 +146,7 @@ jobs:
           kubectl create namespace ${K8S_NAMESPACE} --dry-run=client -o yaml | kubectl apply -f -
 
           # เขียนค่าจาก GitHub Secret ลงไฟล์ชั่วคราว
-          echo "${{ secrets.LARAVEL_ENV }}" > .env.tmp
+          echo "${{ secrets.LARAVEL_UAT_ENV }}" > .env.tmp
 
           # สร้าง/อัปเดต Secret ใน K8S ชื่อ 'laravel-app-env'
           kubectl create secret generic laravel-app-env \
