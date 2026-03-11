@@ -17,13 +17,11 @@ Route::get('/minio/download', [MinioController::class, 'getPreviewUrl']);
 Route::get('/minio/download-pdf', [MinioController::class, 'download']);
 Route::post('/minio/upload', [MinioController::class, 'uploadFile']);
 
-
 Route::post('/approvals', [ApprovalController::class, 'store']);
 Route::get('/approvals/{id}', [ApprovalController::class, 'getApprovalRequestByApplicationId']);
 Route::get('/approvals/{id}/{userId}', [ApprovalController::class, 'getApprovalRequestByApplicationIdAndUserId']);
 
 Route::post('/login', [AuthenticateController::class, 'login'])->name('user.login');
-
 
 Route::middleware('auth:sanctum')->group(function () {
     Route::apiResource('/awards', AwardController::class);
@@ -32,10 +30,8 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/applications/count', [ApplicationController::class, 'getApplicationCountByStatus']);
     Route::get('/applications/count/inprogress', [ApplicationController::class, 'getApplicationCountInprogress']);
     Route::get('/applications/all', [ApplicationController::class, 'getAllApplicationsWithoutPaginate']);
+    Route::get('/event/is-closed', [EventController::class, 'isClosed']);
 });
-
-
-
 
 Route::middleware(['throttle:api', 'auth:sanctum'])->as('api.auth.')->group(function () {
     Route::get('/me', [AuthenticateController::class, 'me']);

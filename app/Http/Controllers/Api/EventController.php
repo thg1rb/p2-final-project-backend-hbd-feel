@@ -10,24 +10,18 @@ use Illuminate\Support\Facades\Log;
 
 class EventController extends Controller
 {
-    public function endEvent(Request $request)
+    public function isClosed(Request $request)
     {
-        $request->validate([
-            'eventId' => 'required|exists:events,id',
-            'path' => 'required|string'
-        ]);
+        $user = $request->user();
 
-        $event = Event::findOrFail($request->eventId);
+        if (!$user) {
+            return response()->json(['message' => 'Unauthenticated'], 401);
+        }
 
-        $event->update([
-            'path' => $request->path,
-            'status' => Status::CLOSED
-        ]);
+        $event = Event::where('status', Status::OPENED)
+            ->where('campus', $user->campus)
+            ->first();
 
-        return response()->json([
-            'message' => 'Event has been closed successfully',
-            'data' => $event
-        ]);
+        return response()->json($event === null);
     }
-    
 }
