@@ -142,19 +142,26 @@ jobs:
 
       - name: Create K8S Secret from Env
         run: |
-          # สร้าง Namespace ถ้ายังไม่มี
+          # 1. สร้าง Namespace
           kubectl create namespace ${K8S_NAMESPACE} --dry-run=client -o yaml | kubectl apply -f -
-
-          # เขียนค่าจาก GitHub Secret ลงไฟล์ชั่วคราว
-          echo "${{ secrets.LARAVEL_UAT_ENV }}" > .env.tmp
-
-          # สร้าง/อัปเดต Secret ใน K8S ชื่อ 'laravel-app-env'
+          
+          # 2. เลือก Secret ก้อนที่ถูกต้องตาม Branch
+          if [[ "${{ github.ref }}" == "refs/heads/main" ]]; then
+            echo "${{ secrets.LARAVEL_PROD_ENV }}" > .env.tmp
+          elif [[ "${{ github.ref }}" == "refs/heads/develop" ]]; then
+            echo "${{ secrets.LARAVEL_UAT_ENV }}" > .env.tmp
+          else
+            # สำหรับ branch อื่นๆ เช่น feature อาจจะใช้ค่า UAT ไปก่อน หรือทำ secret แยกอีกตัว
+            echo "${{ secrets.LARAVEL_UAT_ENV }}" > .env.tmp
+          fi
+          
+          # 3. สร้าง/อัปเดต Secret ใน K8S (ใช้ชื่อเดิมเพื่อให้ deployment.yaml อ้างอิงได้ตลอด)
           kubectl create secret generic laravel-app-env \
             --from-env-file=.env.tmp \
             -n ${K8S_NAMESPACE} \
             --dry-run=client -o yaml | kubectl apply -f -
-
-          rm .env.tmp # ลบไฟล์ทิ้งเพื่อความปลอดภัย
+          
+          rm .env.tmp
 
       - name: Deploy to K8S
         run: |
