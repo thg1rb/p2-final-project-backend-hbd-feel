@@ -95,6 +95,9 @@ Route::middleware(['auth', ForcePasswordChange::class])->group(function () {
 Route::get('/end-event/sign', [EndEventController::class, 'index'])->name('end-event.index');
 Route::post('/end-event/upload-event', [EndEventController::class, 'uploadEvent'])->name('end-event.upload');
 Route::get('/end-event/export-pdf', [EndEventController::class, 'exportPdf'])->name('end-event.pdf');
+Route::get('/award-result', function () {
+    return redirect(env('FRONTEND_URL') . '/award-result');
+})->name("award-result.index");
 
 Route::middleware(['auth', ForcePasswordChange::class])->group(function () {
     Route::post('/approvals', [ApprovalController::class, 'store'])->name('approvals.store');

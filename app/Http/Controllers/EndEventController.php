@@ -88,8 +88,9 @@ class EndEventController extends Controller
         }
     }
 
-    public function exportPdf()
+    public function exportPdf(Request $request)
     {
+        $signerName = $request->query('signer_name', '....................');
         $applications = Application::with(['user.faculty', 'user.department', 'award', 'event'])
             ->where('status', 'APPROVED') // หรือเงื่อนไขที่ต้องการ
             ->get();
@@ -115,6 +116,7 @@ class EndEventController extends Controller
             'applications' => $applications,
             'firstApp' => $firstApp,
             'userName' => $userName,
+            'signerName' => $signerName,
             'stats' => $stats,
             'groupedApps' => $groupedApps,
             'today' => Carbon::now(),
