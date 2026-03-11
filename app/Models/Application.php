@@ -34,6 +34,18 @@ class Application extends Model
         'status' => ApplicationStatus::class,
     ];
 
+    protected $appends = ['is_within_event_date'];
+
+    public function getIsWithinEventDateAttribute()
+    {
+        if (!$this->event || !$this->event->start_date || !$this->event->end_date) {
+            return false;
+        }
+
+        $now = now();
+        return $now->gte($this->event->start_date) && $now->lte($this->event->end_date);
+    }
+
     public function scopeWhereEventStatus($query, string $status, ?User $user = null)
     {
         if ($user && $user->role === UserRole::NISIT) {
