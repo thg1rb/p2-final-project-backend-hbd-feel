@@ -18,38 +18,6 @@ spec:
           imagePullPolicy: Always
           ports:
             - containerPort: 80
-          env:
-            - name: APP_ENV
-              value: local
-            - name: APP_DEBUG
-              value: "true"
-            - name: APP_KEY
-              valueFrom:
-                secretKeyRef:
-                  name: laravel-secrets
-                  key: APP_KEY
-            - name: DB_PASSWORD
-              valueFrom:
-                secretKeyRef:
-                  name: laravel-secrets
-                  key: DB_PASSWORD
-            - name: DB_CONNECTION
-              value: mysql
-            - name: DB_HOST
-              value: mysql # อย่าลืม Deploy MySQL Service ด้วยชื่อนี้
-            - name: DB_PORT
-              value: "3306"
-            - name: DB_DATABASE
-              value: nisit-reward
-            - name: DB_USERNAME
-              value: laravel
-#            - name: APP_URL
-#              value: "https://laravel.local"
-            - name: FILESYSTEM_DISK
-              value: local
-            - name: AWS_URL
-              value: ""
-            - name: AWS_ENDPOINT
-              value: ""
-            - name: LOG_CHANNEL
-              value: stderr
+          envFrom:
+            - secretRef:
+                name: laravel-app-env
