@@ -2,7 +2,6 @@
 
 namespace Database\Seeders;
 
-use App\Enums\ApplicationStatus;
 use App\Enums\ApprovalStatus;
 use App\Enums\RoleLevel;
 use App\Enums\UserRole;
@@ -20,7 +19,7 @@ class ApprovalSeeder extends Seeder
 
             if ($level === RoleLevel::NISIT) {
                 $application->update([
-                    'status' => ApplicationStatus::APPROVED,
+                    'status' => ApprovalStatus::APPROVED,
                 ]);
 
                 return;
@@ -83,8 +82,8 @@ class ApprovalSeeder extends Seeder
             if ($finalStatus) {
                 $application->update([
                     'status' => $finalStatus === ApprovalStatus::APPROVED
-                        ? ApplicationStatus::APPROVED
-                        : ApplicationStatus::REJECTED,
+                        ? ApprovalStatus::APPROVED
+                        : ApprovalStatus::REJECTED,
                     'level' => $lastLevel,
                 ]);
             }
