@@ -41,7 +41,7 @@ RUN npm run build  # <--- ตัวนี้จะสร้างไฟล์ ma
 COPY --from=nodebuilder /app/public/build ./public/build
 
 # ติดตั้ง dependencies ของ PHP
-RUN composer install --no-dev --no-interaction --prefer-dist --optimize-autoloader
+RUN composer install --no-interaction --prefer-dist --optimize-autoloader
 
 # ตั้งสิทธิ์การเข้าถึงไฟล์ (สำคัญมากสำหรับ Laravel เพื่อให้เขียน Log และ Cache ได้)
 RUN chown -R www-data:www-data /var/www/html \
