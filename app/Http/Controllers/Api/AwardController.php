@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\Award;
+use App\Models\Event;
 use Illuminate\Http\Request;
 
 class AwardController extends Controller
@@ -15,7 +16,12 @@ class AwardController extends Controller
     {
         $user = auth()->user();
 
-        $awards = Award::where('campus', $user->campus)
+        $awards = Award::query()
+            ->where('awards.campus', $user->campus)
+            ->whereHas('events', function ($q) use ($user) {
+                $q->where('status', 'OPENED')
+                    ->where('campus', $user->campus);
+            })
             ->get(['id', 'name', 'form_path', 'requirements']);
 
         return response()->json($awards);
