@@ -15,11 +15,11 @@ class InnovationAwardRegistrationFactory extends Factory
     public function definition(): array
     {
         return [
-            'award_date' => $this->faker->date(),
+            'award_date' => $this->faker()->date(),
 
-            'project_name' => $this->faker->sentence(3),
-            'team_name' => $this->faker->word(),
-            'work_name' => $this->faker->sentence(2),
+            'project_name' => $this->faker()->sentence(3),
+            'team_name' => $this->faker()->word(),
+            'work_name' => $this->faker()->sentence(2),
             'award_name' => 'รางวัลดีเด่น',
             'organizer' => 'มหาวิทยาลัยเกษตรศาสตร์',
         ];

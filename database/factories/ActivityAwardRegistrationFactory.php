@@ -15,17 +15,17 @@ class ActivityAwardRegistrationFactory extends Factory
     public function definition(): array
     {
         return [
-            'activity_types' => [$this->faker->randomElement([
+            'activity_types' => [$this->faker()->randomElement([
                 'community',
                 'competition',
                 'leadership',
             ])],
 
-            'award_date' => $this->faker->date(),
+            'award_date' => $this->faker()->date(),
 
-            'project_name' => $this->faker->sentence(3),
-            'team_name' => $this->faker->word(),
-            'work_name' => $this->faker->sentence(2),
+            'project_name' => $this->faker()->sentence(3),
+            'team_name' => $this->faker()->word(),
+            'work_name' => $this->faker()->sentence(2),
             'award_name' => 'รางวัลดีเด่น',
             'organizer' => 'มหาวิทยาลัยเกษตรศาสตร์',
         ];

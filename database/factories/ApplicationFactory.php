@@ -28,12 +28,12 @@ class ApplicationFactory extends Factory
             'student_id' => null,
             'event_id' => 46,
             'award_id' => Award::inRandomOrder()->first()?->id ?? 1,
-            'grade' => $this->faker->randomFloat(2, 2, 4),
+            'grade' => $this->faker()->randomFloat(2, 2, 4),
             'path' => 'form_1.pdf',
             'documents' => $submissionData,
-            'year' => $this->faker->numberBetween(1, 4),
+            'year' => $this->faker()->numberBetween(1, 4),
             'level' => RoleLevel::BOARD,
-            'status' => $this->faker->randomElement(ApprovalStatus::cases())->value,
+            'status' => $this->faker()->randomElement(ApprovalStatus::cases())->value,
         ];
     }
 }
