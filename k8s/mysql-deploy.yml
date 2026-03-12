@@ -17,12 +17,32 @@ spec:
           image: mysql:8.0
           ports:
             - containerPort: 3306
+          containers:
+        - name: mysql
+          image: mysql:8.0
+          ports:
+            - containerPort: 3306
           env:
-            - name: MYSQL_ROOT_PASSWORD
-              value: root
             - name: MYSQL_DATABASE
-              value: nisit-reward
+              valueFrom:
+                secretKeyRef:
+                  name: laravel-app-env
+                  key: DB_DATABASE
+                  
             - name: MYSQL_USER
-              value: sail
+              valueFrom:
+                secretKeyRef:
+                  name: laravel-app-env
+                  key: DB_USERNAME
+                  
             - name: MYSQL_PASSWORD
-              value: password
+              valueFrom:
+                secretKeyRef:
+                  name: laravel-app-env
+                  key: DB_PASSWORD
+                  
+            - name: MYSQL_ROOT_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: laravel-app-env
+                  key: DB_ROOT_PASSWORD
