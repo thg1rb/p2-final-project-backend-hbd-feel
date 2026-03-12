@@ -44,7 +44,7 @@ class UserFactory extends Factory
             'role' => fake()->randomElement(['NISIT']),
             'password' => static::$password ??= Hash::make('password'),
             'remember_token' => Str::random(10),
-            'campus' => CampusType::BANGKHEN,
+            'campus' => fake()->randomElement(CampusType::cases()),
 
             'faculty_id' => $department->faculty_id,
             'department_id' => $department->id,
