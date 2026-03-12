@@ -13,6 +13,9 @@ return new class extends Migration
     {
         Schema::create('users', function (Blueprint $table) {
             $table->id();
+            $table->string('student_id')->unique()->nullable();
+            $table->foreignId('faculty_id')->nullable()->constrained()->cascadeOnDelete();
+            $table->foreignId('department_id')->nullable()->constrained()->cascadeOnDelete();
             $table->string('firstName');
             $table->string('lastName');
             $table->string('username')->unique();
@@ -20,6 +23,9 @@ return new class extends Migration
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
             $table->rememberToken();
+            $table->string('campus');
+
+
             $table->timestamps();
         });
 

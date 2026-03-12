@@ -1,0 +1,190 @@
+name: Laravel CI/CD to Local K8S
+
+on:
+  push:
+    branches:
+      - main
+      - develop
+      - feature/setup-cicd
+  pull_request:
+    branches:
+      - main
+      - develop
+
+jobs:
+  # JOB 1: รัน Unit Test อย่างเดียว
+  laravel-tests:
+    runs-on: ubuntu-latest
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_ROOT_PASSWORD: password
+          MYSQL_DATABASE: testing
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping"
+          --health-interval=20s
+          --health-timeout=10s
+          --health-retries=5
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.4'
+          extensions: mbstring, dom, curl, libxml, mysql, pcov
+          coverage: pcov
+
+      - name: Install PHP Dependencies
+        run: |
+          php -r "copy('.env.example', '.env');"
+          composer install --no-ansi --no-interaction --no-scripts --no-progress --prefer-dist
+          php artisan key:generate
+
+      # --- แก้ไขเพิ่มสเต็ป NPM ตรงนี้ เพื่อป้องกัน Vite manifest not found ---
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install NPM dependencies & Build Assets
+        run: |
+          yarn install
+          yarn run build
+      # -----------------------------------------------------------
+
+      - name: Run Tests and Generate Coverage
+        env:
+          DB_CONNECTION: mysql
+          DB_HOST: 127.0.0.1
+          DB_PORT: 3306
+          DB_DATABASE: testing
+          DB_USERNAME: root
+          DB_PASSWORD: password
+        run: php artisan test --coverage-clover=coverage.xml
+
+      - name: Upload Coverage Report
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-report
+          path: coverage.xml
+
+  # JOB 2: วิเคราะห์โค้ดด้วย SonarQube
+  sonarqube-analysis:
+    needs: laravel-tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # Sonar ต้องการประวัติ git เพื่อวิเคราะห์ความเปลี่ยนแปลง
+
+      - name: Download Coverage Report
+        uses: actions/download-artifact@v4
+        with:
+          name: coverage-report
+
+      - name: SonarQube Scan
+        uses: sonarsource/sonarqube-scan-action@master
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
+        with:
+          args: >
+            -Dsonar.projectKey=myapp-backend
+            -Dsonar.sources=app,routes,database,config
+            -Dsonar.tests=tests
+            -Dsonar.php.coverage.reportPaths=coverage.xml
+            -Dsonar.exclusions=vendor/**,node_modules/**,public/**,bootstrap/cache/**
+
+  # JOB 3: Build Docker (รอให้ทั้ง Test และ Sonar ผ่านก่อน หรือเลือกแค่ Test ก็ได้)
+  build-docker:
+    needs: [laravel-tests, sonarqube-analysis]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Login to Docker Hub
+        if: github.event_name != 'pull_request'
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+      - name: Build and push
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          push: ${{ github.event_name != 'pull_request' }}
+          tags: |
+            ${{ secrets.DOCKERHUB_USERNAME }}/laravel-app:${{ github.sha }}
+            ${{ secrets.DOCKERHUB_USERNAME }}/laravel-app:latest
+
+  # JOB 4: Deploy ไปยัง K8S
+  deploy-local:
+    needs: build-docker
+    if: github.event_name != 'pull_request'
+    runs-on: self-hosted
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set Environment Variables
+        run: |
+          if [[ "${{ github.ref }}" == "refs/heads/main" ]]; then
+            echo "APP_HOST=admin.nisit-deeden.k8s.dev" >> $GITHUB_ENV
+            echo "K8S_NAMESPACE=production" >> $GITHUB_ENV
+          elif [[ "${{ github.ref }}" == "refs/heads/develop" ]]; then
+            echo "APP_HOST=admin.nisit-deeden.uat.k8s.dev" >> $GITHUB_ENV
+            echo "K8S_NAMESPACE=uat" >> $GITHUB_ENV
+          elif [[ "${{ github.ref }}" == "refs/heads/feature/setup-cicd" ]]; then
+            echo "APP_HOST=api.test.k8s.dev" >> $GITHUB_ENV
+            echo "K8S_NAMESPACE=test" >> $GITHUB_ENV
+          fi
+
+      - name: Create K8S Secret from Env
+        run: |
+          # 1. สร้าง Namespace
+          kubectl create namespace ${K8S_NAMESPACE} --dry-run=client -o yaml | kubectl apply -f -
+          
+          # 2. เลือก Secret ก้อนที่ถูกต้องตาม Branch
+          if [[ "${{ github.ref }}" == "refs/heads/main" ]]; then
+            echo "${{ secrets.LARAVEL_PROD_ENV }}" > .env.tmp
+          elif [[ "${{ github.ref }}" == "refs/heads/develop" ]]; then
+            echo "${{ secrets.LARAVEL_UAT_ENV }}" > .env.tmp
+          else
+            # สำหรับ branch อื่นๆ เช่น feature อาจจะใช้ค่า UAT ไปก่อน หรือทำ secret แยกอีกตัว
+            echo "${{ secrets.LARAVEL_UAT_ENV }}" > .env.tmp
+          fi
+          
+          # 3. สร้าง/อัปเดต Secret ใน K8S (ใช้ชื่อเดิมเพื่อให้ deployment.yaml อ้างอิงได้ตลอด)
+          kubectl create secret generic laravel-app-env \
+            --from-env-file=.env.tmp \
+            -n ${K8S_NAMESPACE} \
+            --dry-run=client -o yaml | kubectl apply -f -
+          
+          rm .env.tmp
+
+      - name: Deploy to K8S
+        run: |
+          # 1. Apply config ไฟล์ทั้งหมด (deployment, service, ingress)
+          kubectl apply -f k8s/ -n ${K8S_NAMESPACE}
+
+          # 2. อัปเดต Image เป็นตัวล่าสุดที่เพิ่ง Build
+          kubectl set image deployment/laravel-app laravel=${{ secrets.DOCKERHUB_USERNAME }}/laravel-app:${{ github.sha }} -n ${K8S_NAMESPACE}
+
+          # 3. Patch Ingress ให้ Host ตรงกับ Branch
+          kubectl patch ingress laravel-ingress -n ${K8S_NAMESPACE} --type=json -p='[{"op": "replace", "path": "/spec/rules/0/host", "value": "'"${APP_HOST}"'"}]'
+
+          # 4. อัปเดต APP_URL ให้ตรงตาม Host
+          kubectl set env deployment/laravel-app APP_URL=https://${APP_HOST} -n ${K8S_NAMESPACE}
+
+#      - name: Deploy to K8S
+#        run: |
+#          kubectl create namespace ${K8S_NAMESPACE} --dry-run=client -o yaml | kubectl apply -f -
+#          kubectl create secret generic laravel-secrets \
+#            --from-literal=APP_KEY="${{ secrets.LARAVEL_APP_KEY }}" \
+#            --from-literal=DB_PASSWORD="${{ secrets.DB_PASSWORD }}" \
+#            -n ${K8S_NAMESPACE} --dry-run=client -o yaml | kubectl apply -f -
+#          kubectl apply -f k8s/ -n ${K8S_NAMESPACE}
+#          kubectl patch ingress laravel-ingress -n ${K8S_NAMESPACE} --type=json -p='[{"op": "replace", "path": "/spec/rules/0/host", "value": "'"${APP_HOST}"'"}]'
+#          kubectl set env deployment/laravel-app APP_URL=https://${APP_HOST} -n ${K8S_NAMESPACE}
+#          kubectl set image deployment/laravel-app laravel=${{ secrets.DOCKERHUB_USERNAME }}/laravel-app:${{ github.sha }} -n ${K8S_NAMESPACE}

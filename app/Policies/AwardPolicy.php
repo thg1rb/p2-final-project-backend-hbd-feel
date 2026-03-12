@@ -29,7 +29,7 @@ class AwardPolicy
      */
     public function create(User $user): bool
     {
-        return false;
+        return $user->isAdmin();
     }
 
     /**
@@ -37,7 +37,7 @@ class AwardPolicy
      */
     public function update(User $user, Award $award): bool
     {
-        return false;
+        return $user->isAdmin() || $user->awards()->where('awards.id', $award->id)->exists();
     }
 
     /**
@@ -45,7 +45,7 @@ class AwardPolicy
      */
     public function delete(User $user, Award $award): bool
     {
-        return false;
+        return $user->isAdmin() || $user->awards()->where('awards.id', $award->id)->exists();
     }
 
     /**

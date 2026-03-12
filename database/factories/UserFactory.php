@@ -2,6 +2,7 @@
 
 namespace Database\Factories;
 
+use App\Enums\CampusType;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
@@ -23,15 +24,30 @@ class UserFactory extends Factory
      */
     public function definition(): array
     {
+        $department = \App\Models\Department::inRandomOrder()->first();
+
+        if (! $department) {
+            $faculty = \App\Models\Faculty::firstOrCreate(['name' => 'คณะวิทยาศาสตร์']);
+            $department = \App\Models\Department::firstOrCreate([
+                'name' => 'ภาควิชาวิทยาการคอมพิวเตอร์',
+                'faculty_id' => $faculty->id,
+            ]);
+        }
+
         return [
+            'student_id' => fake()->unique()->numerify('##########'),
             'firstName' => fake()->firstName(),
             'lastName' => fake()->lastName(),
-            'username' => fake()->username(),
+            'username' => fake()->unique()->username(),
             'email' => fake()->unique()->safeEmail(),
             'email_verified_at' => now(),
-            'role' => fake()->randomElement(["NISIT"]),
+            'role' => fake()->randomElement(['NISIT']),
             'password' => static::$password ??= Hash::make('password'),
             'remember_token' => Str::random(10),
+            'campus' => fake()->randomElement(CampusType::cases()),
+
+            'faculty_id' => $department->faculty_id,
+            'department_id' => $department->id,
         ];
     }
 

@@ -28,7 +28,8 @@ class EventRequest extends FormRequest
 
         return [
             'semester' => 'required|integer|in:1,2',
-            'start_date' => 'required|date|after:today',
+            'campus' => 'required|string|in:' . implode(',', array_map(fn($case) => $case->value, \App\Enums\CampusType::cases())),
+            'start_date' => 'required|date|after_or_equal::today',
             'end_date' => 'required|date|after:start_date',
             'status' => [
                 'required',
@@ -37,8 +38,9 @@ class EventRequest extends FormRequest
                 function ($attribute, $value, $fail) use ($eventId) {
                     // Check if trying to set status to OPENED
                     if ($value === \App\Enums\Status::OPENED->value) {
-                        // Check if there's already an OPENED event (exclude current event when editing)
+                        // Check if there's already an OPENED event in the same campus (exclude current event when editing)
                         $hasOpenedEvent = \App\Models\Event::where('status', \App\Enums\Status::OPENED->value)
+                            ->where('campus', auth()->user()->campus)
                             ->when($eventId, function ($query) use ($eventId) {
                                 return $query->where('id', '!=', $eventId);
                             })
@@ -67,6 +69,7 @@ class EventRequest extends FormRequest
 
                     $exists = \App\Models\Event::where('academic_year', $value)
                         ->where('semester', $semester)
+                        ->where('campus', auth()->user()->campus)
                         ->when($eventId, function ($query) use ($eventId) {
                             return $query->where('id', '!=', $eventId);
                         })
