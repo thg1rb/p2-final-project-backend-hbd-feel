@@ -7,8 +7,9 @@ spec:
     - ReadWriteOnce
   resources:
     requests:
-      storage: 10Gi # กำหนดขนาดพื้นที่ที่ต้องการ (ปรับเปลี่ยนได้)
+      storage: 10Gi
 
+---
 
 apiVersion: apps/v1
 kind: Deployment
@@ -29,18 +30,36 @@ spec:
           image: mysql:8.0
           ports:
             - containerPort: 3306
+
           env:
-            - name: MYSQL_ROOT_PASSWORD
-              value: root
             - name: MYSQL_DATABASE
-              value: nisit-reward
+              valueFrom:
+                secretKeyRef:
+                  name: laravel-app-env
+                  key: DB_DATABASE
+
             - name: MYSQL_USER
-              value: sail
+              valueFrom:
+                secretKeyRef:
+                  name: laravel-app-env
+                  key: DB_USERNAME
+
             - name: MYSQL_PASSWORD
-              value: password
-    volumeMounts:
+              valueFrom:
+                secretKeyRef:
+                  name: laravel-app-env
+                  key: DB_PASSWORD
+
+            - name: MYSQL_ROOT_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: laravel-app-env
+                  key: DB_ROOT_PASSWORD
+
+          volumeMounts:
             - name: mysql-data
               mountPath: /var/lib/mysql
+
       volumes:
         - name: mysql-data
           persistentVolumeClaim:
