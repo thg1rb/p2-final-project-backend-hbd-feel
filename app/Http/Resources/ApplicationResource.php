@@ -16,6 +16,7 @@ class ApplicationResource extends JsonResource
     {
         return [
             'application_id' => $this->resource->id,
+            'event_id' => $this->resource->event_id,
             'academic_year' => $this->resource->event->academic_year,
             'semester' => $this->resource->event->semester,
             'status' => $this->resource->status,
