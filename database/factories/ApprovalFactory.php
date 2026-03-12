@@ -19,8 +19,8 @@ class ApprovalFactory extends Factory
     public function definition(): array
     {
         return [
-            'id' => $this->faker()->uuid(),
-            'reason' => $this->faker()->paragraph(),
+            'id' => fake()->uuid(),
+            'reason' => fake()->paragraph(),
         ];
     }
 }

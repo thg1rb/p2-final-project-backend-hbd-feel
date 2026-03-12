@@ -18,25 +18,25 @@ class AwardRegistrationFactory extends Factory
     public function definition(): array
     {
         return [
-            'first_name' => $this->faker()->firstName(),
-            'last_name'  => $this->faker()->lastName(),
+            'first_name' => fake()->firstName(),
+            'last_name'  => fake()->lastName(),
 
             // ปีการศึกษา 1 - 8
-            'academic_year' => $this->faker()->numberBetween(1, 8),
+            'academic_year' => fake()->numberBetween(1, 8),
 
             // สถานะ (ภาษาอังกฤษ)
-            'status' => $this->faker()->randomElement([
+            'status' => fake()->randomElement([
                 'เสร็จสิ้นกระบวนการ',
                 'ส่งคำขอแล้ว',
                 'ไม่ผ่านการพิจารณา',
             ]),
-//            'award_type' => $this->faker->randomElement([
-//                'ActivityAwardRegistration',
-//                'InnovationAwardRegistration',
-//                'BehaviourAwardRegistration',
-//            ]),
-//            'awardable_id' => $innovation->id,
-//            'awardable_type' => InnovationAwardRegistration::class,
+            //            'award_type' => $this->faker->randomElement([
+            //                'ActivityAwardRegistration',
+            //                'InnovationAwardRegistration',
+            //                'BehaviourAwardRegistration',
+            //            ]),
+            //            'awardable_id' => $innovation->id,
+            //            'awardable_type' => InnovationAwardRegistration::class,
         ];
     }
 }
