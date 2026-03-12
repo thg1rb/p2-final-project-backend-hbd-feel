@@ -5,7 +5,7 @@ metadata:
 spec:
   ingressClassName: nginx
   rules:
-    - host: mail.nisit-deeden.uat.k8s.dev # ชื่อโดเมนสำหรับเข้าดูอีเมล
+    - host: mail.nisit-deeden.k8s.dev # ชื่อโดเมนสำหรับเข้าดูอีเมล
       http:
         paths:
           - path: /
