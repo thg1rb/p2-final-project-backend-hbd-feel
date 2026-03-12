@@ -27,13 +27,13 @@ class ApplicationFactory extends Factory
         return [
             'student_id' => null,
             'event_id' => 46,
-            'award_id' => Award::inRandomOrder()->first()?->id ?? 1,
-            'grade' => $this->faker()->randomFloat(2, 2, 4),
+            'award_id' => null,
+            'grade' => fake()->randomFloat(2, 2, 4),
             'path' => 'form_1.pdf',
             'documents' => $submissionData,
-            'year' => $this->faker()->numberBetween(1, 4),
+            'year' => fake()->numberBetween(1, 4),
             'level' => RoleLevel::BOARD,
-            'status' => $this->faker()->randomElement(ApprovalStatus::cases())->value,
+            'status' => fake()->randomElement(ApprovalStatus::cases())->value,
         ];
     }
 }

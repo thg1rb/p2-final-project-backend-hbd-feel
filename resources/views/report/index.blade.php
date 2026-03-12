@@ -105,27 +105,29 @@ use App\Enums\Status;
                                         </td>
 
                                         <td class="p-4">
-                                        @if ($application->status->value === ApprovalStatus::REJECTED->value)
-                                            <div
-                                                class="rounded-full border border-red-400 bg-red-100 px-3 py-1 text-red-500 text-sm w-fit">
-                                                ปฏิเสธ
-                                            </div>
-                                        @elseif ($application->level->value === RoleLevel::BOARD->value && !$event)
-                                            <div
-                                                class="rounded-full border border-primary bg-green-50 px-3 py-1 text-primary text-sm w-fit">
-                                                อนุมัติ
-                                            </div>
-                                        @elseif ($application->status->value === ApprovalStatus::APPROVED->value && $application->level->value === RoleLevel::DEAN->value)
-                                            <div
-                                            class="rounded-full border border-amber-400 bg-amber-100 px-3 py-1 text-amber-500 text-sm w-fit">
-                                            รอพิจารณา
-                                        </div>
-                                        @else
-                                            <div
-                                                class="rounded-full border border-orange-400 bg-orange-50 px-3 py-1 text-orange-500 text-sm w-fit">
-                                                กำลังดำเนินการ
-                                            </div>
-                                        @endif
+                                            @if ($application->status->value === ApprovalStatus::REJECTED->value)
+                                                <div
+                                                    class="rounded-full border border-red-400 bg-red-100 px-3 py-1 text-red-500 text-sm w-fit">
+                                                    ปฏิเสธ
+                                                </div>
+                                            @elseif ($application->level->value === RoleLevel::BOARD->value && !$event)
+                                                <div
+                                                    class="rounded-full border border-primary bg-green-50 px-3 py-1 text-primary text-sm w-fit">
+                                                    อนุมัติ
+                                                </div>
+                                            @elseif (
+                                                $application->status->value === ApprovalStatus::APPROVED->value &&
+                                                    $application->level->value === RoleLevel::DEAN->value)
+                                                <div
+                                                    class="rounded-full border border-amber-400 bg-amber-100 px-3 py-1 text-amber-500 text-sm w-fit">
+                                                    รอพิจารณา
+                                                </div>
+                                            @else
+                                                <div
+                                                    class="rounded-full border border-orange-400 bg-orange-50 px-3 py-1 text-orange-500 text-sm w-fit">
+                                                    กำลังดำเนินการ
+                                                </div>
+                                            @endif
                                         </td>
 
                                         <td class="p-4">
@@ -149,7 +151,18 @@ use App\Enums\Status;
                         <p class=" text-gray-400">ไม่พบข้อมูลที่คุณคัดกรอง</p>
                     </div>
                 @endif
-                <div class="flex justify-end">
+                <div class="flex justify-between">
+                    <div class="flex space-x-2">
+                        <a href="{{ route('report.award-report', array_merge(request()->query(), ['export' => 'csv'])) }}"
+                            class="btn btn-success flex items-center bg-blue-500 text-white p-3 rounded-xl">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" fill="none"
+                                viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                            </svg>
+                            นำออกข้อมูลรายชื่อนิสิต
+                        </a>
+                    </div>
                     <div class="flex gap-4 items-center">
                         @if ($applications->onFirstPage())
                             <x-icon name="arrow-head-left" class="stroke-gray-300"></x-icon>

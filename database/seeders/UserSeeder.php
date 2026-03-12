@@ -94,7 +94,7 @@ class UserSeeder extends Seeder
                 'faculty_id' => $faculty->id,
                 'department_id' => $department->id,
                 'student_id' => fake()->numerify("##########"),
-                'campus' => CampusType::BANGKHEN,
+                'campus' => fake()->randomElement(CampusType::cases()),
             ]);
         }
     }
