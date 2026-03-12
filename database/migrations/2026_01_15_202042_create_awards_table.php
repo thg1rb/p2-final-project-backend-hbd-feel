@@ -14,7 +14,9 @@ return new class extends Migration
         Schema::create('awards', function (Blueprint $table) {
             $table->id();
             $table->string('name');
-            $table->double('reward');
+            $table->string('form_path');
+            $table->json('requirements');
+            $table->string('campus');
             $table->timestamps();
             $table->softDeletes();
         });

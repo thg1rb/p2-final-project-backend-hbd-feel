@@ -2,6 +2,7 @@
 
 namespace Database\Factories;
 
+use App\Enums\CampusType;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
@@ -16,8 +17,23 @@ class AwardFactory extends Factory
      */
     public function definition(): array
     {
+        $requirements = [
+            [
+                "id" => "req_001",
+                "name" => "สำเนาบัตรประชาชน",
+                "required" => true
+            ],
+            [
+                "id" => "req_002",
+                "name" => "Transcript",
+                "required" => true
+            ],
+        ];
         return [
-            'name' => fake()->randomElement(['Extracurricular Activities', 'Creativity & Innovation', 'Good Conduct'])
+            'name' => fake()->words(3, true),
+            'form_path' => "form_1.pdf",
+            'requirements' => $requirements,
+            'campus' => fake()->randomElement(CampusType::cases())->value,
         ];
     }
 }

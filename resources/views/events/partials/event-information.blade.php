@@ -10,68 +10,6 @@
 
 @if(!$readonly)
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
-    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
-    <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/th.js"></script>
-    <script>
-        const flatpickrConfig = {
-            locale: "th",
-            dateFormat: "Y-m-d", // Saves as AD (e.g., 2024-01-01)
-            altInput: true,
-            altFormat: "d F Y",
-            minDate: "today",
-
-            onReady: function(selectedDates, dateStr, instance) {
-                updateInputField(instance);
-                drawBuddhistYear(instance);
-            },
-
-            onOpen: function(selectedDates, dateStr, instance) {
-                drawBuddhistYear(instance);
-            },
-
-            onMonthChange: function(selectedDates, dateStr, instance) {
-                drawBuddhistYear(instance);
-            },
-
-            onYearChange: function(selectedDates, dateStr, instance) {
-                drawBuddhistYear(instance);
-            },
-
-            onChange: function(selectedDates, dateStr, instance) {
-                updateInputField(instance);
-            }
-        };
-
-        // --- Helper Functions ---
-
-        // Logic to update the "Alt Input" (The text box user sees)
-        function updateInputField(instance) {
-            if (instance.selectedDates.length > 0) {
-                const date = instance.selectedDates[0];
-                const beYear = date.getFullYear() + 543;
-                const formatted = instance.formatDate(date, "d F");
-                instance.altInput.value = `${formatted} ${beYear}`;
-            }
-        }
-
-        // Logic to update the Calendar Popup Header (The box inside the calendar)
-        function drawBuddhistYear(instance) {
-            setTimeout(() => {
-                if (instance.currentYearElement) {
-                    // Calculate BE Year
-                    const beYear = instance.currentYear + 543;
-                    // Force the input value to show BE
-                    instance.currentYearElement.value = beYear;
-                }
-            }, 10);
-        }
-
-        // Initialize both date pickers
-        document.addEventListener('DOMContentLoaded', function() {
-            flatpickr("#start_date", flatpickrConfig);
-            flatpickr("#end_date", flatpickrConfig);
-        });
-    </script>
 @endif
 
 <section>
@@ -96,6 +34,9 @@
                 </select>
                 @error('status') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
             </div>
+
+            <input type="hidden" name="campus" value="{{ old('campus', auth()->user()->campus) }}">
+            @error('campus') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
 
             <div class="flex flex-col">
                 <label for="academic_year">ปีการศึกษา <span class="text-red-500">*</span></label>
@@ -166,37 +107,51 @@
 
             <div class="flex flex-col">
                 <label for="start_date">วันที่เริ่มต้น <span class="text-red-500">*</span></label>
-                <input
-                    id="start_date"
-                    name="start_date"
-                    type="text"
-                    value="{{
-                        $readonly && $event?->start_date
-                        ? $event->start_date->locale('th')->translatedFormat('d F') . ' ' . ($event->start_date->year + 543)
-                        : old('start_date', $event?->start_date?->format('Y-m-d'))
-                    }}"
-                    {{ $readonly ? 'disabled' : '' }}
-                    class="border-gray-300 focus:border-primary focus:ring-primary rounded-md shadow-sm {{ $readonly ? 'bg-gray-100 cursor-not-allowed' : '' }}"
-                    required
-                >
+                @if($readonly)
+                    <input
+                        id="start_date"
+                        type="text"
+                        value="{{ $event?->start_date ? $event->start_date->locale('th')->translatedFormat('d F') . ' ' . ($event->start_date->year + 543) : '' }}"
+                        disabled
+                        class="border-gray-300 rounded-md shadow-sm bg-gray-100 cursor-not-allowed"
+                    >
+                @else
+                    {{-- Hidden input holds the real AD value submitted to the server --}}
+                    <input type="hidden" id="start_date" name="start_date" value="{{ old('start_date', $event?->start_date?->format('Y-m-d')) }}">
+                    {{-- Visible input is controlled by flatpickr altInput --}}
+                    <input
+                        id="start_date_display"
+                        type="text"
+                        placeholder="เลือกวันที่เริ่มต้น"
+                        class="border-gray-300 focus:border-primary focus:ring-primary rounded-md shadow-sm"
+                        required
+                    >
+                @endif
                 @error('start_date') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
             </div>
 
             <div class="flex flex-col">
                 <label for="end_date">วันที่สิ้นสุด <span class="text-red-500">*</span></label>
-                <input
-                    id="end_date"
-                    name="end_date"
-                    type="text"
-                    value="{{
-                        $readonly && $event?->end_date
-                        ? $event->end_date->locale('th')->translatedFormat('d F') . ' ' . ($event->end_date->year + 543)
-                        : old('end_date', $event?->end_date?->format('Y-m-d'))
-                    }}"
-                    {{ $readonly ? 'disabled' : '' }}
-                    class="border-gray-300 focus:border-primary focus:ring-primary rounded-md shadow-sm {{ $readonly ? 'bg-gray-100 cursor-not-allowed' : '' }}"
-                    required
-                >
+                @if($readonly)
+                    <input
+                        id="end_date"
+                        type="text"
+                        value="{{ $event?->end_date ? $event->end_date->locale('th')->translatedFormat('d F') . ' ' . ($event->end_date->year + 543) : '' }}"
+                        disabled
+                        class="border-gray-300 rounded-md shadow-sm bg-gray-100 cursor-not-allowed"
+                    >
+                @else
+                    {{-- Hidden input holds the real AD value submitted to the server --}}
+                    <input type="hidden" id="end_date" name="end_date" value="{{ old('end_date', $event?->end_date?->format('Y-m-d')) }}">
+                    {{-- Visible input is controlled by flatpickr --}}
+                    <input
+                        id="end_date_display"
+                        type="text"
+                        placeholder="เลือกวันที่สิ้นสุด"
+                        class="border-gray-300 focus:border-primary focus:ring-primary rounded-md shadow-sm"
+                        required
+                    >
+                @endif
                 @error('end_date') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
             </div>
         </div>
@@ -208,3 +163,82 @@
         @endif
     </form>
 </section>
+
+@if(!$readonly)
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/th.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+
+            // Updates the hidden input (real AD date for the server)
+            function syncHiddenInput(hiddenInputId, selectedDates, instance) {
+                const hidden = document.getElementById(hiddenInputId);
+                if (selectedDates.length > 0) {
+                    hidden.value = instance.formatDate(selectedDates[0], "Y-m-d");
+                } else {
+                    hidden.value = "";
+                }
+            }
+
+            // Updates the visible display input to show Buddhist Era year
+            function updateDisplayInput(selectedDates, instance) {
+                if (selectedDates.length > 0) {
+                    const date = selectedDates[0];
+                    const beYear = date.getFullYear() + 543;
+                    const formatted = instance.formatDate(date, "d F");
+                    instance.input.value = `${formatted} ${beYear}`;
+                }
+            }
+
+            // Overrides the calendar popup year header to show Buddhist Era
+            function drawBuddhistYear(instance) {
+                setTimeout(() => {
+                    if (instance.currentYearElement) {
+                        instance.currentYearElement.value = instance.currentYear + 543;
+                    }
+                }, 10);
+            }
+
+            function createConfig(hiddenInputId, existingValue, isCreate) {
+                return {
+                    locale: "th",
+                    dateFormat: "Y-m-d",
+                    defaultDate: existingValue || null,
+                    minDate: isCreate ? "today" : null,
+                    disableMobile: true, // Use flatpickr on mobile too
+
+                    onReady: function(selectedDates, dateStr, instance) {
+                        updateDisplayInput(selectedDates, instance);
+                        drawBuddhistYear(instance);
+                    },
+
+                    onOpen: function(selectedDates, dateStr, instance) {
+                        drawBuddhistYear(instance);
+                    },
+
+                    onMonthChange: function(selectedDates, dateStr, instance) {
+                        drawBuddhistYear(instance);
+                    },
+
+                    onYearChange: function(selectedDates, dateStr, instance) {
+                        drawBuddhistYear(instance);
+                    },
+
+                    onChange: function(selectedDates, dateStr, instance) {
+                        syncHiddenInput(hiddenInputId, selectedDates, instance);
+                        updateDisplayInput(selectedDates, instance);
+                    }
+                };
+            }
+
+            const isCreate = {{ $isCreate ? 'true' : 'false' }};
+
+            const startExisting = document.getElementById('start_date').value;
+            const endExisting   = document.getElementById('end_date').value;
+
+            // Attach flatpickr to the DISPLAY inputs, sync value into the hidden inputs
+            flatpickr("#start_date_display", createConfig('start_date', startExisting, isCreate));
+            flatpickr("#end_date_display",   createConfig('end_date',   endExisting,   isCreate));
+        });
+    </script>
+@endif

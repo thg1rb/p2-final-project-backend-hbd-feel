@@ -32,7 +32,7 @@
         <form action="{{ route('users.destroy', $user) }}" method="POST" class="inline">
             @csrf
             @method('DELETE')
-            <button type="submit" class="text-sm text-red-600 hover:text-red-800 font-medium" onclick="return confirm('ลบจริงไหม?')">
+            <button type="submit" class="text-sm text-red-600 hover:text-red-800 font-medium" onclick="return confirm('คุณแน่ใจที่จะลบผู้ใช้หรือไม่')">
                 ลบ
             </button>
         </form>

@@ -31,8 +31,8 @@
             <div class="hidden sm:flex sm:items-center sm:ms-6">
                 <div class="flex gap-3 justify-center items-center">
                     <p class="bg-[#2e3336] p-3 rounded-full text-white text-sm">
-                        @if (Auth::user()->role === App\Enums\UserRole::ADMIN)
-                            ผู้ดูแลระบบ
+                        @if (Auth::check() && Auth::user()->role === App\Enums\UserRole::NISIT_DEV)
+                            กองพัฒนานิสิต
                         @endif
                     </p>
                     <p class="">{{ Auth::user()?->username }}</p>
@@ -41,7 +41,7 @@
                     <x-slot name="trigger">
                         <button
                             class="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-gray-500 bg-white hover:text-gray-700 focus:outline-none transition ease-in-out duration-150">
-                            {{-- <div>{{ Auth::user()->name }}</div> --}}
+                            <div>{{ Auth::user()->name }}</div>
 
                             <div class="ms-1">
                                 <svg class="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg"

@@ -2,7 +2,7 @@
 
 namespace App\Enums;
 
-enum UserRole : string
+enum UserRole: string
 {
     case NISIT = 'NISIT';
     case DEPT_HEAD = 'DEPT_HEAD';
@@ -10,9 +10,6 @@ enum UserRole : string
     case DEAN = 'DEAN';
     case NISIT_DEV = 'NISIT_DEV';
     case BOARD = 'BOARD';
-    case BOARD_HEAD = 'BOARD_HEAD';
-    case CHANCELLOR = 'CHANCELLOR';
-    case ADMIN = 'ADMIN';
 
     public static function label(self $role): string
     {
@@ -21,11 +18,20 @@ enum UserRole : string
             self::DEPT_HEAD => 'หัวหน้าภาค',
             self::ASSO_DEAN => 'รองคณบดี',
             self::DEAN => 'คณบดี',
-            self::NISIT_DEV => 'นิสิตนักพัฒนา',
-            self::BOARD => 'กรรมการ',
-            self::BOARD_HEAD => 'ประธานกรรมการ',
-            self::CHANCELLOR => 'อธิการบดี',
-            self::ADMIN => 'ผู้ดูแลระบบ',
+            self::NISIT_DEV => 'กองพัฒนานิสิต',
+            self::BOARD => 'คณะกรรมการ',
+        };
+    }
+
+    public function level(): RoleLevel
+    {
+        return match ($this) {
+            self::NISIT => RoleLevel::NISIT,
+            self::DEPT_HEAD => RoleLevel::DEPT_HEAD,
+            self::ASSO_DEAN => RoleLevel::ASSO_DEAN,
+            self::DEAN => RoleLevel::DEAN,
+            self::NISIT_DEV => RoleLevel::NISIT_DEV,
+            self::BOARD => RoleLevel::BOARD,
         };
     }
 }

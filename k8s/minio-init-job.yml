@@ -1,0 +1,36 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: minio-init
+spec:
+  backoffLimit: 3
+  template:
+    spec:
+      containers:
+        - name: minio-init
+          image: minio/mc
+          command:
+            - /bin/sh
+            - -c
+            - |
+              sleep 5
+              mc alias set minio http://minio:9000 $MINIO_ACCESS_KEY $MINIO_SECRET_KEY
+              mc mb minio/$AWS_BUCKET --ignore-existing
+              mc anonymous set public minio/$AWS_BUCKET
+          env:
+            - name: MINIO_ACCESS_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: laravel-app-env
+                  key: MINIO_ACCESS_KEY
+            - name: MINIO_SECRET_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: laravel-app-env
+                  key: MINIO_SECRET_KEY
+            - name: AWS_BUCKET
+              valueFrom:
+                secretKeyRef:
+                  name: laravel-app-env
+                  key: AWS_BUCKET
+      restartPolicy: Never
