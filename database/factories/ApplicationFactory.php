@@ -27,7 +27,7 @@ class ApplicationFactory extends Factory
         return [
             'student_id' => null,
             'event_id' => 46,
-            'award_id' => Award::inRandomOrder()->first()?->id ?? 1,
+            'award_id' => null,
             'grade' => fake()->randomFloat(2, 2, 4),
             'path' => 'form_1.pdf',
             'documents' => $submissionData,

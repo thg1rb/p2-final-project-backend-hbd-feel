@@ -19,12 +19,21 @@ class AwardReportController extends Controller
     public function index(Request $request)
     {
         Gate::authorize('viewAny', Award::class);
+
+        $adminCampus = Auth::user()->campus;
+
         $targetYear = $request->year;
         $targetSemester = $request->semester;
         $search = $request->search;
         $awardType = $request->type;
 
         $query = Application::query();
+
+        $query->whereHas('user', function ($q) use ($adminCampus) {
+            $q->where('campus', $adminCampus);
+        })->whereHas('award', function ($q) use ($adminCampus) {
+            $q->where('campus', $adminCampus);
+        });
 
         if ($targetYear != "" || $targetSemester != "") {
             $query->whereHas('event', function ($q) use ($targetYear, $targetSemester) {
@@ -35,7 +44,6 @@ class AwardReportController extends Controller
             });
         }
 
-        Log::info("AWARD TYPE: " . $awardType);
 
         if ($awardType != "") {
             $query->whereHas('award', function ($q) use ($awardType) {
@@ -100,31 +108,36 @@ class AwardReportController extends Controller
         ]);
     }
 
-    private function exportCsv($users)
+    private function exportCsv($applications) // เปลี่ยนชื่อตัวแปรให้ไม่งง
     {
-        $fileName = 'award-report.csv';
+        $fileName = 'award-report-' . now()->format('Y-m-d') . '.csv';
 
         $headers = [
-            "Content-type" => "text/csv",
+            "Content-type"        => "text/csv; charset=UTF-8", // เพิ่ม charset
             "Content-Disposition" => "attachment; filename=$fileName",
-            "Pragma" => "no-cache",
-            "Cache-Control" => "must-revalidate, post-check=0, pre-check=0",
-            "Expires" => "0"
+            "Pragma"              => "no-cache",
+            "Cache-Control"       => "must-revalidate, post-check=0, pre-check=0",
+            "Expires"             => "0"
         ];
 
-        $callback = function () use ($users) {
+        $callback = function () use ($applications) {
             $file = fopen('php://output', 'w');
 
-            fputcsv($file, ['ชื่อนักเรียน', 'สกุลนักเรียน', 'รายละเอียดรางวัล']);
+            // ใส่ BOM เพื่อให้ Excel เปิดภาษาไทยได้ถูกต้อง
+            fprintf($file, chr(0xEF) . chr(0xBB) . chr(0xBF));
 
-            foreach ($users as $user) {
+            // หัวตาราง
+            fputcsv($file, ['รหัสนักศึกษา', 'ชื่อ', 'นามสกุล', 'รางวัล', 'ปีการศึกษา', 'เทอม', 'ชั้นปี']);
 
-                $awardNames = $user->awards->pluck('name')->join(', ');
-
+            foreach ($applications as $app) {
                 fputcsv($file, [
-                    $user->firstName,
-                    $user->lastName,
-                    $awardNames
+                    $app->user->student_id ?? '-',
+                    $app->user->firstName,
+                    $app->user->lastName,
+                    $app->award->name ?? '-',
+                    $app->event->academic_year ?? '-',
+                    $app->event->semester ?? '-',
+                    $app->event->year,
                 ]);
             }
             fclose($file);
