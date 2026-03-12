@@ -2,7 +2,6 @@
 
 namespace App\Models;
 
-use App\Enums\ApplicationStatus;
 use App\Enums\ApprovalStatus;
 use App\Enums\RoleLevel;
 use App\Enums\UserRole;
@@ -31,7 +30,7 @@ class Application extends Model
     protected $casts = [
         'documents' => 'array',
         'level' => RoleLevel::class,
-        'status' => ApplicationStatus::class,
+        'status' => ApprovalStatus::class,
     ];
 
     protected $appends = ['is_within_event_date'];
