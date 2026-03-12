@@ -2,23 +2,20 @@
 
 namespace App\Http\Controllers\Api;
 
-use App\Enums\ApplicationStatus;
 use App\Enums\ApprovalStatus;
+use App\Enums\RoleLevel;
 use App\Enums\Status;
 use App\Enums\UserRole;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\ApplicationIndexResource;
-use App\Http\Resources\ApplicationResource;
 use App\Models\Application;
 use App\Models\Event;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use App\Models\Award;
-use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
-use JsonException;
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
@@ -103,12 +100,42 @@ class ApplicationController extends Controller
         $user = $request->user();
         $level = $user->role->level()->value;
 
-        $baseQuery = Application::visibleFor($user)->whereEventStatus(Status::OPENED->value, $user)->whereCampus($user->campus->value);
+        // Base query ensuring campus and user visibility permissions
+        $baseQuery = Application::visibleFor($user)
+            ->whereCampus($user->campus->value);
+            
+        if ($user->role->value === UserRole::NISIT) {
+            return response()->json([
+                // Pending: Application is not rejected and the associated event is still OPENED.
+                'pending' => (clone $baseQuery)
+                    ->whereHas('event', function ($query) {
+                        $query->where('status', Status::OPENED->value);
+                    })
+                    ->where('applications.status', '!=', ApprovalStatus::REJECTED->value)
+                    ->count(),
+
+                // Approved: Application reached level 5 (BOARD) and the event is now CLOSED.
+                'approved' => (clone $baseQuery)
+                    ->whereHas('event', function ($query) {
+                        $query->where('status', Status::CLOSED);
+                    })
+                    ->where('applications.level', RoleLevel::BOARD->value)
+                    ->count(),
+
+                // Rejected: Any application that has been rejected across any level or event.
+                'rejected' => (clone $baseQuery)
+                    ->where('applications.status', ApprovalStatus::REJECTED->value)
+                    ->count(),
+            ]);
+        }
+
+        // Default logic for Staff/Admin roles, typically filtered by the currently OPENED event cycle.
+        $staffBaseQuery = (clone $baseQuery)->whereEventStatus(Status::OPENED->value, $user);
 
         return response()->json([
-            'pending' => (clone $baseQuery)->filterByStatus('PENDING', $level)->count(),
-            'approved' => (clone $baseQuery)->filterByStatus('APPROVED', $level)->count(),
-            'rejected' => (clone $baseQuery)->filterByStatus('REJECTED', $level)->count(),
+            'pending' => (clone $staffBaseQuery)->filterByStatus('PENDING', $level)->count(),
+            'approved' => (clone $staffBaseQuery)->filterByStatus('APPROVED', $level)->count(),
+            'rejected' => (clone $staffBaseQuery)->filterByStatus('REJECTED', $level)->count(),
         ]);
     }
 
@@ -181,9 +208,9 @@ class ApplicationController extends Controller
 
             $rules = [
                 'award_id' => ['required', 'exists:awards,id'],
-                'year'     => ['required', 'integer'],
-                'grade'    => ['required', 'numeric'],
-                'path'     => ['required', 'file', 'mimes:pdf,jpg,png', 'max:10240'],
+                'year' => ['required', 'integer'],
+                'grade' => ['required', 'numeric'],
+                'path' => ['required', 'file', 'mimes:pdf,jpg,png', 'max:10240'],
                 'documents' => ['required', 'array'],
             ];
 
@@ -238,18 +265,18 @@ class ApplicationController extends Controller
 
             $application = Application::create([
                 'student_id' => auth()->user()->student_id,
-                'award_id'   => $validated['award_id'],
-                'event_id'   => $event->id,
-                'year'       => $validated['year'],
-                'grade'      => $validated['grade'],
-                'path'       => $mainPath,
-                'documents'  => $storedDocuments,
-                'status'     => 'SUBMITTED'
+                'award_id' => $validated['award_id'],
+                'event_id' => $event->id,
+                'year' => $validated['year'],
+                'grade' => $validated['grade'],
+                'path' => $mainPath,
+                'documents' => $storedDocuments,
+                'status' => 'SUBMITTED'
             ]);
 
             return response()->json([
                 'message' => 'Application submitted successfully',
-                'data'    => $application->load(['user', 'event', 'award'])
+                'data' => $application->load(['user', 'event', 'award'])
             ], 201);
         });
     }
@@ -333,7 +360,8 @@ class ApplicationController extends Controller
             }
 
             $now = now();
-            if (!$application->event
+            if (
+                !$application->event
                 || !$application->event->start_date
                 || !$application->event->end_date
                 || $now->lt($application->event->start_date)
@@ -346,9 +374,9 @@ class ApplicationController extends Controller
             $requirements = $award->requirements ?? [];
 
             $rules = [
-                'year'     => ['required', 'integer','min:1', 'max:4'],
-                'grade'    => ['required', 'numeric', 'min:0', 'max:4'],
-                'path'     => ['nullable', 'file', 'mimes:pdf', 'max:10240'],
+                'year' => ['required', 'integer', 'min:1', 'max:4'],
+                'grade' => ['required', 'numeric', 'min:0', 'max:4'],
+                'path' => ['nullable', 'file', 'mimes:pdf', 'max:10240'],
                 'documents' => ['nullable', 'array'],
             ];
 
@@ -408,61 +436,61 @@ class ApplicationController extends Controller
 
             return response()->json([
                 'message' => 'Application updated successfully',
-                'data'    => $application->load(['user', 'event', 'award'])
+                'data' => $application->load(['user', 'event', 'award'])
             ], 200);
         });
     }
 
     public function destroy(Request $request, $id): JsonResponse
-{
-    try {
-        return DB::transaction(function () use ($id, $request) {
-            $user = $request->user();
+    {
+        try {
+            return DB::transaction(function () use ($id, $request) {
+                $user = $request->user();
 
-            if (!$user) {
-                return response()->json(['message' => 'Unauthenticated'], 401);
-            }
-
-            $application = Application::find($id);
-            if (!$application) {
-                return response()->json(['message' => 'Application not found'], 404);
-            }
-
-            
-            $isOwner = $application->student_id === $user->student_id;
-
-            if (!$isOwner) {
-                return response()->json(['message' => 'Unauthorized'], 403);
-            }
-
-            if ($application->path) {
-                Storage::disk('s3')->delete($application->path);
-            }
-
-            $documents = is_array($application->documents)
-                ? $application->documents
-                : json_decode($application->documents, true) ?? [];
-            
-            foreach ($documents as $doc) {
-                if (isset($doc['file_path'])) {
-                    Storage::disk('s3')->delete($doc['file_path']);
+                if (!$user) {
+                    return response()->json(['message' => 'Unauthenticated'], 401);
                 }
-            }
 
-            $application->delete();
+                $application = Application::find($id);
+                if (!$application) {
+                    return response()->json(['message' => 'Application not found'], 404);
+                }
 
+
+                $isOwner = $application->student_id === $user->student_id;
+
+                if (!$isOwner) {
+                    return response()->json(['message' => 'Unauthorized'], 403);
+                }
+
+                if ($application->path) {
+                    Storage::disk('s3')->delete($application->path);
+                }
+
+                $documents = is_array($application->documents)
+                    ? $application->documents
+                    : json_decode($application->documents, true) ?? [];
+
+                foreach ($documents as $doc) {
+                    if (isset($doc['file_path'])) {
+                        Storage::disk('s3')->delete($doc['file_path']);
+                    }
+                }
+
+                $application->delete();
+
+                return response()->json([
+                    'message' => 'Application deleted successfully'
+                ], 200);
+            });
+
+        } catch (\Exception $e) {
             return response()->json([
-                'message' => 'Application deleted successfully'
-            ], 200);
-        });
-
-    } catch (\Exception $e) {
-        return response()->json([
-            'message' => 'Internal Server Error',
-            'error_detail' => $e->getMessage(),
-            'file' => $e->getFile(),
-            'line' => $e->getLine()
-        ], 500);
+                'message' => 'Internal Server Error',
+                'error_detail' => $e->getMessage(),
+                'file' => $e->getFile(),
+                'line' => $e->getLine()
+            ], 500);
+        }
     }
-}
 }
