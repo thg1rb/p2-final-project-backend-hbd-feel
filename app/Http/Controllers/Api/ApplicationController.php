@@ -211,7 +211,7 @@ class ApplicationController extends Controller
                 'year' => ['required', 'integer'],
                 'grade' => ['required', 'numeric'],
                 'path' => ['required', 'file', 'mimes:pdf,jpg,png', 'max:10240'],
-                'documents' => ['required', 'array'],
+                'documents' => ['nullable', 'array'],
             ];
 
             foreach ($requirements as $req) {
