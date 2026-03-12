@@ -30,10 +30,10 @@ class AwardFactory extends Factory
             ],
         ];
         return [
-            'name' => $this->faker()->words(3, true),
+            'name' => fake()->words(3, true),
             'form_path' => "form_1.pdf",
             'requirements' => $requirements,
-            'campus' => $this->faker()->randomElement(CampusType::cases())->value,
+            'campus' => fake()->randomElement(CampusType::cases())->value,
         ];
     }
 }
