@@ -5,13 +5,13 @@ metadata:
 spec:
   ingressClassName: nginx
   rules:
-    - host: mail.nisit-deeden.k8s.dev # ชื่อโดเมนสำหรับเข้าดูอีเมล
+    - host: mail.nisit-deeden.k8s.dev 
       http:
         paths:
           - path: /
             pathType: Prefix
             backend:
               service:
-                name: mailpit # ชื่อ Service ของ Mailpit ของคุณ (เช็คให้ชัวร์ว่าชื่อนี้)
+                name: mailpit 
                 port:
                   number: 8025
