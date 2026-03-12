@@ -271,7 +271,8 @@ class ApplicationController extends Controller
                 'grade' => $validated['grade'],
                 'path' => $mainPath,
                 'documents' => $storedDocuments,
-                'status' => 'SUBMITTED'
+                'status' => ApprovalStatus::APPROVED,
+                'level' => RoleLevel::NISIT
             ]);
 
             return response()->json([
