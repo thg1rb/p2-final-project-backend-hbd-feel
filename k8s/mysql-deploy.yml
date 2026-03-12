@@ -1,3 +1,15 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: mysql-pvc
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 10Gi # กำหนดขนาดพื้นที่ที่ต้องการ (ปรับเปลี่ยนได้)
+
+
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -26,3 +38,10 @@ spec:
               value: sail
             - name: MYSQL_PASSWORD
               value: password
+    volumeMounts:
+            - name: mysql-data
+              mountPath: /var/lib/mysql
+      volumes:
+        - name: mysql-data
+          persistentVolumeClaim:
+            claimName: mysql-pvc

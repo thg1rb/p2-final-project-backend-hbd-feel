@@ -51,8 +51,8 @@ class EventFactory extends Factory
             ? Status::OPENED
             : Status::CLOSED;
 
-        $startDate = $this->faker->dateTimeBetween('-1 year', 'now');
-        $endDate = $this->faker->dateTimeBetween($startDate, '+6 months');
+        $startDate = $this->faker()->dateTimeBetween('-1 year', 'now');
+        $endDate = $this->faker()->dateTimeBetween($startDate, '+6 months');
 
         return [
             'academic_year' => $item['academic_year'],
