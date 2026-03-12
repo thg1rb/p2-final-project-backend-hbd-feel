@@ -103,7 +103,7 @@ class ApplicationController extends Controller
         // Base query ensuring campus and user visibility permissions
         $baseQuery = Application::visibleFor($user)
             ->whereCampus($user->campus->value);
-            
+
         if ($user->role->value === UserRole::NISIT) {
             return response()->json([
                 // Pending: Application is not rejected and the associated event is still OPENED.
@@ -300,6 +300,8 @@ class ApplicationController extends Controller
             'user.faculty:id,name',
             'event:id,academic_year,semester,campus,status'
         ])
+            ->where('status', ApprovalStatus::APPROVED)
+            ->where('level', RoleLevel::BOARD)
             ->whereHas('event', function ($q) use ($year, $semester, $campus) {
                 $q->where('academic_year', $year)
                     ->where('semester', $semester)
