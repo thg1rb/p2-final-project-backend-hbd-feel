@@ -19,7 +19,7 @@ spec:
                 name: minio
                 port:
                   number: 9000
-    - host: console-minio.nisit-deeden.k8s.dev
+    - host: console-minio.nisit-deeden.uat.k8s.dev
       http:
         paths:
           - path: /
