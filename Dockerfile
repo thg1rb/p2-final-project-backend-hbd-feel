@@ -1,28 +1,28 @@
 # ---------- Stage 1: Build Frontend ----------
 FROM node:20 AS nodebuilder
-
 WORKDIR /app
-
 COPY package*.json ./
 RUN npm install
-
 COPY . .
 RUN npm run build
 
-
 # ---------- Stage 2: PHP + Apache ----------
 FROM php:8.4-apache
-
 WORKDIR /var/www/html
 
+# เพิ่มการติดตั้ง lib สำหรับ GD
 RUN apt-get update && apt-get install -y \
     git \
     unzip \
     libicu-dev \
     libzip-dev \
     libonig-dev \
+    libpng-dev \
+    libjpeg62-turbo-dev \
+    libfreetype6-dev \
     zip \
-    && docker-php-ext-install pdo pdo_mysql mbstring intl bcmath \
+    && docker-php-ext-configure gd --with-freetype --with-jpeg \
+    && docker-php-ext-install pdo pdo_mysql mbstring intl bcmath gd \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
@@ -30,20 +30,16 @@ RUN a2enmod rewrite
 
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
-# ดึงไฟล์โค้ดจากเครื่องคุณ
+# ดึงไฟล์โค้ด
 COPY . .
 
-RUN apt-get update && apt-get install -y nodejs npm
-RUN npm install
-RUN npm run build  # <--- ตัวนี้จะสร้างไฟล์ manifest.json ที่ขาดไปครับ
-
-# 🌟 เพิ่มบรรทัดนี้: ดึงไฟล์ Frontend ที่ Build เสร็จแล้วจาก Stage 1 มาใส่โฟลเดอร์ public
+# 🌟 ย้ายการดึงไฟล์ที่ Build แล้วมาไว้ตรงนี้
 COPY --from=nodebuilder /app/public/build ./public/build
 
-# ติดตั้ง dependencies ของ PHP
+# ติดตั้ง PHP dependencies
 RUN composer install --no-interaction --prefer-dist --optimize-autoloader
 
-# ตั้งสิทธิ์การเข้าถึงไฟล์ (สำคัญมากสำหรับ Laravel เพื่อให้เขียน Log และ Cache ได้)
+# ตั้งสิทธิ์การเข้าถึงไฟล์
 RUN chown -R www-data:www-data /var/www/html \
     && chmod -R 775 /var/www/html/storage \
     && chmod -R 775 /var/www/html/bootstrap/cache
