@@ -13,7 +13,7 @@ class AwardController extends Controller
 {
     public function index(Request $request) {
         Gate::authorize('view-any', Award::class);
-        $event = Event::query()->where(["campus" => auth()->user()->campus, "status" => "OPENED"])->first();
+        $event = Event::query()->where(["campus" => auth()->user()->campus->value, "status" => "OPENED"])->first();
 
         if (!$event) {
             return view('awards.index', ['awards' => [], 'event' => null]);
@@ -77,7 +77,7 @@ class AwardController extends Controller
         $award->name = $request->input('name');
 //        $award->reward = $request->input('reward');
         $award->form_path = $path;
-        $award->campus = auth()->getUser()->campus;
+        $award->campus = auth()->getUser()->campus->value;
         $requirements = collect($request->input('requirements', []))
             ->filter(fn ($field) => !empty($field['name']))
             ->map(fn ($field) => [
