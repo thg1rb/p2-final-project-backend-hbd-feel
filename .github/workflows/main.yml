@@ -121,7 +121,7 @@ jobs:
             ${{ secrets.DOCKERHUB_USERNAME }}/laravel-app:latest
 
   # JOB 4: Deploy ไปยัง K8S
-  deploy-local:
+  deploy_local:
     needs: build-docker
     if: github.event_name != 'pull_request'
     runs-on: self-hosted
@@ -135,9 +135,10 @@ jobs:
           elif [[ "${{ github.ref }}" == "refs/heads/develop" ]]; then
             echo "APP_HOST=admin.nisit-deeden.uat.k8s.dev" >> $GITHUB_ENV
             echo "K8S_NAMESPACE=uat" >> $GITHUB_ENV
-          elif [[ "${{ github.ref }}" == "refs/heads/feature/setup-cicd" ]]; then
-            echo "APP_HOST=api.test.k8s.dev" >> $GITHUB_ENV
-            echo "K8S_NAMESPACE=test" >> $GITHUB_ENV
+
+          else
+            echo "APP_HOST=admin.nisit-deeden.uat.k8s.dev" >> $GITHUB_ENV
+            echo "K8S_NAMESPACE=uat" >> $GITHUB_ENV
           fi
 
       - name: Create K8S Secret from Env
@@ -166,13 +167,12 @@ jobs:
       - name: Deploy to K8S
         run: |
           # 1. Apply config ไฟล์ทั้งหมด (deployment, service, ingress)
-          kubectl apply -f k8s/ -n ${K8S_NAMESPACE}
+          kubectl apply -f k8s/base -n ${K8S_NAMESPACE}
+          kubectl apply -f k8s/${K8S_NAMESPACE} -n ${K8S_NAMESPACE}
 
           # 2. อัปเดต Image เป็นตัวล่าสุดที่เพิ่ง Build
           kubectl set image deployment/laravel-app laravel=${{ secrets.DOCKERHUB_USERNAME }}/laravel-app:${{ github.sha }} -n ${K8S_NAMESPACE}
 
-          # 3. Patch Ingress ให้ Host ตรงกับ Branch
-          kubectl patch ingress laravel-ingress -n ${K8S_NAMESPACE} --type=json -p='[{"op": "replace", "path": "/spec/rules/0/host", "value": "'"${APP_HOST}"'"}]'
 
           # 4. อัปเดต APP_URL ให้ตรงตาม Host
           kubectl set env deployment/laravel-app APP_URL=https://${APP_HOST} -n ${K8S_NAMESPACE}

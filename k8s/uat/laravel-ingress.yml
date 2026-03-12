@@ -10,7 +10,7 @@ metadata:
 spec:
   ingressClassName: nginx
   rules:
-    - host: laravel.k8s.dev
+    - host: admin.nisit-deeden.uat.k8s.dev
       http:
         paths:
           - path: /
