@@ -7,6 +7,7 @@ use App\Enums\RoleLevel;
 use App\Enums\UserRole;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreApprovalRequest;
+use App\Jobs\SendApplicationReviewedEmail;
 use App\Models\Application;
 use App\Models\Approval;
 use App\Models\User;
@@ -70,6 +71,13 @@ class ApprovalController extends Controller
         $application->update($nextStatus);
 
         Approval::create($request->validated());
+
+        SendApplicationReviewedEmail::dispatch(
+            $application,
+            $user,
+            $request->status,
+            $request->reason
+        );
 
         return response()->noContent(201);
     }
