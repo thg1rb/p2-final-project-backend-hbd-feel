@@ -13,6 +13,9 @@ class SendApplicationReviewedEmail implements ShouldQueue
 {
     use Queueable;
 
+    public int $tries = 3;
+    public array $backoff = [10, 30, 60];
+
     /**
      * Create a new job instance.
      */
