@@ -6,7 +6,7 @@
             </a>
         <div class="bg-white shadow-xl rounded-2xl overflow-hidden border border-gray-100">
 
-            <div class="h-32 bg-gradient-to-r from-gray-700 to-gray-900 relative"></div>
+            <div class="h-32 bg-gradient-to-r from-green-600 to-emerald-600 relative"></div>
 
             <form action="{{ route('users.update', $user) }}" method="POST">
                 @csrf

@@ -12,7 +12,7 @@
             <p>กลับหน้ารายชื่อ</p>
         </a>
         <div class="bg-white shadow-xl rounded-2xl overflow-hidden border border-gray-100">
-            <div class="h-32 bg-gradient-to-r from-gray-700 to-gray-900 relative"></div>
+            <div class="h-32 bg-gradient-to-r from-green-600 to-emerald-600 relative"></div>
             <div class="px-6 pb-8 relative mt-3">
 
                 <div class="relative -mt-16 mb-6 flex justify-between items-end">
