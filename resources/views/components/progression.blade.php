@@ -41,7 +41,7 @@
                     $status = $index === count($approvals) ? 'PENDING' : 'NOT_STARTED';
                 }
 
-                if ($event == null && !$hasRejected) {
+                if ($event->status === \App\Enums\Status::CLOSED && !$hasRejected) {
                     $status = 'APPROVED';
                 }
 
@@ -93,7 +93,7 @@
                         @if ($approval->reason)
                             <p class="text-xs text-gray-600 mt-1 italic">"{{ $approval->reason }}"</p>
                         @endif
-                    @elseif ($event == null)
+                    @elseif ($event->status === \App\Enums\Status::CLOSED)
                         <p class="text-xs text-gray-600 mt-1 italic">
                             ดำเนินการลงนามใบสมัครนิสิตดีเด่นสำเร็จ
                         </p>

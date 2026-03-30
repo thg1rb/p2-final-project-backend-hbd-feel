@@ -169,7 +169,7 @@ class ApplicationController extends Controller
         $currEvent = Event::get()->where('status', 'OPENED')->where('campus', $user->campus)->first();
 
         //        return response()->json($applications);
-        return new ApplicationIndexResource([
+        return response()->json([
             'applications' => $applications,
             'current_event' => $currEvent,
             'student' => $user,
