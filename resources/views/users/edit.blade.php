@@ -96,9 +96,11 @@
                                 >
                                     <option value="">เลือกคณะ</option>
                                     @foreach($faculties as $f)
-                                        <option value="{{$f->id}}" {{ old('faculty', $user->faculty_id) == $f->id ? 'selected' : '' }}>
-                                            {{$f->name}}
-                                        </option>
+                                        @if($f->campus === auth()->user()->campus)
+                                            <option value="{{$f->id}}" {{ old('faculty', $user->faculty_id) == $f->id ? 'selected' : '' }}>
+                                                {{$f->name}}
+                                            </option>
+                                        @endif
                                     @endforeach
                                 </select>
                                 @error('faculty') <span class="text-red-500 text-xs">{{ $message }}</span> @enderror
