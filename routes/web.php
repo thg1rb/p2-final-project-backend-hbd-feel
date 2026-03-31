@@ -28,24 +28,18 @@ Route::middleware(['auth', ForcePasswordChange::class])->group(function () {
     Route::post('/events', [EventController::class, 'store'])->name('events.store');
     Route::put('/events/{event}', [EventController::class, 'update'])->name('events.update');
     Route::delete('/events/{event}', [EventController::class, 'destroy'])->name('events.destroy');
-});
 
-Route::middleware(['auth', ForcePasswordChange::class])->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
-});
 
-Route::middleware(['auth', ForcePasswordChange::class])->group(function () {
     Route::get('/awards', [AwardController::class, 'index'])->name('awards.index');
     Route::get('/awards/create', [AwardController::class, 'create'])->name('awards.create');
     Route::post('/awards', [AwardController::class, 'store'])->name('awards.store');
     Route::get('/awards/{award}/edit', [AwardController::class, 'edit'])->name('awards.edit');
     Route::put('/awards/{award}', [AwardController::class, 'update'])->name('awards.update');
     Route::delete('/awards/{award}', [AwardController::class, 'destroy'])->name('awards.destroy');
-});
 
-Route::middleware(['auth', ForcePasswordChange::class])->group(function () {
     Route::get('/award-registrations', [\App\Http\Controllers\AwardRegistrationController::class, 'index'])->name('award-registrations');
 
     Route::get(
@@ -57,34 +51,37 @@ Route::middleware(['auth', ForcePasswordChange::class])->group(function () {
         'award-registrations/store',
         [AwardRegistrationController::class, 'store']
     )->name('award-registrations.store');
+
+    Route::get('/users', [
+        UserController::class,
+        'index'
+    ])->name('users.index');
+
+    Route::get('/users/create', [
+        UserController::class,
+        'create'
+    ])->name('users.create');
+
+    Route::resource('users', UserController::class);
+
+    Route::get('/report/{id}', [AwardReportController::class, 'show'])->name('report.show');
+    Route::get('/report', [AwardReportController::class, 'index'])->name('report.award-report');
+    Route::get('/report/edit/{id}', [AwardReportController::class, 'edit'])->name('report.edit');
+    Route::put('report/{application}', [AwardReportController::class, 'update'])->name('report.update');
+
+    Route::get('/file-preview', [MinioController::class, 'getFile'])->name('file.preview');
+
+    Route::get('/end-event/sign', [EndEventController::class, 'index'])->name('end-event.index');
+    Route::post('/end-event/upload-event', [EndEventController::class, 'uploadEvent'])->name('end-event.upload');
+    Route::get('/end-event/export-pdf', [EndEventController::class, 'exportPdf'])->name('end-event.pdf');
+
+    Route::post('/approvals', [ApprovalController::class, 'store'])->name('approvals.store');
+
+    Route::resource('faculties', FacultyController::class);
+    Route::resource('departments', DepartmentController::class);
 });
 
-Route::get('/auth/google/redirect', [SocialAuthController::class, 'redirectToProvider'])
-    ->name('google.redirect');
 
-Route::get('/auth/google/callback', [SocialAuthController::class, 'handleProviderCallback'])
-    ->name('google.callback');
-
-
-
-Route::get('/users', [
-    UserController::class,
-    'index'
-])->name('users.index');
-
-Route::get('/users/create', [
-    UserController::class,
-    'create'
-])->name('users.create');
-
-Route::resource('users', UserController::class);
-
-Route::get('/report/{id}', [AwardReportController::class, 'show'])->name('report.show');
-Route::get('/report', [AwardReportController::class, 'index'])->name('report.award-report');
-Route::get('/report/edit/{id}', [AwardReportController::class, 'edit'])->name('report.edit');
-Route::put('report/{application}', [AwardReportController::class, 'update'])->name('report.update');
-
-Route::get('/file-preview', [MinioController::class, 'getFile'])->name('file.preview');
 
 Route::middleware(['auth', ForcePasswordChange::class])->group(function () {
     Route::post('/force-change-password', [ForceChangePasswordController::class, 'update'])->name('force-change-password');
@@ -93,18 +90,14 @@ Route::middleware(['auth', ForcePasswordChange::class])->group(function () {
 
 
 
-Route::get('/end-event/sign', [EndEventController::class, 'index'])->name('end-event.index');
-Route::post('/end-event/upload-event', [EndEventController::class, 'uploadEvent'])->name('end-event.upload');
-Route::get('/end-event/export-pdf', [EndEventController::class, 'exportPdf'])->name('end-event.pdf');
+Route::get('/auth/google/redirect', [SocialAuthController::class, 'redirectToProvider'])
+    ->name('google.redirect');
+
+Route::get('/auth/google/callback', [SocialAuthController::class, 'handleProviderCallback'])
+    ->name('google.callback');
+
 Route::get('/award-result', function () {
     return redirect(env('FRONTEND_URL') . '/award-result');
 })->name("award-result.index");
-
-Route::middleware(['auth', ForcePasswordChange::class])->group(function () {
-    Route::post('/approvals', [ApprovalController::class, 'store'])->name('approvals.store');
-});
-
-Route::resource('faculties', FacultyController::class);
-Route::resource('departments', DepartmentController::class);
 
 require __DIR__ . '/auth.php';
