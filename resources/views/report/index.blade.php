@@ -110,7 +110,7 @@ use App\Enums\Status;
                                                     class="rounded-full border border-red-400 bg-red-100 px-3 py-1 text-red-500 text-sm w-fit">
                                                     ปฏิเสธ
                                                 </div>
-                                            @elseif ($application->level->value === RoleLevel::BOARD->value && !$event)
+                                            @elseif ($application->level->value === RoleLevel::BOARD->value && $application->event->status === \App\Enums\Status::CLOSED)
                                                 <div
                                                     class="rounded-full border border-primary bg-green-50 px-3 py-1 text-primary text-sm w-fit">
                                                     อนุมัติ

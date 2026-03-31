@@ -162,6 +162,10 @@ class AwardReportController extends Controller
 
         $headDeptApproval = $approvals->firstWhere('user.role', 'DEPT_HEAD');
 
+        Log::info($application);
+        Log::info($approvals);
+        Log::info($event);
+
         return view('report.show', compact('application', 'approvals', 'headDeptApproval', 'event'));
     }
 

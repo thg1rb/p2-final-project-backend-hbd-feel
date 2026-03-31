@@ -6,7 +6,7 @@
             </a>
         <div class="bg-white shadow-xl rounded-2xl overflow-hidden border border-gray-100">
 
-            <div class="h-32 bg-gradient-to-r from-gray-700 to-gray-900 relative"></div>
+            <div class="h-32 bg-gradient-to-r from-green-600 to-emerald-600 relative"></div>
 
             <form action="{{ route('users.update', $user) }}" method="POST">
                 @csrf
@@ -96,9 +96,11 @@
                                 >
                                     <option value="">เลือกคณะ</option>
                                     @foreach($faculties as $f)
-                                        <option value="{{$f->id}}" {{ old('faculty', $user->faculty_id) == $f->id ? 'selected' : '' }}>
-                                            {{$f->name}}
-                                        </option>
+                                        @if($f->campus === auth()->user()->campus)
+                                            <option value="{{$f->id}}" {{ old('faculty', $user->faculty_id) == $f->id ? 'selected' : '' }}>
+                                                {{$f->name}}
+                                            </option>
+                                        @endif
                                     @endforeach
                                 </select>
                                 @error('faculty') <span class="text-red-500 text-xs">{{ $message }}</span> @enderror
