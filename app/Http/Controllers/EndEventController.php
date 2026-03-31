@@ -10,6 +10,7 @@ use Barryvdh\DomPDF\Facade\Pdf;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
 
 class EndEventController extends Controller
@@ -80,6 +81,18 @@ class EndEventController extends Controller
                 'status' => Status::CLOSED,
                 'path' => $path // มั่นใจว่าคอลัมน์ใน DB ชื่อ path นะครับ
             ]);
+
+            // ===========================================
+            $campus = $event->campus->value ?? $event->campus;
+            $year = $event->academic_year;
+            $semester = $event->semester;
+
+            Cache::forget("winner_years_{$campus}");
+
+            Cache::forget("winner_semesters_{$campus}_{$year}");
+
+            Cache::forget("winner_results_{$campus}_{$year}_{$semester}");
+            // ===========================================
 
             return back()->with('success', 'อัปโหลดเรียบร้อย');
         } catch (\Exception $e) {

@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use App\Models\Award;
 use App\Models\Event;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
@@ -15,7 +17,7 @@ class AwardController extends Controller
     public function index(Request $request)
     {
         Gate::authorize('view-any', Award::class);
-        $event = Event::query()->where(["campus" => auth()->user()->campus->value, "status" => "OPENED"])->first();
+        $event = Event::query()->where(["campus" => Auth::user()->campus->value, "status" => "OPENED"])->first();
 
         if (!$event) {
             return view('awards.index', ['awards' => [], 'event' => null]);
@@ -23,10 +25,10 @@ class AwardController extends Controller
 
         $query = Award::query()
             ->with('events')
-            ->where('awards.campus', auth()->user()->campus)
+            ->where('awards.campus', Auth::user()->campus)
             ->whereHas('events', function ($q) {
                 $q->where('status', 'OPENED')
-                    ->where('campus', auth()->user()->campus);
+                    ->where('campus', Auth::user()->campus);
             });
 
         if ($request->filled('search')) {
@@ -47,6 +49,10 @@ class AwardController extends Controller
     public function store(Request $request)
     {
         Gate::authorize('create', Award::class);
+
+        $campus = Auth::user()->campus;
+        Cache::forget("all_award_names_{$campus->value}");
+
         $request->validate(
             [
                 'name' => ['required', 'string', 'max:255', 'min:3'],
@@ -73,7 +79,7 @@ class AwardController extends Controller
         $file = $request->file('application_document');
         $uploadRequest = new Request();
         $uploadRequest->merge([
-            'folder' => auth()->user()->campus->value,
+            'folder' => Auth::user()->campus->value,
         ]);
 
         $uploadRequest->files->set('file', $file);
@@ -82,7 +88,7 @@ class AwardController extends Controller
         $award->name = $request->input('name');
         //        $award->reward = $request->input('reward');
         $award->form_path = $path;
-        $award->campus = auth()->getUser()->campus->value;
+        $award->campus = Auth::getUser()->campus->value;
         $requirements = collect($request->input('requirements', []))
             ->filter(fn($field) => !empty($field['name']))
             ->map(fn($field) => [
@@ -95,8 +101,14 @@ class AwardController extends Controller
         $award->requirements = $requirements;
         $award->save();
 
-        $eventId = Event::query()->where(["campus" => auth()->user()->campus->value, "status" => "OPENED"])->first()->id;
-        $award->events()->attach($eventId);
+        $activeEvent = Event::where("campus", Auth::user()->campus->value)
+            ->where("status", "OPENED")
+            ->first();
+
+        if (!$activeEvent) {
+            return redirect()->back()->withErrors(['error' => 'ไม่พบช่วงเวลาการสมัครที่เปิดอยู่']);
+        }
+        $award->events()->attach($activeEvent->id);
 
         return redirect()->route('awards.index');
     }
@@ -110,6 +122,10 @@ class AwardController extends Controller
     public function update(Request $request, Award $award)
     {
         Gate::authorize('update', $award);
+
+        $campus = Auth::user()->campus;
+        Cache::forget("all_award_names_{$campus->value}");
+
         $changes = $request->validate(
             [
                 'name' => ['required', 'string', 'max:255', 'min:3'],
@@ -146,7 +162,7 @@ class AwardController extends Controller
             Storage::disk('s3')->delete($award->form_path);
             $uploadRequest = new Request();
             $uploadRequest->merge([
-                'folder' => auth()->user()->campus->value,
+                'folder' => Auth::user()->campus->value,
             ]);
 
             $uploadRequest->files->set('file', $file);
@@ -161,6 +177,10 @@ class AwardController extends Controller
     public function destroy(Award $award)
     {
         Gate::authorize('delete', $award);
+
+        $campus = Auth::user()->campus;
+        Cache::forget("all_award_names_{$campus->value}");
+
         $award->delete();
         return redirect()->route('awards.index');
     }
