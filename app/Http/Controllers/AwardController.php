@@ -8,9 +8,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Gate;
-use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Str;
+use Illuminate\Validation\Rule;
 
 class AwardController extends Controller
 {
@@ -66,10 +65,40 @@ class AwardController extends Controller
         $campus = Auth::user()->campus;
         Cache::forget("all_award_names_{$campus->value}");
 
+        $activeEvent = Event::where("campus", $campus->value)
+            ->where("status", "OPENED")
+            ->first();
+
+        if (!$activeEvent) {
+            return redirect()->back()->withErrors(['error' => 'ไม่พบช่วงเวลาการสมัครที่เปิดอยู่']);
+        }
+
+        if ($request->has('name')) {
+            $request->merge([
+                'name' => trim($request->input('name'))
+            ]);
+        }
+
         $request->validate(
             [
-                'name' => ['required', 'string', 'max:255', 'min:3'],
-                //            'reward' => ['required', 'numeric', 'min:0', 'max:1000000', 'regex:/^\d+(\.\d{1,2})?$/'],
+                'name' => [
+                    'required',
+                    'string',
+                    'max:255',
+                    'min:3',
+                    function ($attribute, $value, $fail) use ($campus, $activeEvent) {
+                        $exists = Award::where('name', $value)
+                            ->where('campus', $campus->value)
+                            ->whereHas('events', function ($q) use ($activeEvent) {
+                                $q->where('events.id', $activeEvent->id);
+                            })
+                            ->exists();
+
+                        if ($exists) {
+                            $fail('ชื่อหมวดรางวัลซ้ำ! มีชื่อนี้อยู่แล้วในรอบการสมัครปัจจุบัน');
+                        }
+                    }
+                ],
                 'application_document' => ['required', 'mimes:pdf', 'max:10240', 'file'],
                 'requirements' => ['nullable', 'array'],
 
@@ -80,9 +109,6 @@ class AwardController extends Controller
             [
                 'name.required' => "โปรดกรอกชื่อหมวดรางวัล",
                 'name.min' => "โปรดใส่ชื่อหมวดรางวัลอย่างน้อย 3 ตัวอักษร",
-                //                'reward.required' => "โปรดกรอกจำนวนรางวัล (บาท)",
-                //                'reward.min' => 'จำนวนเงินรางวัลต้องไม่เป็นเลขติดลบ',
-                //                'reward' => 'โปรดกรอกจำนวนเงินรางวัลให้ถูกต้อง',
                 'application_document.required' => "โปรดอัปโหลดเอกสารใบสมัคร",
                 'application_document' => "โปรดอัปโหลดเอกสารที่ถูกต้องตามข้อกำหนด",
                 'requirements.*.required' => "โปรดกรอกเอกสารเพิ่มเติมให้ถูกต้อง"
@@ -92,35 +118,30 @@ class AwardController extends Controller
         $file = $request->file('application_document');
         $uploadRequest = new Request();
         $uploadRequest->merge([
-            'folder' => Auth::user()->campus->value,
+            'folder' => $campus->value,
         ]);
 
         $uploadRequest->files->set('file', $file);
         $path = MinioController::uploadFile($uploadRequest);
+
         $award = new Award();
         $award->name = $request->input('name');
-        //        $award->reward = $request->input('reward');
         $award->form_path = $path;
-        $award->campus = Auth::getUser()->campus->value;
+        $award->campus = $campus->value;
+
         $requirements = collect($request->input('requirements', []))
             ->filter(fn($field) => !empty($field['name']))
             ->map(fn($field) => [
                 'id' => $field['id'],
                 'name' => $field['name'],
-                'required' => (bool) $field['required'],
+                'required' => (bool)$field['required'],
             ])
             ->values()
             ->toArray();
+
         $award->requirements = $requirements;
         $award->save();
 
-        $activeEvent = Event::where("campus", Auth::user()->campus->value)
-            ->where("status", "OPENED")
-            ->first();
-
-        if (!$activeEvent) {
-            return redirect()->back()->withErrors(['error' => 'ไม่พบช่วงเวลาการสมัครที่เปิดอยู่']);
-        }
         $award->events()->attach($activeEvent->id);
 
         return redirect()->route('awards.index');
@@ -170,10 +191,35 @@ class AwardController extends Controller
         $campus = Auth::user()->campus;
         Cache::forget("all_award_names_{$campus->value}");
 
+        if ($request->has('name')) {
+            $request->merge([
+                'name' => trim($request->input('name'))
+            ]);
+        }
+
         $changes = $request->validate(
             [
-                'name' => ['required', 'string', 'max:255', 'min:3'],
-                //            'reward' => ['required', 'numeric', 'min:0', 'max:1000000', 'regex:/^\d+(\.\d{1,2})?$/'],
+                'name' => [
+                    'required',
+                    'string',
+                    'max:255',
+                    'min:3',
+                    function ($attribute, $value, $fail) use ($campus, $award) {
+                        $eventIds = $award->events()->pluck('events.id');
+
+                        $exists = Award::where('name', $value)
+                            ->where('campus', $campus->value)
+                            ->where('id', '!=', $award->id) // ยกเว้นตัวเอง
+                            ->whereHas('events', function ($q) use ($eventIds) {
+                                $q->whereIn('events.id', $eventIds);
+                            })
+                            ->exists();
+
+                        if ($exists) {
+                            $fail('ชื่อหมวดรางวัลซ้ำ! มีชื่อนี้อยู่แล้วในรอบการสมัครเดียวกัน');
+                        }
+                    }
+                ],
                 'application_document' => ['mimes:pdf', 'max:10240', 'file'],
                 'requirements' => ['nullable', 'array'],
 
@@ -184,9 +230,6 @@ class AwardController extends Controller
             [
                 'name.required' => "โปรดกรอกชื่อหมวดรางวัล",
                 'name.min' => "โปรดใส่ชื่อหมวดรางวัลอย่างน้อย 3 ตัวอักษร",
-                //                'reward.required' => "โปรดกรอกจำนวนรางวัล (บาท)",
-                //                'reward.min' => 'จำนวนเงินรางวัลต้องไม่เป็นเลขติดลบ',
-                //                'reward' => 'โปรดกรอกจำนวนเงินรางวัลให้ถูกต้อง'
                 'application_document' => "โปรดอัปโหลดเอกสารที่ถูกต้องตามข้อกำหนด",
                 'requirements.*.required' => "โปรดกรอกเอกสารเพิ่มเติมให้ถูกต้อง"
             ]
@@ -194,19 +237,20 @@ class AwardController extends Controller
 
         $changes['requirements'] = collect($request->input('requirements', []))
             ->map(function ($req) {
-                $req['required'] = (bool) $req['required'];
+                $req['required'] = (bool)$req['required'];
                 return $req;
             })
             ->values()
             ->toArray();
 
         $award->update($changes);
+
         $file = $request->file('application_document');
         if ($file) {
             Storage::disk('s3')->delete($award->form_path);
             $uploadRequest = new Request();
             $uploadRequest->merge([
-                'folder' => Auth::user()->campus->value,
+                'folder' => $campus->value,
             ]);
 
             $uploadRequest->files->set('file', $file);
@@ -215,6 +259,7 @@ class AwardController extends Controller
             $award->form_path = $path;
             $award->save();
         }
+
         return redirect()->route('awards.index')->with('success');
     }
 
