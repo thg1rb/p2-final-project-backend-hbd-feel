@@ -20,8 +20,8 @@ use App\Enums\Status;
                     <p class="mb-8 font-semibold">
                         เลือกปีการศึกษาและภาคการศึกษาหรือคัดกรองตามชื่อนิสิตหรือคัดกรองตามหมวดหมู่รางวัล
                     </p>
-                    <div class="flex gap-5 items-center">
-                        <div class="flex flex-col gap-2 flex-1">
+                    <div class="flex md:flex-row flex-col gap-5">
+                        <div class="flex flex-col gap-2 flex-1 ">
                             <p>ค้นหาด้วยรหัสใบสมัคร ชื่อจริง รหัสนิสิต</p>
                             <input type="text" name="search" placeholder="ค้นหาด้วยรหัสใบสมัคร ชื่อจริง รหัสนิสิต"
                                 class="border border-gray-300  rounded-xl w-full cursor-pointer focus:outline-primary focus:border-gray-300 focus:ring-offset-0 focus:ring-0 flex-1">
@@ -67,7 +67,7 @@ use App\Enums\Status;
                     </div>
                 </form>
                 @if ($applications->isNotEmpty())
-                    <div class="rounded-xl border border-gray-300 overflow-hidden bg-white">
+                    <div class="rounded-xl border border-gray-300 bg-white overflow-x-auto">
                         <table class="w-full">
                             <thead class="divide-y border-b bg-gray-100">
                                 <tr class="divide-x">
@@ -151,7 +151,7 @@ use App\Enums\Status;
                         <p class=" text-gray-400">ไม่พบข้อมูลที่คุณคัดกรอง</p>
                     </div>
                 @endif
-                <div class="flex justify-between">
+                <div class="flex md:flex-row flex-col md:justify-between gap-4">
                     <div class="flex space-x-2">
                         <a href="{{ route('report.award-report', array_merge(request()->query(), ['export' => 'csv'])) }}"
                             class="btn btn-success flex items-center bg-blue-500 text-white p-3 rounded-xl">
