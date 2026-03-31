@@ -290,28 +290,22 @@ class ApplicationController extends Controller
         // 1. Cache รายการปีทั้งหมดแยกตามวิทยาเขต (เก็บ 1 วัน)
         $years = Cache::remember("winner_years_{$campus}", now()->addDay(), function () use ($campus) {
             return Event::where('campus', $campus)
+                ->where('status', Status::CLOSED)
                 ->select('academic_year')
                 ->distinct()
                 ->orderByDesc('academic_year')
                 ->pluck('academic_year');
         });
 
-        Log::info("winner_years_{$campus}");
-
-        // ถ้าไม่ได้ส่งปีมา ให้ใช้ปีล่าสุดจากรายการด้านบน
-        $year = $year ?: $years->first();
-
         // 2. Cache รายการเทอมของปีนั้นๆ (เก็บ 1 วัน)
         $semesters = Cache::remember("winner_semesters_{$campus}_{$year}", now()->addDay(), function () use ($year, $campus) {
             return Event::where('academic_year', $year)
                 ->where('campus', $campus)
+                ->where('status', Status::CLOSED)
                 ->select('semester')
                 ->distinct()
                 ->pluck('semester');
         });
-
-        // ถ้าไม่ได้ส่งเทอมมา ให้ใช้เทอมแรกจากรายการ
-        $semester = $semester ?: collect($semesters)->first();
 
         // 3. Cache ข้อมูลผลรางวัล (ตัวนี้สำคัญที่สุด เพราะ Query หนัก)
         // ใช้ Key ที่ระบุถึง วิทยาเขต+ปี+เทอม
@@ -332,6 +326,9 @@ class ApplicationController extends Controller
             ])
                 ->where('status', ApprovalStatus::APPROVED)
                 ->where('level', RoleLevel::BOARD)
+                ->whereHas('award', function ($q) use ($campus) {
+                    $q->where('campus', $campus);
+                })
                 ->whereHas('event', function ($q) use ($year, $semester, $campus) {
                     $q->where('academic_year', $year)
                         ->where('semester', $semester)
@@ -339,6 +336,8 @@ class ApplicationController extends Controller
                         ->where('status', Status::CLOSED);
                 })
                 ->get();
+
+            Log::info($applications);
 
             $categories = $applications
                 ->groupBy(fn($app) => $app->award->name)

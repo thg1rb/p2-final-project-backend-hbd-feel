@@ -14,7 +14,9 @@
                 <a href="{{ route('departments.edit', $department) }}"
                     class="flex items-center gap-x-2 px-4 py-2 bg-yellow-500 text-white rounded-md hover:bg-yellow-600 transition">
                     <x-icon name="square-pen" size="18" />
-                    แก้ไขข้อมูล
+                    <p class="hidden md:block">
+                        แก้ไขข้อมูล
+                    </p>
                 </a>
             </div>
 

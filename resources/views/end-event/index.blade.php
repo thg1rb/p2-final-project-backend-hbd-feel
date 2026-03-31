@@ -15,7 +15,7 @@
                 {{-- ส่วนที่ 1: เช็คว่าไม่มีงานค้าง (In Progress) --}}
                 @if ($stats['totalInprogress'] !== 0 || !$event)
                     <div class="flex flex-col gap-10 border-border border-2 rounded-xl">
-                        <div class="flex items-center gap-5 rounded-2xl bg-gray-100 p-8">
+                        <div class="flex md:flex-row flex-col items-center gap-5 rounded-2xl bg-gray-100 p-8">
                             <div class="rounded-2xl bg-gray-200 p-5 text-gray-600">
                                 <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path
@@ -37,9 +37,9 @@
                             <div
                                 class="flex flex-col rounded-2xl bg-gradient-to-br from-blue-500 to-indigo-600 p-10 text-white">
                                 <div class="flex flex-col items-start gap-8">
-                                    <div class="flex items-center gap-5">
+                                    <div class="flex md:flex-row flex-col items-center gap-5">
                                         <div class="bg-blue-400 p-3 rounded-2xl">
-                                            <x-icon name="download"/>
+                                            <x-icon name="download" />
                                         </div>
                                         <div>
                                             <p class="text-xl font-bold">ดาวน์โหลดข้อมูลนิสิตดีเด่น</p>
@@ -48,13 +48,13 @@
                                         </div>
                                     </div>
                                     <form action="{{ route('end-event.pdf') }}" method="GET"
-                                          class="flex gap-3 w-full">
+                                        class="flex md:flex-row flex-col gap-3 w-full">
                                         <input type="text" name="signer_name" placeholder="ชื่อนามสกุล ผู้ลงนาม"
-                                               class="w-full flex-1 rounded-xl border-none text-black" required>
+                                            class="w-full flex-1 rounded-xl border-none text-black" required>
 
                                         <div class="flex items-stretch gap-5">
                                             <button type="submit"
-                                                    class="flex items-center gap-2 rounded-xl bg-white px-6 py-3 font-semibold text-blue-500 shadow-lg active:opacity-80">
+                                                class="flex items-center justify-center gap-2 rounded-xl bg-white px-6 py-3 font-semibold text-blue-500 shadow-lg active:opacity-80 w-full">
                                                 <span>ดาวน์โหลดข้อมูลนิสิตดีเด่น</span>
                                             </button>
                                         </div>
@@ -64,17 +64,16 @@
 
                             <div class="flex justify-center items-center w-full">
                                 <div class=" border-2 border-dashed border-blue-500 p-4 rounded-full">
-                                    <x-icon name="arrow-down" class="stroke-blue-500 animate-bounce"
-                                            size="40"/>
+                                    <x-icon name="arrow-down" class="stroke-blue-500 animate-bounce" size="40" />
                                 </div>
                             </div>
 
                             <div
                                 class="flex flex-col rounded-2xl bg-gradient-to-br from-emerald-500 to-teal-600 p-10 text-white">
                                 <div class="flex flex-col items-start gap-8">
-                                    <div class="flex items-center gap-5">
+                                    <div class="flex md:flex-row flex-col items-center gap-5">
                                         <div class="bg-emerald-400 p-3 rounded-2xl">
-                                            <x-icon name="upload"/>
+                                            <x-icon name="upload" />
                                         </div>
                                         <div>
                                             <p class="text-xl font-bold">อัปโหลดเอกสารที่ลงนามแล้ว</p>
@@ -85,14 +84,14 @@
 
                                     <div class="flex w-full items-stretch gap-5">
                                         <form action="{{ route('end-event.upload') }}" method="POST"
-                                              enctype="multipart/form-data" class="flex flex-1 items-center gap-4">
+                                            enctype="multipart/form-data"
+                                            class="flex md:flex-row flex-col flex-1 items-center gap-4">
                                             @csrf
-                                            <input type="hidden" name="event_id"
-                                                   value="{{ $event->id ?? '' }}">
+                                            <input type="hidden" name="event_id" value="{{ $event->id ?? '' }}">
                                             <input name="document" type="file" accept=".pdf" required
-                                                   class="block flex-1 cursor-pointer rounded-xl border border-white p-3 text-white file:mr-4 file:rounded-lg file:border-0 file:bg-white file:text-emerald-500">
+                                                class="block w-full flex-1 cursor-pointer rounded-xl border border-white p-3 text-white file:mr-4 file:rounded-lg file:border-0 file:bg-white file:text-emerald-500">
                                             <button type="submit"
-                                                    class="flex items-center gap-2 rounded-xl bg-white px-6 py-3 font-semibold text-blue-500 shadow-lg active:opacity-80">
+                                                class="flex justify-center items-center gap-2 rounded-xl bg-white px-6 py-3 font-semibold text-blue-500 shadow-lg active:opacity-80 w-full md:w-fit">
                                                 อัปโหลดไฟล์ที่ลงนาม
                                             </button>
                                         </form>

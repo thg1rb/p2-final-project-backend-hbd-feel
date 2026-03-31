@@ -75,7 +75,7 @@
         {{-- Table --}}
         <div class="w-full p-5 flex flex-col gap-y-6 bg-white shadow-sm rounded-xl">
             <form action="{{ route('events.index') }}" method="GET" class="w-full flex flex-col md:flex-row gap-2.5">
-                <div class="flex-1 flex flex-row gap-x-2.5">
+                <div class="flex-1 flex flex-col md:flex-row gap-2.5">
                     <div class="relative flex-1">
                         <x-icon name="search" class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
                         <input name="search" placeholder="ค้นหารอบการให้รางวัลจากปีการศึกษา"

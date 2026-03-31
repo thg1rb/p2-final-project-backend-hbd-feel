@@ -28,7 +28,7 @@ class AwardReportController extends Controller
 
         $query = Application::query();
 
-        $query->whereHas('user', function ($q) use ($adminCampus) {
+        $query->whereHas('award', function ($q) use ($adminCampus) {
             $q->where('campus', $adminCampus);
         })->whereHas('award', function ($q) use ($adminCampus) {
             $q->where('campus', $adminCampus);
@@ -140,7 +140,7 @@ class AwardReportController extends Controller
                     $app->award->name ?? '-',
                     $app->event->academic_year ?? '-',
                     $app->event->semester ?? '-',
-                    $app->event->year,
+                    $app->year,
                 ]);
             }
             fclose($file);
