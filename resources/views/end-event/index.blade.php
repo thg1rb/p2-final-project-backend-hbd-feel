@@ -33,103 +33,75 @@
                 @else
                     <div class="flex flex-col gap-7">
 
-                        @if ($applications->count() > 0)
-                            <div class="flex flex-col gap-10">
-                                <div
-                                    class="flex flex-col rounded-2xl bg-gradient-to-br from-blue-500 to-indigo-600 p-10 text-white">
-                                    <div class="flex flex-col items-start gap-8">
-                                        <div class="flex items-center gap-5">
-                                            <div class="bg-blue-400 p-3 rounded-2xl">
-                                                <x-icon name="download" />
-                                            </div>
-                                            <div>
-                                                <p class="text-xl font-bold">ดาวน์โหลดข้อมูลนิสิตดีเด่น</p>
-                                                <p class="text-sm opacity-80">
-                                                    กรอกชื่อผู้ลงนาม (อธิการบดี) และดาวน์โหลดเอกสารเพื่อนำไปลงนาม</p>
-                                            </div>
+                        <div class="flex flex-col gap-10">
+                            <div
+                                class="flex flex-col rounded-2xl bg-gradient-to-br from-blue-500 to-indigo-600 p-10 text-white">
+                                <div class="flex flex-col items-start gap-8">
+                                    <div class="flex items-center gap-5">
+                                        <div class="bg-blue-400 p-3 rounded-2xl">
+                                            <x-icon name="download"/>
                                         </div>
-                                        <form action="{{ route('end-event.pdf') }}" method="GET"
-                                            class="flex gap-3 w-full">
-                                            <input type="text" name="signer_name" placeholder="ชื่อนามสกุล ผู้ลงนาม"
-                                                class="w-full flex-1 rounded-xl border-none text-black" required>
+                                        <div>
+                                            <p class="text-xl font-bold">ดาวน์โหลดข้อมูลนิสิตดีเด่น</p>
+                                            <p class="text-sm opacity-80">
+                                                กรอกชื่อผู้ลงนาม (อธิการบดี) และดาวน์โหลดเอกสารเพื่อนำไปลงนาม</p>
+                                        </div>
+                                    </div>
+                                    <form action="{{ route('end-event.pdf') }}" method="GET"
+                                          class="flex gap-3 w-full">
+                                        <input type="text" name="signer_name" placeholder="ชื่อนามสกุล ผู้ลงนาม"
+                                               class="w-full flex-1 rounded-xl border-none text-black" required>
 
-                                            <div class="flex items-stretch gap-5">
-                                                <button type="submit"
+                                        <div class="flex items-stretch gap-5">
+                                            <button type="submit"
                                                     class="flex items-center gap-2 rounded-xl bg-white px-6 py-3 font-semibold text-blue-500 shadow-lg active:opacity-80">
-                                                    <span>ดาวน์โหลดข้อมูลนิสิตดีเด่น</span>
-                                                </button>
-                                            </div>
+                                                <span>ดาวน์โหลดข้อมูลนิสิตดีเด่น</span>
+                                            </button>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+
+                            <div class="flex justify-center items-center w-full">
+                                <div class=" border-2 border-dashed border-blue-500 p-4 rounded-full">
+                                    <x-icon name="arrow-down" class="stroke-blue-500 animate-bounce"
+                                            size="40"/>
+                                </div>
+                            </div>
+
+                            <div
+                                class="flex flex-col rounded-2xl bg-gradient-to-br from-emerald-500 to-teal-600 p-10 text-white">
+                                <div class="flex flex-col items-start gap-8">
+                                    <div class="flex items-center gap-5">
+                                        <div class="bg-emerald-400 p-3 rounded-2xl">
+                                            <x-icon name="upload"/>
+                                        </div>
+                                        <div>
+                                            <p class="text-xl font-bold">อัปโหลดเอกสารที่ลงนามแล้ว</p>
+                                            <p class="text-sm opacity-80">
+                                                เลือกไฟล์เอกสารที่ลงนามเรียบร้อยแล้วเพื่ออัปโหลดกลับเข้าระบบ</p>
+                                        </div>
+                                    </div>
+
+                                    <div class="flex w-full items-stretch gap-5">
+                                        <form action="{{ route('end-event.upload') }}" method="POST"
+                                              enctype="multipart/form-data" class="flex flex-1 items-center gap-4">
+                                            @csrf
+                                            <input type="hidden" name="event_id"
+                                                   value="{{ $event->id ?? '' }}">
+                                            <input name="document" type="file" accept=".pdf" required
+                                                   class="block flex-1 cursor-pointer rounded-xl border border-white p-3 text-white file:mr-4 file:rounded-lg file:border-0 file:bg-white file:text-emerald-500">
+                                            <button type="submit"
+                                                    class="flex items-center gap-2 rounded-xl bg-white px-6 py-3 font-semibold text-blue-500 shadow-lg active:opacity-80">
+                                                อัปโหลดไฟล์ที่ลงนาม
+                                            </button>
                                         </form>
                                     </div>
                                 </div>
-
-                                <div class="flex justify-center items-center w-full">
-                                    <div class=" border-2 border-dashed border-blue-500 p-4 rounded-full">
-                                        <x-icon name="arrow-down" class="stroke-blue-500 animate-bounce"
-                                            size="40" />
-                                    </div>
-                                </div>
-
-                                <div
-                                    class="flex flex-col rounded-2xl bg-gradient-to-br from-emerald-500 to-teal-600 p-10 text-white">
-                                    <div class="flex flex-col items-start gap-8">
-                                        <div class="flex items-center gap-5">
-                                            <div class="bg-emerald-400 p-3 rounded-2xl">
-                                                <x-icon name="upload" />
-                                            </div>
-                                            <div>
-                                                <p class="text-xl font-bold">อัปโหลดเอกสารที่ลงนามแล้ว</p>
-                                                <p class="text-sm opacity-80">
-                                                    เลือกไฟล์เอกสารที่ลงนามเรียบร้อยแล้วเพื่ออัปโหลดกลับเข้าระบบ</p>
-                                            </div>
-                                        </div>
-
-                                        <div class="flex w-full items-stretch gap-5">
-                                            <form action="{{ route('end-event.upload') }}" method="POST"
-                                                enctype="multipart/form-data" class="flex flex-1 items-center gap-4">
-                                                @csrf
-                                                <input type="hidden" name="event_id"
-                                                    value="{{ $applications[0]->event_id ?? '' }}">
-                                                <input name="document" type="file" accept=".pdf" required
-                                                    class="block flex-1 cursor-pointer rounded-xl border border-white p-3 text-white file:mr-4 file:rounded-lg file:border-0 file:bg-white file:text-emerald-500">
-                                                <button type="submit"
-                                                    class="flex items-center gap-2 rounded-xl bg-white px-6 py-3 font-semibold text-blue-500 shadow-lg active:opacity-80">อัปโหลดไฟล์ที่ลงนาม</button>
-                                            </form>
-                                        </div>
-                                    </div>
-                                </div>
                             </div>
-                        @endif
-
-                        {{-- ส่วนที่ 2: แสดงตารางและปุ่มอัปโหลดเมื่อมีข้อมูล --}}
-                        @if ($applications->count() > 0 || $hasParams)
-                        @endif {{-- ปิด @if ($applications->count() > 0) --}}
-
-                        {{-- <div class="bg-white rounded-xl shadow overflow-hidden">
-                            <table class="min-w-full">
-                                <thead class="bg-gray-50 border-b">
-                                    <tr>
-                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                                            ชื่อ-นามสกุล</th>
-                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                                            ประเภทรางวัล</th>
-                                    </tr>
-                                </thead>
-                                <tbody class="divide-y divide-gray-200">
-                                    @foreach ($applications as $app)
-                                        <tr>
-                                            <td class="px-6 py-4">{{ $app->user->firstName }} {{ $app->user->lastName }}
-                                            </td>
-                                            <td class="px-6 py-4">{{ $app->award->name }}</td>
-                                        </tr>
-                                    @endforeach
-                                </tbody>
-                            </table>
-                        </div> --}}
-
-                    </div> {{-- ปิด div ของส่วนที่ 2 --}}
-                @endif {{-- ปิด @if ($applications->count() > 0 || $hasParams) --}}
-
+                        </div>
+                    </div>
+                @endif
             </div>
         </div>
     </div>
