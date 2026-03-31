@@ -39,7 +39,7 @@ class SocialAuthController extends Controller
 
 
         if ($from == 'svelte') {
-            $token = $user->createToken('svelte-app')->plainTextToken;
+            $token = $user->createToken('svelte-app', [$user->role])->plainTextToken;
             if (!$user->email_verified_at) {
                 return redirect("$frontendURL/oauth?token={$token}&activate=true");
             }
