@@ -13,7 +13,7 @@ class AwardPolicy
      */
     public function viewAny(User $user): bool
     {
-        return $user->isAdmin();
+        return true;
     }
 
     /**
@@ -21,7 +21,7 @@ class AwardPolicy
      */
     public function view(User $user, Award $award): bool
     {
-        return $user->isAdmin() || $user->awards()->where('awards.id', $award->id)->exists();
+        return $user->campus == $award->campus;
     }
 
     /**
@@ -37,7 +37,7 @@ class AwardPolicy
      */
     public function update(User $user, Award $award): bool
     {
-        return $user->isAdmin() || $user->awards()->where('awards.id', $award->id)->exists();
+        return $user->isAdmin() && $user->campus == $award->campus;
     }
 
     /**
@@ -45,7 +45,7 @@ class AwardPolicy
      */
     public function delete(User $user, Award $award): bool
     {
-        return $user->isAdmin() || $user->awards()->where('awards.id', $award->id)->exists();
+        return $user->isAdmin() && $user->campus == $award->campus;
     }
 
     /**
