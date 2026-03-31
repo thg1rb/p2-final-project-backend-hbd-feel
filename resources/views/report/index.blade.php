@@ -54,10 +54,10 @@ use App\Enums\Status;
                             <select name="type" id=""
                                 class="border border-gray-300  rounded-xl w-full cursor-pointer focus:outline-primary focus:border-gray-300 focus:ring-offset-0 focus:ring-0 flex-1">
                                 <option value="">ทั้งหมด</option>
-                                <option value="ด้านกิจกรรมเสริมหลักสูตร">ด้านกิจกรรมเสริมหลักสูตร</option>
-                                <option value="ด้านความคิดสร้างสรรค์และนวัตกรรม">ด้านความคิดสร้างสรรค์และนวัตกรรม
-                                </option>
-                                <option value="ด้านความประพฤติดี">ด้านความประพฤติดี</option>
+                                @foreach ($awards as $award)
+                                    <option value={{ $award }} @selected($targetAward == $award)>
+                                        {{ $award }}</option>
+                                @endforeach
                             </select>
                         </div>
                         <button type="submit"

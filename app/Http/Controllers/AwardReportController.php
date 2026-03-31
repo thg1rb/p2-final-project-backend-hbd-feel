@@ -2,17 +2,15 @@
 
 namespace App\Http\Controllers;
 
-use App\Enums\AwardType;
 use App\Enums\Status;
 use App\Models\Application;
 use App\Models\Approval;
 use App\Models\Award;
 use App\Models\Event;
-use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Gate;
-use Illuminate\Support\Facades\Log;
 
 class AwardReportController extends Controller
 {
@@ -24,6 +22,7 @@ class AwardReportController extends Controller
 
         $targetYear = $request->year;
         $targetSemester = $request->semester;
+        $targetAward = $request->targetAward;
         $search = $request->search;
         $awardType = $request->type;
 
@@ -70,32 +69,35 @@ class AwardReportController extends Controller
 
         $applications = $query->paginate(10)->appends($request->all());
 
-        $allYears = Event::distinct()->orderBy('academic_year', 'desc')->pluck('academic_year');
-        $allSemesters = Event::distinct()->orderBy('semester', 'asc')->pluck('semester');
+        $cacheKey = "all_years_{$adminCampus->value}";
 
-        $awardStats = Award::whereHas('events', function ($q) use ($targetYear, $targetSemester) {
-            if ($targetYear)
-                $q->where('academic_year', $targetYear);
-            if ($targetSemester)
-                $q->where('semester', $targetSemester);
-        })
-            ->withCount([
-                'applications' => function ($q) use ($targetYear, $targetSemester) {
-                    $q->whereHas('event', function ($sq) use ($targetYear, $targetSemester) {
-                        if ($targetYear)
-                            $sq->where('academic_year', $targetYear);
-                        if ($targetSemester)
-                            $sq->where('semester', $targetSemester);
-                    });
-                }
-            ])
-            ->get()
-            ->groupBy('name')
-            ->map(fn($group) => $group->sum('applications_count'));
+        $allYears = Cache::remember($cacheKey, now()->addDay(), function () use ($adminCampus) {
+            return Event::where('campus', $adminCampus)
+                ->distinct()
+                ->orderBy('academic_year', 'desc')
+                ->pluck('academic_year');
+        });
 
-        $event = Event::where('status', Status::OPENED)
-            ->where('campus', Auth::user()->campus)
-            ->first();
+
+        $allSemesters = Cache::remember("all_semesters_{$adminCampus->value}", now()->addDay(), function () use ($adminCampus) {
+            return Event::where('campus', $adminCampus)
+                ->distinct()
+                ->orderBy('semester', 'asc')
+                ->pluck('semester');
+        });
+
+        $event = Cache::remember("active_event_{$adminCampus->value}", now()->addMinutes(5), function () use ($adminCampus) {
+            return Event::where('status', Status::OPENED)
+                ->where('campus', $adminCampus)
+                ->first();
+        });
+
+        $allAwardNames = Cache::remember("all_award_names_{$adminCampus->value}", now()->addDay(), function () use ($adminCampus) {
+            return Award::where('campus', $adminCampus)
+                ->distinct()
+                ->orderBy('name', 'asc')
+                ->pluck('name');
+        });
 
         return view("report.index", [
             'applications' => $applications,
@@ -103,7 +105,8 @@ class AwardReportController extends Controller
             'allSemesters' => $allSemesters,
             'targetSemester' => $targetSemester,
             'targetYear' => $targetYear,
-            'awardStats' => $awardStats,
+            'targetAward' => $targetAward,
+            'awards' => $allAwardNames,
             'event' => $event,
         ]);
     }
