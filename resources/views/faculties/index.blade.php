@@ -71,7 +71,7 @@
             </form>
 
             <div class="rounded-xl border border-gray-300 bg-white overflow-x-auto">
-                <table class="w-full min-w-max">
+                <table class="w-full min-w-max whitespace-nowrap">
                     <thead class="divide-y border-b bg-gray-100">
                         <tr class="divide-x">
                             <th class="px-6 py-3 text-center cursor-pointer hover:bg-gray-200 transition">
