@@ -14,6 +14,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use App\Models\Award;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use App\Models\User;
@@ -91,6 +92,7 @@ class ApplicationController extends Controller
     public function getApplicationById($id)
     {
         $application = Application::with(['user', 'event', 'award', 'user.faculty', 'user.department'])->findOrFail($id);
+        Gate::authorize('view', $application);
 
         return response()->json($application);
     }
@@ -177,6 +179,7 @@ class ApplicationController extends Controller
     }
     public function store(Request $request): JsonResponse
     {
+        Gate::authorize('create', Application::class);
         return DB::transaction(function () use ($request) {
 
             $event = Event::where('status', Status::OPENED)
@@ -379,6 +382,7 @@ class ApplicationController extends Controller
             }
 
             $application = Application::with('event')->findOrFail($id);
+            Gate::authorize('update', $application);
 
             $isOwner = $application->student_id === $user->student_id;
 
@@ -479,6 +483,7 @@ class ApplicationController extends Controller
                 }
 
                 $application = Application::find($id);
+                Gate::authorize('delete', $application);
                 if (!$application) {
                     return response()->json(['message' => 'Application not found'], 404);
                 }
