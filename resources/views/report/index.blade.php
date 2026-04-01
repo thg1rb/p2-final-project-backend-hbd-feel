@@ -68,7 +68,7 @@ use App\Enums\Status;
                 </form>
                 @if ($applications->isNotEmpty())
                     <div class="rounded-xl border border-gray-300 bg-white overflow-x-auto">
-                        <table class="w-full">
+                        <table class="w-full min-w-max whitespace-nowrap">
                             <thead class="divide-y border-b bg-gray-100">
                                 <tr class="divide-x">
                                     <th class=" p-4 text-start">ชื่อนิสิต</th>

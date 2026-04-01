@@ -70,8 +70,8 @@
                 <button type="submit" class="px-10 py-1.5 bg-primary text-white rounded-md">ค้นหา</button>
             </form>
 
-            <div class="overflow-x-auto border rounded-xl">
-                <table class="w-full text-center">
+            <div class="rounded-xl border border-gray-300 bg-white overflow-x-auto">
+                <table class="w-full min-w-max whitespace-nowrap">
                     <thead class="bg-gray-100 border-b">
                         <tr class="divide-x">
                             <th class="px-6 py-3 text-center cursor-pointer hover:bg-gray-200 transition">
@@ -94,7 +94,7 @@
                             <tr class="divide-x">
                                 <td class="px-6 py-3 text-start">{{ $dept->name }}</td>
                                 <td class="px-6 py-3 text-start">{{ $dept->faculty->name }}</td>
-                                <td class="px-6 py-3">
+                                <td class="px-6 py-3 text-center">
                                     <x-dropdown align="right" width="48">
                                         <x-slot name="trigger">
                                             <button><x-icon name="ellipsis" /></button>
