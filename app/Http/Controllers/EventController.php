@@ -147,11 +147,14 @@ class EventController extends Controller
         Cache::forget("all_semesters_{$campusValue}");
         Cache::forget("active_event_{$campusValue}");
 
-        // ล้าง Cache หน้าทำเนียบ (Dropdown ปี) - แนะนำให้พ่วง $campusValue
+        Cache::forget("years_campus_{$campusValue}");
+        if ($year) {
+            Cache::forget("semesters_campus_{$campusValue}_year_{$year}");
+        }
+
         Cache::forget("winner_years_{$campusValue}");
         Log::info("forget winner_years_{$campusValue}");
 
-        // ล้าง Cache เจาะจงปีและเทอม (รายชื่อผู้ชนะ และ Dropdown เทอม)
         if ($year && $semester) {
             Cache::forget("winner_semesters_{$campusValue}_{$year}");
             Cache::forget("winner_results_{$campusValue}_{$year}_{$semester}");
