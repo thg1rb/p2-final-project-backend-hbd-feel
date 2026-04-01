@@ -7,6 +7,7 @@ use App\Models\Award;
 use App\Models\Event;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Gate;
 
 class AwardController extends Controller
 {
@@ -15,6 +16,7 @@ class AwardController extends Controller
      */
     public function index()
     {
+        Gate::authorize("viewAny", Award::class);
         $user = Auth::user();
 
         $awards = Award::query()
@@ -42,6 +44,7 @@ class AwardController extends Controller
     public function show(string $id)
     {
         //
+        Gate::authorize("view", Award::findOrFail($id, ['id','campus']));
         return response()->json(Award::findOrFail($id, ['id', 'name', 'form_path', 'requirements']));
     }
 

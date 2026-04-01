@@ -71,6 +71,7 @@ class EventController extends Controller
      */
     public function store(EventRequest $request)
     {
+        Gate::authorize('create', Event::class);
         Event::create($request->validated());
 
         $this->clearEventCache(
@@ -109,6 +110,7 @@ class EventController extends Controller
      */
     public function update(EventRequest $request, Event $event)
     {
+        Gate::authorize('update', $event);
         $event->update($request->validated());
 
         $this->clearEventCache(
