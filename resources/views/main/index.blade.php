@@ -4,7 +4,7 @@
             <p class="font-bold text-2xl">แดชบอร์ดผู้ดูแลระบบ</p>
             <p class=" text-gray-400">จัดการผู้ใช้ รอบรับสมัคร และดูรายงานสรุป</p>
         </div>
-        <div class="flex gap-4">
+        <div class="md:flex-row flex-col gap-4 flex">
             <div class="flex justify-between items-center bg-white rounded-xl p-5 shadow-sm flex-1">
                 <div class="flex flex-col gap-2">
                     <p>ผู้ใช้ทั้งหมด</p>
@@ -28,15 +28,6 @@
                     <x-icon name='calendar' class="stroke-white"></x-icon>
                 </div>
             </div>
-            {{--            <div class="flex justify-between items-center bg-white rounded-xl p-5 shadow-sm flex-1"> --}}
-            {{--                <div class="flex flex-col gap-2"> --}}
-            {{--                    <p>รางวัลที่อนุมัติในรอบรับสมัครที่เปิด</p> --}}
-            {{--                    <p class="text-2xl font-bold">{{ $currentAwardTotal }}</p> --}}
-            {{--                </div> --}}
-            {{--                <div class="bg-primary p-3 rounded-xl"> --}}
-            {{--                    <x-icon name='book' class="stroke-white"></x-icon> --}}
-            {{--                </div> --}}
-            {{--            </div> --}}
         </div>
         <div>
             <p class="font-bold mb-4 text-xl">เมนูหลัก</p>

@@ -16,25 +16,49 @@ class AwardController extends Controller
     public function index(Request $request)
     {
         Gate::authorize('view-any', Award::class);
-        $event = Event::query()->where(["campus" => Auth::user()->campus->value, "status" => "OPENED"])->first();
 
-        if (!$event) {
-            return view('awards.index', ['awards' => [], 'event' => null]);
+        // 1. ดึงปีการศึกษาที่มีทั้งหมด (Unique) เพื่อแสดงใน Dropdown แรก
+        $years = Event::distinct()
+            ->where('campus', Auth::user()->campus)
+            ->orderBy('academic_year', 'desc')
+            ->pluck('academic_year');
+
+        // 2. ดึงภาคเรียน โดยอ้างอิงจากปีการศึกษาที่เลือก (ถ้าไม่ได้เลือก ให้ดึงทั้งหมดที่มีในระบบ)
+        $semesterQuery = Event::distinct()->where('campus', Auth::user()->campus);
+
+        if ($request->filled('academic_year')) {
+            $semesterQuery->where('academic_year', $request->academic_year);
         }
 
+        $semesters = $semesterQuery->orderBy('semester', 'asc')->pluck('semester');
+
+        // 3. กรองข้อมูล Award
         $query = Award::query()
-            ->with('events')
-            ->where('awards.campus', Auth::user()->campus)
-            ->whereHas('events', function ($q) {
-                $q->where('status', 'OPENED')
-                    ->where('campus', Auth::user()->campus);
+            ->where('campus', Auth::user()->campus);
+
+        // กรองตามความสัมพันธ์ของ Event (Year & Semester)
+        if ($request->filled('academic_year') || $request->filled('semester')) {
+            $query->whereHas('events', function ($q) use ($request) {
+                if ($request->filled('academic_year')) {
+                    $q->where('academic_year', $request->academic_year);
+                }
+                if ($request->filled('semester')) {
+                    $q->where('semester', $request->semester);
+                }
             });
+        }
 
         if ($request->filled('search')) {
             $query->where('name', 'like', '%' . $request->search . '%');
         }
-        $awards = $query->paginate(10)->withQueryString();
-        return view('awards.index', ['awards' => $awards, 'event' => $event]);
+
+        $awards = $query->with('events')->paginate(10)->withQueryString();
+
+        $event = Event::where("campus", Auth::user()->campus->value)
+            ->where("status", "OPENED")
+            ->first();
+
+        return view('awards.index', compact('awards', 'event', 'years', 'semesters'));
     }
 
     public function create()

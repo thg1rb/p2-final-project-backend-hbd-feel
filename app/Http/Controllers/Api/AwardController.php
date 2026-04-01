@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Award;
 use App\Models\Event;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class AwardController extends Controller
 {
@@ -14,7 +15,7 @@ class AwardController extends Controller
      */
     public function index()
     {
-        $user = auth()->user();
+        $user = Auth::user();
 
         $awards = Award::query()
             ->where('awards.campus', $user->campus)
@@ -41,7 +42,7 @@ class AwardController extends Controller
     public function show(string $id)
     {
         //
-        return response()->json(Award::findOrFail($id,['id', 'name','form_path','requirements']));
+        return response()->json(Award::findOrFail($id, ['id', 'name', 'form_path', 'requirements']));
     }
 
     /**
