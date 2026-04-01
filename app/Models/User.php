@@ -66,6 +66,10 @@ class User extends Authenticatable
         return $this->role == UserRole::NISIT_DEV;
     }
 
+    public function isStudent(): bool {
+        return $this->role == UserRole::NISIT;
+    }
+
     public function isUser(): bool
     {
         return $this->role != UserRole::NISIT_DEV;
