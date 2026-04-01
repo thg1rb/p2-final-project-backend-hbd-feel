@@ -78,7 +78,7 @@ class ApplicationController extends Controller
             ->when(
                 $request->filled('status'),
                 fn($q) => $q->filterByStatus($request->input('status'), $level)
-            )
+            )->latest()
             ->paginate(
                 perPage: min(100, max(1, (int) $request->input('page_size', 10))),
                 page: max(1, (int) $request->input('page', 1))
