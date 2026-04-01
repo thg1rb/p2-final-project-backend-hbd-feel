@@ -18,24 +18,37 @@ class AwardController extends Controller
     {
         Gate::authorize('view-any', Award::class);
         $event = Event::query()->where(["campus" => Auth::user()->campus->value, "status" => "OPENED"])->first();
+        $pastEvent = Event::query()->where(["campus" => Auth::user()->campus->value])->get();
 
-        if (!$event) {
+        $selectedEventId = $request->event_id;
+
+        if (!$event && !$selectedEventId) {
             return view('awards.index', ['awards' => [], 'event' => null]);
         }
-
-        $query = Award::query()
-            ->with('events')
-            ->where('awards.campus', Auth::user()->campus)
-            ->whereHas('events', function ($q) {
-                $q->where('status', 'OPENED')
-                    ->where('campus', Auth::user()->campus);
-            });
+        $query = Award::query();
+        if (!$selectedEventId) {
+            $query = $query
+                ->with('events')
+                ->where('awards.campus', Auth::user()->campus)
+                ->whereHas('events', function ($q) {
+                    $q->where('status', 'OPENED')
+                        ->where('campus', Auth::user()->campus);
+                });
+        } else {
+            $event = Event::query()->where("events.id", $selectedEventId)->first();
+            $query = $query
+                ->with('events')
+                ->where('awards.campus', Auth::user()->campus)
+                ->whereHas('events', function ($q) use ($event) {
+                    $q->where('events.id', $event->id);
+                });
+        }
 
         if ($request->filled('search')) {
             $query->where('name', 'like', '%' . $request->search . '%');
         }
         $awards = $query->paginate(10)->withQueryString();
-        return view('awards.index', ['awards' => $awards, 'event' => $event]);
+        return view('awards.index', ['awards' => $awards, 'event' => $event, 'pastEvent' => $pastEvent]);
     }
 
     public function create()
@@ -112,11 +125,42 @@ class AwardController extends Controller
 
         return redirect()->route('awards.index');
     }
+    public function copy(Award $award)
+    {
+        Gate::authorize('create', Award::class);
+
+        $campus = Auth::user()->campus;
+        Cache::forget("all_award_names_{$campus->value}");
+
+
+        $newAward = new Award();
+        $newAward->name = $award->name;
+
+        $newAward->form_path = $award->form_path;
+        $newAward->campus = Auth::getUser()->campus->value;
+        $newAward->requirements = $award->requirements;
+        $newAward->save();
+
+        $activeEvent = Event::where("campus", Auth::user()->campus->value)
+            ->where("status", "OPENED")
+            ->first();
+
+        if (!$activeEvent) {
+            return redirect()->back()->withErrors(['error' => 'ไม่พบช่วงเวลาการสมัครที่เปิดอยู่']);
+        }
+        $newAward->events()->attach($activeEvent->id);
+
+        return redirect()->route('awards.index');
+    }
 
     public function edit(Award $award)
     {
         Gate::authorize('update', $award);
         return view('awards.edit', ['award' => $award]);
+    }
+    public function show(Award $award)
+    {
+        return view('awards.show', ['award' => $award]);
     }
 
     public function update(Request $request, Award $award)
