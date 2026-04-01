@@ -21,7 +21,7 @@ class EventPolicy
      */
     public function view(User $user, Event $event): bool
     {
-        return $user->isAdmin();
+        return $user->isAdmin() && $user->campus->value == $event->campus;
     }
 
     /**
@@ -37,7 +37,7 @@ class EventPolicy
      */
     public function update(User $user, Event $event): bool
     {
-        return $user->isAdmin();
+        return $user->isAdmin() && $user->campus->value == $event->campus;
     }
 
     /**
@@ -45,7 +45,7 @@ class EventPolicy
      */
     public function delete(User $user, Event $event): bool
     {
-        return $user->isAdmin();
+        return $user->isAdmin() && $user->campus->value == $event->campus;
     }
 
     /**

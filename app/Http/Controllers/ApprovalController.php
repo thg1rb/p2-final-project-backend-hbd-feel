@@ -10,11 +10,13 @@ use App\Jobs\SendApplicationReviewedEmail;
 use App\Models\Application;
 use App\Models\Approval;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Gate;
 
 class ApprovalController extends Controller
 {
     public function store(StoreApprovalRequest $request)
     {
+        Gate::authorize("create", Approval::class);
         $application = Application::findOrFail($request->application_id);
         $user = Auth::user();
 
