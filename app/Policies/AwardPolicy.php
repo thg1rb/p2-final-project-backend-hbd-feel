@@ -21,7 +21,7 @@ class AwardPolicy
      */
     public function view(User $user, Award $award): bool
     {
-        return $user->campus == $award->campus;
+        return $user->campus->value == $award->campus;
     }
 
     /**
@@ -37,7 +37,7 @@ class AwardPolicy
      */
     public function update(User $user, Award $award): bool
     {
-        return $user->isAdmin() && $user->campus == $award->campus;
+        return $user->isAdmin() && $user->campus->value == $award->campus;
     }
 
     /**
@@ -45,7 +45,7 @@ class AwardPolicy
      */
     public function delete(User $user, Award $award): bool
     {
-        return $user->isAdmin() && $user->campus == $award->campus;
+        return $user->isAdmin() && $user->campus->value == $award->campus;
     }
 
     /**
