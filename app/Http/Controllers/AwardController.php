@@ -48,7 +48,7 @@ class AwardController extends Controller
             $query->where('name', 'like', '%' . $request->search . '%');
         }
         $awards = $query->paginate(10)->withQueryString();
-        return view('awards.index', ['awards' => $awards, 'event' => $event, 'pastEvent' => $pastEvent]);
+        return view('awards.index', ['awards' => $awards, 'event' => $event]);
     }
 
     public function create()
