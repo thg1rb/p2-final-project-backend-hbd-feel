@@ -340,8 +340,6 @@ class ApplicationController extends Controller
                 })
                 ->get();
 
-            Log::info($applications);
-
             $categories = $applications
                 ->groupBy(fn($app) => $app->award->name)
                 ->map(function ($apps, $awardName) {
