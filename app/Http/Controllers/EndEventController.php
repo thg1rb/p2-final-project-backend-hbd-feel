@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Enums\ApprovalStatus;
 use App\Enums\RoleLevel;
 use App\Enums\Status;
 use App\Models\Application;
@@ -91,10 +92,38 @@ class EndEventController extends Controller
 
     public function exportPdf(Request $request)
     {
+
+        Log::info("TEST");
+        $campus = Auth::user()->campus;
+
         $signerName = $request->query('signer_name', '....................');
-        $applications = Application::with(['user.faculty', 'user.department', 'award', 'event'])
-            ->where('status', 'APPROVED') // หรือเงื่อนไขที่ต้องการ
+
+        $event = Event::where('status', Status::OPENED)
+            ->where('campus', Auth::user()->campus)
+            ->first();
+
+        $year = $event->academic_year;
+        $semester = $event->semester;
+
+        $applications = Application::with([
+            'award',
+            'user',
+            'user.faculty',
+            'event'
+        ])
+            ->where('status', ApprovalStatus::APPROVED)
+            ->where('level', RoleLevel::BOARD)
+            ->whereHas('award', function ($q) use ($campus) {
+                $q->where('campus', $campus);
+            })
+            ->whereHas('event', function ($q) use ($year, $semester, $campus) {
+                $q->where('academic_year', $year)
+                    ->where('semester', $semester)
+                    ->where('campus', $campus);
+            })
             ->get();
+
+        Log::info($applications);
 
         if ($applications->isEmpty()) {
             return back()->with('error', 'ไม่พบข้อมูลนิสิตที่ได้รับรางวัล');

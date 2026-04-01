@@ -17,26 +17,33 @@ class AwardController extends Controller
     {
         Gate::authorize('view-any', Award::class);
 
-        // 1. ดึงปีการศึกษาที่มีทั้งหมด (Unique) เพื่อแสดงใน Dropdown แรก
-        $years = Event::distinct()
-            ->where('campus', Auth::user()->campus)
-            ->orderBy('academic_year', 'desc')
-            ->pluck('academic_year');
+        $campus = Auth::user()->campus;
 
-        // 2. ดึงภาคเรียน โดยอ้างอิงจากปีการศึกษาที่เลือก (ถ้าไม่ได้เลือก ให้ดึงทั้งหมดที่มีในระบบ)
+        $years = Cache::remember("years_campus_{$campus}", now()->addDays(1), function () use ($campus) {
+            return Event::distinct()
+                ->where('campus', $campus)
+                ->orderBy('academic_year', 'desc')
+                ->pluck('academic_year');
+        });
+
         $semesterQuery = Event::distinct()->where('campus', Auth::user()->campus);
 
         if ($request->filled('academic_year')) {
             $semesterQuery->where('academic_year', $request->academic_year);
         }
 
-        $semesters = $semesterQuery->orderBy('semester', 'asc')->pluck('semester');
+        $academicYear = $request->academic_year;
+        $semesters = Cache::remember("semesters_campus_{$campus}_year_{$academicYear}", now()->addHours(12), function () use ($campus, $academicYear) {
+            $semesterQuery = Event::distinct()->where('campus', $campus);
+            if ($academicYear) {
+                $semesterQuery->where('academic_year', $academicYear);
+            }
+            return $semesterQuery->orderBy('semester', 'asc')->pluck('semester');
+        });
 
-        // 3. กรองข้อมูล Award
         $query = Award::query()
             ->where('campus', Auth::user()->campus);
 
-        // กรองตามความสัมพันธ์ของ Event (Year & Semester)
         if ($request->filled('academic_year') || $request->filled('semester')) {
             $query->whereHas('events', function ($q) use ($request) {
                 if ($request->filled('academic_year')) {
