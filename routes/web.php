@@ -34,11 +34,11 @@ Route::middleware(['auth', ForcePasswordChange::class])->group(function () {
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 
     Route::get('/awards', [AwardController::class, 'index'])->name('awards.index');
-    Route::get('/awards/{award}', [AwardController::class, 'show'])->name('awards.show');
     Route::get('/awards/create', [AwardController::class, 'create'])->name('awards.create');
     Route::post('/awards', [AwardController::class, 'store'])->name('awards.store');
     Route::post('/awards/{award}/copy', [AwardController::class, 'copy'])->name('awards.copy');
     Route::get('/awards/{award}/edit', [AwardController::class, 'edit'])->name('awards.edit');
+    Route::get('/awards/{award}', [AwardController::class, 'show'])->name('awards.show');
     Route::put('/awards/{award}', [AwardController::class, 'update'])->name('awards.update');
     Route::delete('/awards/{award}', [AwardController::class, 'destroy'])->name('awards.destroy');
 
