@@ -11,8 +11,8 @@
                 <h1 class="font-bold text-2xl">จัดการหมวดรางวัล</h1>
                 <p class="text-gray-400">เพิ่ม แก้ไข หรือลบข้อมูลรางวัลในระบบ</p>
             </div>
-            <a href="{{ $event ? route('awards.create') : "" }}"
-                class="{{$event ? "bg-primary text-white transition-all hover:scale-105" : "bg-gray-500 cursor-not-allowed"}} px-[10px] py-[6px] w-full md:w-fit flex flex-row justify-center items-center gap-x-[10px] rounded-md">
+            <a href="{{ $open ? route('awards.create') : "" }}"
+                class="{{$open ? "bg-primary text-white transition-all hover:scale-105" : "bg-gray-500 cursor-not-allowed"}} px-[10px] py-[6px] w-full md:w-fit flex flex-row justify-center items-center gap-x-[10px] rounded-md">
                 <x-icon name="plus" size="30" />
                 <p class="p-2">เพิ่มหมวดรางวัล</p>
             </a>
@@ -65,15 +65,16 @@
                                                class="py-1 px-3 bg-gray-200 hover:bg-gray-300 font-semibold text-gray-700 rounded-md transition-all hover:scale-105">
                                                 ดูรายละเอียด
                                             </a>
-
-                                            <form action="{{ route('awards.copy', $award) }}" method="POST"
-                                                onsubmit="return confirm('คุณแน่ใจหรือไม่ที่จะคัดลอกหมวดรางวัลนี้ไปยังรอบรางวัลล่าสุด?');">
-                                                @csrf
-                                                <button
-                                                    class="py-1 px-3 bg-green-200 hover:bg-green-300 font-semibold text-green-700 rounded-md transition-all hover:scale-105">
-                                                    คัดลอกไปยังรอบปัจจุบัน
-                                                </button>
-                                            </form>
+                                        @if($open)
+                                                <form action="{{ route('awards.copy', $award) }}" method="POST"
+                                                      onsubmit="return confirm('คุณแน่ใจหรือไม่ที่จะคัดลอกหมวดรางวัลนี้ไปยังรอบรางวัลล่าสุด?');">
+                                                    @csrf
+                                                    <button
+                                                        class="py-1 px-3 bg-green-200 hover:bg-green-300 font-semibold text-green-700 rounded-md transition-all hover:scale-105">
+                                                        คัดลอกไปยังรอบปัจจุบัน
+                                                    </button>
+                                                </form>
+                                            @endif
                                         @else
                                             <a href="{{ route('awards.edit', $award) }}"
                                                 class="py-1 px-3 bg-blue-200 hover:bg-blue-300 font-semibold text-blue-700 rounded-md cursor-pointer transition-all hover:scale-105">
