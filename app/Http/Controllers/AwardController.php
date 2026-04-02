@@ -22,8 +22,14 @@ class AwardController extends Controller
 
         $selectedEventId = $request->event_id;
 
+        $current = false;
+
+        if ($event) {
+            $current = true;
+        }
+
         if (!$event && !$selectedEventId) {
-            return view('awards.index', ['awards' => [], 'event' => null]);
+            return view('awards.index', ['awards' => [], 'event' => null, 'pastEvent' => $pastEvent, 'open' => $current]);
         }
         $query = Award::query();
         if (!$selectedEventId) {
@@ -48,7 +54,7 @@ class AwardController extends Controller
             $query->where('name', 'like', '%' . $request->search . '%');
         }
         $awards = $query->paginate(10)->withQueryString();
-        return view('awards.index', ['awards' => $awards, 'event' => $event, 'pastEvent' => $pastEvent]);
+        return view('awards.index', ['awards' => $awards, 'event' => $event, 'pastEvent' => $pastEvent, 'open' => $current]);
     }
 
     public function create()

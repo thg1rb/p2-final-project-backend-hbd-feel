@@ -14,17 +14,17 @@ class EventAwardSeeder extends Seeder
      */
     public function run(): void
     {
-        //
         $events = Event::all();
         $awards = Award::all();
 
         foreach ($awards as $award) {
-            $award->events()->attach(
-                $events->random(1)->pluck('id')->toArray(),
-                // [
-                //     'round' => '2569/1',
-                // ]
-            );
+            $matchingEvents = $events->where('campus', $award->campus);
+
+            if ($matchingEvents->isNotEmpty()) {
+                $award->events()->attach(
+                    $matchingEvents->random(1)->pluck('id')->toArray()
+                );
+            }
         }
     }
 }
