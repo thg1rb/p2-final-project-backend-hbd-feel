@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Enums\UserRole;
 use App\Models\Application;
 use App\Models\Award;
 use App\Models\User;
@@ -14,6 +15,7 @@ class ApplicationSeeder extends Seeder
         $students = User::query()
             ->whereNotNull('student_id')
             ->where('student_id', '!=', '')
+            ->where('role', UserRole::NISIT)
             ->get();
 
         $this->command->warn("Actual students found in DB: " . $students->count());
