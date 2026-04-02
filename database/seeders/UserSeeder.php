@@ -55,7 +55,6 @@ class UserSeeder extends Seeder
             User::query()->firstOrCreate(
                 ['email' => 'admin@example.com'],
                 [
-                    'student_id' => fake()->numerify("##########"),
                     'firstName' => "Adminstrator",
                     'lastName' => 'S',
                     'username' => 'admin',

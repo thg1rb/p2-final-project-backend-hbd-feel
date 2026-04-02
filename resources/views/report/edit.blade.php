@@ -32,9 +32,10 @@
                         @endforeach
                     </select>
                     <div class="flex justify-end items-center gap-5 mt-5">
-                        <button type="button" class="rounded-xl border border-gray-400 py-2 px-10 active:opacity-50">
+                        <a href="{{ route('report.show', $application) }}" type="button"
+                            class="rounded-xl border border-gray-400 py-2 px-10 active:opacity-50">
                             ยกเลิก
-                        </button>
+                        </a>
                         <button type="submit" class="text-white rounded-xl py-2 px-10 bg-primary active:bg-primary/50">
                             ตกลง
                         </button>

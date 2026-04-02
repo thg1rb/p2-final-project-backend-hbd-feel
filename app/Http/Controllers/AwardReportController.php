@@ -172,7 +172,11 @@ class AwardReportController extends Controller
     {
         $application = Application::with(['user.department', 'award', 'event'])
             ->findOrFail($id);
-        $awards = Award::all();
+        $awards = Award::where('campus', Auth::user()->campus) // เช็ค Campus ของ User ปัจจุบัน
+            ->whereHas('events', function ($query) {
+                $query->where('status', "OPENED");
+            })
+            ->get();
         return view('report.edit', compact('application', 'awards'));
     }
 
