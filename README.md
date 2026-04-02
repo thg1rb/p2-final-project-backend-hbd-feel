@@ -1,15 +1,27 @@
-# 🏆 KU Award - Core API & Admin Porta
+# 🏆 KU Award - Core API & Admin Portal
 
 The backbone of the KU Award system, built with Laravel. This repository handles the business logic, database
 management, file storage via MinIO, and the high-level administrative interface.
 
-## 👤 Team Members (HBD Feel)
+## 👤 WebTech Team Members
 
 | Student ID | Full Name (Nickname)                 |                  GitHub Username                  |
 |:----------:|--------------------------------------|:-------------------------------------------------:|
 | 6610401934 | Kerdsiri Srijaroen (Tonnam)          | [Tonwantpillow](https://github.com/Tonwantpillow) |
 | 6610402132 | Bowornrat Tangnararatchakit (Bright) |        [thg1rb](https://github.com/thg1rb)        |
 | 6610402205 | Rugsit Rungrattanachai (Nest)        |        [Rugsit](https://github.com/Rugsit)        |
+| 6610405905 | Narakorn Thanapornpakdee (Nam)       |          [nk-n](https://github.com/nk-n)          |
+
+## 👤 DevOps Team Members
+
+| Student ID | Full Name (Nickname)                 |                  GitHub Username                  |
+|:----------:|--------------------------------------|:-------------------------------------------------:|
+| 6610401934 | Kerdsiri Srijaroen (Tonnam)          | [Tonwantpillow](https://github.com/Tonwantpillow) |
+| 6610402116 | Tee Anusonsart (Tee)                 | [TeeAnusonsart](https://github.com/TeeAnusonsart) |
+| 6610402132 | Bowornrat Tangnararatchakit (Bright) |        [thg1rb](https://github.com/thg1rb)        |
+| 6610402183 | Pawat Chaijaroen (Keam)              |      [KeamKRUB](https://github.com/KeamKRUB)      |
+| 6610402205 | Rugsit Rungrattanachai (Nest)        |        [Rugsit](https://github.com/Rugsit)        |
+| 6610402272 | Isarapong Tuensakul (Game)           |     [Gamenakub](https://github.com/Gamenakub)     |
 | 6610405905 | Narakorn Thanapornpakdee (Nam)       |          [nk-n](https://github.com/nk-n)          |
 
 ## 🛠 Tech Stack
