@@ -6,7 +6,9 @@ use App\Http\Requests\EventRequest;
 use App\Models\Event;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Redirect;
 
 class EventController extends Controller
@@ -69,7 +71,14 @@ class EventController extends Controller
      */
     public function store(EventRequest $request)
     {
+        Gate::authorize('create', Event::class);
         Event::create($request->validated());
+
+        $this->clearEventCache(
+            Auth::user()->campus,
+            $request->academic_year,
+            $request->semester
+        );
 
         return Redirect::route('events.index');
     }
@@ -101,7 +110,14 @@ class EventController extends Controller
      */
     public function update(EventRequest $request, Event $event)
     {
+        Gate::authorize('update', $event);
         $event->update($request->validated());
+
+        $this->clearEventCache(
+            Auth::user()->campus,
+            $event->academic_year,
+            $event->semester
+        );
 
         return Redirect::route('events.index');
     }
@@ -112,8 +128,38 @@ class EventController extends Controller
     public function destroy(Event $event)
     {
         Gate::authorize('delete', $event);
+
+        $campus = Auth::user()->campus;
+        $year = $event->academic_year;
+        $semester = $event->semester;
+
         $event->delete();
 
+        $this->clearEventCache($campus, $year, $semester);
+
         return Redirect::route('events.index');
+    }
+
+    private function clearEventCache($campus, $year = null, $semester = null)
+    {
+        $campusValue = $campus->value ?? $campus;
+
+        // ล้าง Cache หน้า Admin
+        Cache::forget("all_years_{$campusValue}");
+        Cache::forget("all_semesters_{$campusValue}");
+        Cache::forget("active_event_{$campusValue}");
+
+        Cache::forget("years_campus_{$campusValue}");
+        if ($year) {
+            Cache::forget("semesters_campus_{$campusValue}_year_{$year}");
+        }
+
+        Cache::forget("winner_years_{$campusValue}");
+        Log::info("forget winner_years_{$campusValue}");
+
+        if ($year && $semester) {
+            Cache::forget("winner_semesters_{$campusValue}_{$year}");
+            Cache::forget("winner_results_{$campusValue}_{$year}_{$semester}");
+        }
     }
 }

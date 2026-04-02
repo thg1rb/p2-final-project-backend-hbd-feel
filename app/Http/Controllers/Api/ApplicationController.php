@@ -14,10 +14,12 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use App\Models\Award;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
 
 class ApplicationController extends Controller
@@ -76,14 +78,13 @@ class ApplicationController extends Controller
             ->when(
                 $request->filled('status'),
                 fn($q) => $q->filterByStatus($request->input('status'), $level)
-            )
+            )->latest()
             ->paginate(
                 perPage: min(100, max(1, (int) $request->input('page_size', 10))),
                 page: max(1, (int) $request->input('page', 1))
             )
             ->withQueryString();
 
-        Log::info("LOG: ", $applications->toArray());
 
         return response()->json($applications);
     }
@@ -91,6 +92,7 @@ class ApplicationController extends Controller
     public function getApplicationById($id)
     {
         $application = Application::with(['user', 'event', 'award', 'user.faculty', 'user.department'])->findOrFail($id);
+        Gate::authorize('view', $application);
 
         return response()->json($application);
     }
@@ -169,7 +171,7 @@ class ApplicationController extends Controller
         $currEvent = Event::get()->where('status', 'OPENED')->where('campus', $user->campus)->first();
 
         //        return response()->json($applications);
-        return new ApplicationIndexResource([
+        return response()->json([
             'applications' => $applications,
             'current_event' => $currEvent,
             'student' => $user,
@@ -177,6 +179,7 @@ class ApplicationController extends Controller
     }
     public function store(Request $request): JsonResponse
     {
+        Gate::authorize('create', Application::class);
         return DB::transaction(function () use ($request) {
 
             $event = Event::where('status', Status::OPENED)
@@ -264,7 +267,7 @@ class ApplicationController extends Controller
             }
 
             $application = Application::create([
-                'student_id' => auth()->user()->student_id,
+                'student_id' => Auth::user()->student_id,
                 'award_id' => $validated['award_id'],
                 'event_id' => $event->id,
                 'year' => $validated['year'],
@@ -287,61 +290,83 @@ class ApplicationController extends Controller
         $semester = $request->query('semester');
         $campus = $request->query('campus');
 
-        $event = Event::where('academic_year', $year)
-            ->where('semester', $semester)
-            ->where('campus', $campus)
-            ->where('status', Status::CLOSED)
-            ->first();
+        // 1. Cache รายการปีทั้งหมดแยกตามวิทยาเขต (เก็บ 1 วัน)
+        $years = Cache::remember("winner_years_{$campus}", now()->addDay(), function () use ($campus) {
+            return Event::where('campus', $campus)
+                ->where('status', Status::CLOSED)
+                ->select('academic_year')
+                ->distinct()
+                ->orderByDesc('academic_year')
+                ->pluck('academic_year');
+        });
 
-        $pdfPath = $event?->path;
+        // 2. Cache รายการเทอมของปีนั้นๆ (เก็บ 1 วัน)
+        $semesters = Cache::remember("winner_semesters_{$campus}_{$year}", now()->addDay(), function () use ($year, $campus) {
+            return Event::where('academic_year', $year)
+                ->where('campus', $campus)
+                ->where('status', Status::CLOSED)
+                ->select('semester')
+                ->distinct()
+                ->pluck('semester');
+        });
 
-        $applications = Application::with([
-            'award:id,name,campus',
-            'user:id,student_id,firstName,lastName,faculty_id',
-            'user.faculty:id,name',
-            'event:id,academic_year,semester,campus,status'
-        ])
-            ->where('status', ApprovalStatus::APPROVED)
-            ->where('level', RoleLevel::BOARD)
-            ->whereHas('event', function ($q) use ($year, $semester, $campus) {
-                $q->where('academic_year', $year)
-                    ->where('semester', $semester)
-                    ->where('campus', $campus)
-                    ->where('status', Status::CLOSED);
-            })
-            ->get();
+        // 3. Cache ข้อมูลผลรางวัล (ตัวนี้สำคัญที่สุด เพราะ Query หนัก)
+        // ใช้ Key ที่ระบุถึง วิทยาเขต+ปี+เทอม
+        $cacheKey = "winner_results_{$campus}_{$year}_{$semester}";
 
-        $categories = $applications
-            ->groupBy(fn($app) => $app->award->name)
-            ->map(function ($apps, $awardName) {
-                return [
-                    'name' => $awardName,
-                    'students' => $apps->map(fn($app) => [
-                        'name' => trim(($app->user?->firstName ?? '') . ' ' . ($app->user?->lastName ?? '')),
-                        'faculty' => $app->user?->faculty?->name ?? '-'
-                    ])
-                ];
-            })
-            ->values();
+        $winnerData = Cache::remember($cacheKey, now()->addDay(), function () use ($year, $semester, $campus) {
+            $event = Event::where('academic_year', $year)
+                ->where('semester', $semester)
+                ->where('campus', $campus)
+                ->where('status', Status::CLOSED)
+                ->first();
+
+            $applications = Application::with([
+                'award:id,name,campus',
+                'user:id,student_id,firstName,lastName,faculty_id',
+                'user.faculty:id,name',
+                'event:id,academic_year,semester,campus,status'
+            ])
+                ->where('status', ApprovalStatus::APPROVED)
+                ->where('level', RoleLevel::BOARD)
+                ->whereHas('award', function ($q) use ($campus) {
+                    $q->where('campus', $campus);
+                })
+                ->whereHas('event', function ($q) use ($year, $semester, $campus) {
+                    $q->where('academic_year', $year)
+                        ->where('semester', $semester)
+                        ->where('campus', $campus)
+                        ->where('status', Status::CLOSED);
+                })
+                ->get();
+
+            $categories = $applications
+                ->groupBy(fn($app) => $app->award->name)
+                ->map(function ($apps, $awardName) {
+                    return [
+                        'name' => $awardName,
+                        'students' => $apps->map(fn($app) => [
+                            'name' => trim(($app->user?->firstName ?? '') . ' ' . ($app->user?->lastName ?? '')),
+                            'faculty' => $app->user?->faculty?->name ?? '-'
+                        ])
+                    ];
+                })
+                ->values();
+
+            return [
+                'pdf_path' => $event?->path,
+                'categories' => $categories
+            ];
+        });
 
         return response()->json([
             'year' => $year,
             'semester' => $semester,
             'campus' => $campus,
-
-            'pdf_path' => $pdfPath,
-
-            'years' => Event::select('academic_year')
-                ->distinct()
-                ->orderByDesc('academic_year')
-                ->pluck('academic_year'),
-
-            'semesters' => Event::where('academic_year', $year)
-                ->select('semester')
-                ->distinct()
-                ->pluck('semester'),
-
-            'categories' => $categories
+            'pdf_path' => $winnerData['pdf_path'],
+            'years' => $years,
+            'semesters' => $semesters,
+            'categories' => $winnerData['categories']
         ]);
     }
 
@@ -355,6 +380,7 @@ class ApplicationController extends Controller
             }
 
             $application = Application::with('event')->findOrFail($id);
+            Gate::authorize('update', $application);
 
             $isOwner = $application->student_id === $user->student_id;
 
@@ -455,6 +481,7 @@ class ApplicationController extends Controller
                 }
 
                 $application = Application::find($id);
+                Gate::authorize('delete', $application);
                 if (!$application) {
                     return response()->json(['message' => 'Application not found'], 404);
                 }
@@ -486,7 +513,6 @@ class ApplicationController extends Controller
                     'message' => 'Application deleted successfully'
                 ], 200);
             });
-
         } catch (\Exception $e) {
             return response()->json([
                 'message' => 'Internal Server Error',

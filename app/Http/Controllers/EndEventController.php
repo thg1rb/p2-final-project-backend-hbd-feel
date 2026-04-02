@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Enums\ApprovalStatus;
 use App\Enums\RoleLevel;
 use App\Enums\Status;
 use App\Models\Application;
@@ -10,27 +11,13 @@ use Barryvdh\DomPDF\Facade\Pdf;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
 
 class EndEventController extends Controller
 {
     public function index(Request $request)
     {
-        $search = $request->query('search', '');
-        $status = $request->query('status', '');
-
-        // จำลอง Logic การดึงข้อมูลเหมือนใน load function
-        $query = Application::with(['user.faculty', 'user.department', 'award']);
-
-        if ($search) {
-            $query->whereHas('user', function ($q) use ($search) {
-                $q->where('firstName', 'like', "%{$search}%")
-                    ->orWhere('student_id', 'like', "%{$search}%");
-            });
-        }
-
-        $applications = $query->paginate(10);
-
         // ดึง Stats (totalInprogress)
         $totalInprogress = Application::where('status', '!=', 'REJECTED')
             ->where('level', '!=', RoleLevel::BOARD)
@@ -39,12 +26,10 @@ class EndEventController extends Controller
         $event = Event::where('status', Status::OPENED)
             ->where('campus', Auth::user()->campus)
             ->first();
-        Log::info($event);
 
         $total = Application::count();
 
         return view('end-event.index', [
-            'applications' => $applications,
             'stats' => [
                 'total' => $total,
                 'totalInprogress' => $totalInprogress
@@ -68,18 +53,35 @@ class EndEventController extends Controller
             // 2. ระบุโฟลเดอร์ให้ชัดเจนแบบ uploadFile ที่ทำสำเร็จ
             $path = $file->store('event', 's3');
 
-            Log::info('Path generated: ' . ($path ?: 'EMPTY'));
+            Log::info('1: Path generated: ' . ($path ?: 'EMPTY'));
 
             if (!$path) {
+                Log::info('2: inner if -> ' . $path);
                 throw new \Exception('S3 Store returned empty path');
             }
 
+            Log::info('3: after if -> ' . $path);
+
             // 3. อัปเดต Database
             $event = Event::findOrFail($request->event_id);
+
+            Log::info('4: after findOrFail -> ' . $request->input(''));
             $event->update([
                 'status' => Status::CLOSED,
                 'path' => $path // มั่นใจว่าคอลัมน์ใน DB ชื่อ path นะครับ
             ]);
+
+            // ===========================================
+            $campus = $event->campus->value ?? $event->campus;
+            $year = $event->academic_year;
+            $semester = $event->semester;
+
+            Cache::forget("winner_years_{$campus}");
+
+            Cache::forget("winner_semesters_{$campus}_{$year}");
+
+            Cache::forget("winner_results_{$campus}_{$year}_{$semester}");
+            // ===========================================
 
             return back()->with('success', 'อัปโหลดเรียบร้อย');
         } catch (\Exception $e) {
@@ -90,10 +92,38 @@ class EndEventController extends Controller
 
     public function exportPdf(Request $request)
     {
+
+        Log::info("TEST");
+        $campus = Auth::user()->campus;
+
         $signerName = $request->query('signer_name', '....................');
-        $applications = Application::with(['user.faculty', 'user.department', 'award', 'event'])
-            ->where('status', 'APPROVED') // หรือเงื่อนไขที่ต้องการ
+
+        $event = Event::where('status', Status::OPENED)
+            ->where('campus', Auth::user()->campus)
+            ->first();
+
+        $year = $event->academic_year;
+        $semester = $event->semester;
+
+        $applications = Application::with([
+            'award',
+            'user',
+            'user.faculty',
+            'event'
+        ])
+            ->where('status', ApprovalStatus::APPROVED)
+            ->where('level', RoleLevel::BOARD)
+            ->whereHas('award', function ($q) use ($campus) {
+                $q->where('campus', $campus);
+            })
+            ->whereHas('event', function ($q) use ($year, $semester, $campus) {
+                $q->where('academic_year', $year)
+                    ->where('semester', $semester)
+                    ->where('campus', $campus);
+            })
             ->get();
+
+        Log::info($applications);
 
         if ($applications->isEmpty()) {
             return back()->with('error', 'ไม่พบข้อมูลนิสิตที่ได้รับรางวัล');

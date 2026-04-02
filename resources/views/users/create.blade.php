@@ -83,7 +83,9 @@
                     >
                         <option value="">เลือกคณะ</option>
                         @foreach($faculties as $f)
-                            <option value="{{$f->id}}">{{$f->name}}</option>
+                            @if($f->campus === auth()->user()->campus)
+                                <option value="{{$f->id}}">{{$f->name}}</option>
+                            @endif
                         @endforeach
                     </select>
                 </div>

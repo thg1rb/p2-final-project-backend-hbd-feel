@@ -6,15 +6,17 @@ use App\Enums\ApprovalStatus;
 use App\Enums\RoleLevel;
 use App\Enums\UserRole;
 use App\Http\Requests\StoreApprovalRequest;
+use App\Jobs\SendApplicationReviewedEmail;
 use App\Models\Application;
 use App\Models\Approval;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Gate;
 
 class ApprovalController extends Controller
 {
     public function store(StoreApprovalRequest $request)
     {
+        Gate::authorize("create", Approval::class);
         $application = Application::findOrFail($request->application_id);
         $user = Auth::user();
 
@@ -39,6 +41,13 @@ class ApprovalController extends Controller
             'reason' => $request->reason ?: null,
             'status' => $request->status,
         ]);
+
+        SendApplicationReviewedEmail::dispatch(
+            $application,
+            $user,
+            $request->status,
+            $request->reason
+        );
 
         $message = $request->status === 'APPROVED' ? 'อนุมัติสำเร็จ' : 'ปฏิเสธสำเร็จ';
         return back()->with('success', $message);

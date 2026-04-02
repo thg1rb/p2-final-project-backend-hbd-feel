@@ -7,6 +7,7 @@ use App\Models\User;
 use App\Models\Faculty;
 use App\Models\Department;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rule;
@@ -19,10 +20,10 @@ class UserController extends Controller
     public function index(Request $request)
     {
         Gate::authorize('viewAny', User::class);
-         $users = User::query()
+        $users = User::query()
             ->where('campus', auth()->user()->campus)
-            ->when($request->role, function($query, $role) {
-                 return $query->where('role', $role);
+            ->when($request->role, function ($query, $role) {
+                return $query->where('role', $role);
             })
             ->when($request->search, function ($query, $search) {
                 $query->where(function ($q) use ($search) {
@@ -35,9 +36,10 @@ class UserController extends Controller
             ->paginate(15)
             ->withQueryString();
 
-        return view('users.index',
+        return view(
+            'users.index',
             [
-            'users' => $users,
+                'users' => $users,
                 'roles' => UserRole::cases(),
             ]
         );
@@ -49,12 +51,14 @@ class UserController extends Controller
     public function create()
     {
         Gate::authorize('create', User::class);
-        return view('users.create',
+        return view(
+            'users.create',
             [
                 'roles' => UserRole::cases(),
-                'faculties' => Faculty::all(),
+                'faculties' => Faculty::where('campus', auth()->user()->campus)->get(),
                 'departments' => Department::all(),
-            ]);
+            ]
+        );
     }
 
     /**
@@ -142,6 +146,7 @@ class UserController extends Controller
      */
     public function show(User $user)
     {
+        Gate::authorize('view', $user);
         return view('users.show', [
             'user' => $user,
         ]);
@@ -156,7 +161,7 @@ class UserController extends Controller
         return view('users.edit', [
             'user' => $user,
             'roles' => UserRole::cases(),
-            'faculties' => Faculty::all(),
+            'faculties' => Faculty::where('campus', auth()->user()->campus)->get(),
             'departments' => Department::all(),
         ]);
     }

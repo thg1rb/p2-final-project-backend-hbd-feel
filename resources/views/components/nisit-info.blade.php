@@ -4,7 +4,7 @@
         <x-icon name="user" class="text-blue-600" />
         <p>ข้อมูลนิสิต</p>
     </div>
-    <div class="grid grid-cols-2 gap-y-6">
+    <div class="grid md:grid-cols-2 grid-cols-1 gap-y-6 gap-x-4">
         <div class="flex flex-col gap-2">
             <p class="text-sm text-gray-400">ชื่อ-นามสกุล</p>
             <p class="font-medium">{{ $application->user->firstName }} {{ $application->user->lastName }}</p>

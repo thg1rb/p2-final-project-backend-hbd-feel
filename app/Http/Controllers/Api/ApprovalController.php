@@ -7,10 +7,12 @@ use App\Enums\RoleLevel;
 use App\Enums\UserRole;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreApprovalRequest;
+use App\Jobs\SendApplicationReviewedEmail;
 use App\Models\Application;
 use App\Models\Approval;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Gate;
 
 class ApprovalController extends Controller
 {
@@ -24,7 +26,7 @@ class ApprovalController extends Controller
 
     public function getApprovalRequestByApplicationId($applicationId)
     {
-
+        Gate::authorize("viewAny", Approval::class);
         $approvals = Approval::with('user:id,firstName,lastName,role')
             ->where('application_id', $applicationId)
             ->get();
@@ -38,6 +40,7 @@ class ApprovalController extends Controller
 
     public function getApprovalRequestByApplicationIdAndUserId($applicationId, $userId)
     {
+        Gate::authorize("viewAny", Approval::class);
         $approval = Approval::with('user:id,firstName,lastName,role')
             ->where('application_id', $applicationId)
             ->where('user_id', $userId)
@@ -51,6 +54,7 @@ class ApprovalController extends Controller
      */
     public function store(StoreApprovalRequest $request)
     {
+        Gate::authorize("create", Approval::class);
         $application = Application::findOrFail($request->application_id);
         $user = User::findOrFail($request->user_id);
 
@@ -70,6 +74,13 @@ class ApprovalController extends Controller
         $application->update($nextStatus);
 
         Approval::create($request->validated());
+
+        SendApplicationReviewedEmail::dispatch(
+            $application,
+            $user,
+            $request->status,
+            $request->reason
+        );
 
         return response()->noContent(201);
     }

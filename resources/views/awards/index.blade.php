@@ -26,42 +26,71 @@
                     <input name="search" placeholder="ค้นหาชื่อหมวดรางวัล" value="{{ request('search') }}"
                         class="w-full rounded-md border-slate-300 pl-10 placeholder:font-light placeholder:text-slate-400">
                 </div>
+
+                <select name="event_id" class="rounded-md border-slate-300"
+                    onchange="this.form.submit()"
+                >
+                    <option value="">-- เลือกรอบรางวัล --</option>
+                    @foreach($pastEvent as $e)
+                        <option value="{{ $e->id }}"
+                            {{ request('event_id') == $e->id ? 'selected' : '' }}>
+                            {{ $e->semester."/".$e->academic_year }}
+                        </option>
+                    @endforeach
+                </select>
+
                 <button type="submit" class="px-10 py-1.5 bg-primary text-white  rounded-md">
                     ค้นหา
                 </button>
             </form>
-            <div class="rounded-xl border border-gray-300 bg-white overflow-hidden">
-                <table class="w-full">
+            <div class="rounded-xl border border-gray-300 bg-white overflow-x-auto">
+                <table class="w-full min-w-max whitespace-nowrap">
                     <thead class="divide-y border-b bg-gray-100">
                         <tr class="divide-x">
                             <th class="px-6 py-3 text-left cursor-pointer hover:bg-gray-200 transition">หมวดรางวัล</th>
 {{--                            <th class="px-6 py-3 text-left cursor-pointer hover:bg-gray-200 transition">รางวัล</th>--}}
-                            <th class="px-2 py-3 text-center cursor-pointer hover:bg-gray-200 transition">ดำเนินการ</th>
+                            <th class="px-2 py-3 text-center w-1/5 cursor-pointer hover:bg-gray-200 transition">ดำเนินการ</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y">
                         @forelse($awards as $award)
-                            <tr class="divide-x">
-                                <td class="px-6 py-3 text-left">{{ $award->name }}</td>
-{{--                                <td class="px-6 py-3 text-left">--}}
-{{--                                    {{ NumberFormatter::create(app()->getLocale(), NumberFormatter::DECIMAL)->format($award->reward) }}--}}
-{{--                                </td>--}}
-                                <td class="px-2 py-3 text-center flex items-center justify-center gap-2">
-                                    <a href="{{ route('awards.edit', $award) }}"
-                                        class="py-1 px-3 bg-blue-200 hover:bg-blue-300 font-semibold text-blue-700 rounded-md cursor-pointer transition-all hover:scale-105">
-                                        แก้ไข
-                                    </a>
-                                    <form action="{{ route('awards.destroy', $award) }}" method="POST"
-                                        onsubmit="return confirm('คุณแน่ใจหรือไม่ที่จะลบหมวดรางวัลนี้?');">
-                                        @csrf
-                                        @method('DELETE')
-                                        <button
-                                            class="py-1 px-3 bg-red-200 hover:bg-red-300 font-semibold text-red-700 rounded-md cursor-pointer transition-all hover:scale-105">
-                                            ลบ
-                                        </button>
-                                    </form>
-                                </td>
-                            </tr>
+                                <tr class="divide-x">
+                                    <td class="px-6 py-3 text-left">{{ $award->name }}</td>
+    {{--                                <td class="px-6 py-3 text-left">--}}
+    {{--                                    {{ NumberFormatter::create(app()->getLocale(), NumberFormatter::DECIMAL)->format($award->reward) }}--}}
+    {{--                                </td>--}}
+                                    <td class="px-2 py-3 text-center flex items-center justify-center gap-2">
+                                        @if($event && $event->status->value == "CLOSED")
+                                            <a href="{{ route('awards.show', $award) }}"
+                                               class="py-1 px-3 bg-gray-200 hover:bg-gray-300 font-semibold text-gray-700 rounded-md transition-all hover:scale-105">
+                                                ดูรายละเอียด
+                                            </a>
+
+                                            <form action="{{ route('awards.copy', $award) }}" method="POST"
+                                                onsubmit="return confirm('คุณแน่ใจหรือไม่ที่จะคัดลอกหมวดรางวัลนี้ไปยังรอบรางวัลล่าสุด?');">
+                                                @csrf
+                                                <button
+                                                    class="py-1 px-3 bg-green-200 hover:bg-green-300 font-semibold text-green-700 rounded-md transition-all hover:scale-105">
+                                                    คัดลอกไปยังรอบปัจจุบัน
+                                                </button>
+                                            </form>
+                                        @else
+                                            <a href="{{ route('awards.edit', $award) }}"
+                                                class="py-1 px-3 bg-blue-200 hover:bg-blue-300 font-semibold text-blue-700 rounded-md cursor-pointer transition-all hover:scale-105">
+                                                แก้ไข
+                                            </a>
+                                            <form action="{{ route('awards.destroy', $award) }}" method="POST"
+                                                onsubmit="return confirm('คุณแน่ใจหรือไม่ที่จะลบหมวดรางวัลนี้?');">
+                                                @csrf
+                                                @method('DELETE')
+                                                <button
+                                                    class="py-1 px-3 bg-red-200 hover:bg-red-300 font-semibold text-red-700 rounded-md cursor-pointer transition-all hover:scale-105">
+                                                    ลบ
+                                                </button>
+                                            </form>
+                                        @endif
+                                    </td>
+                                </tr>
                         @empty
                             <tr class="divide-x">
                                 <td colspan="6" class="px-6 py-32 text-center text-slate-500">

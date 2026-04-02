@@ -10,7 +10,7 @@
                     </a>
                 </div> --}}
 
-                <div class=" bg-primary rounded-xl p-3 flex justify-center items-center">
+                <div class=" bg-gradient-to-r from-green-600 to-emerald-600 rounded-xl p-3 flex justify-center items-center">
                     <x-icon name="badge" size="24" class="stroke-white"></x-icon>
                 </div>
 
