@@ -1,18 +1,40 @@
-[![Review Assignment Due Date](https://classroom.github.com/assets/deadline-readme-button-22041afd0340ce965d47ae6ef1cefeee28c7c493a6346c4f15d667ab976d596c.svg)](https://classroom.github.com/a/tZPypXcQ)
+# 🏆 KU Award - Core API & Admin Porta
 
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+The backbone of the KU Award system, built with Laravel. This repository handles the business logic, database
+management, file storage via MinIO, and the high-level administrative interface.
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+## 👤 Team Members (HBD Feel)
 
-## About KU Award
+| Student ID | Full Name (Nickname)                 |                  GitHub Username                  |
+|:----------:|--------------------------------------|:-------------------------------------------------:|
+| 6610401934 | Kerdsiri Srijaroen (Tonnam)          | [Tonwantpillow](https://github.com/Tonwantpillow) |
+| 6610402132 | Bowornrat Tangnararatchakit (Bright) |        [thg1rb](https://github.com/thg1rb)        |
+| 6610402205 | Rugsit Rungrattanachai (Nest)        |        [Rugsit](https://github.com/Rugsit)        |
+| 6610405905 | Narakorn Thanapornpakdee (Nam)       |          [nk-n](https://github.com/nk-n)          |
 
-The Student Affairs Division of Kasetsart University aims to develop the "Nisit Deeden System" to streamline the selection process for the Outstanding Student Award, which grants tuition waivers or certificates to qualified students. In this workflow, students self-nominate in one of three categories—Extra-curricular Activities, Creativity and Innovation, or Good Conduct—by submitting specific supporting documents for a single chosen category per round. The application undergoes a hierarchical approval process starting with the Head of Department, followed by the Associate Dean and the Dean, before reaching the Student Affairs Division for verification, where staff possess the authority to correct award categories if necessary. Subsequently, a committee reviews and votes on the candidates, requiring a majority consensus for approval, after which the process concludes with the Committee Chairman and University President signing off on the final announcement; however, complex specific steps may remain as manual processes depending on development feasibility
+## 🛠 Tech Stack
 
+* **Framework:** Laravel (PHP)
+* **Database:** MySQL
+* **Caching/Queues:** Redis
+* **Object Storage:** MinIO (for handling dynamic student uploads)
+* **Auth:** Laravel Breeze/Socialite (Password & Google OAuth)
+
+## 🌟 Key Features
+
+* **Dynamic Form Builder:** Create award types with custom requirements. Support for N+ additional files (transcripts,
+  ID cards, etc.).
+* **Academic Calendar:** Manage scholarship events by Year and Semester.
+* **Campus Isolation:** Strict data separation ensures admins only see data relevant to their specific campus.
+* **Admin Workflow:** Manage Users, Departments, and Faculties. Review, approve, or reject applications.
+* **PDF Engine:** Export approved applicants into the official university-formatted PDF for the Chancellor's signature.
+* **API Provider:** Serves as the headless backend for the Svelte frontend.
+
+## 🔐 Security & Auth
+
+* **Dual Login:** Supports traditional credentials and Google OAuth.
+* **First-Login Policy:** Users are forced to change their password upon first entry.
+* **Password Recovery:** Integrated "Forgot Password" flow via email.
 
 ## 🚀 Get Started
 
