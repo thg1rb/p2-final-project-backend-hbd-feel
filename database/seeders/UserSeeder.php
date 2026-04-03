@@ -5,8 +5,10 @@ namespace Database\Seeders;
 use App\Enums\CampusType;
 use App\Enums\UserRole;
 use App\Models\User;
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
+use App\Models\Faculty;
+use App\Models\Department;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\Hash;
 
 class UserSeeder extends Seeder
 {
@@ -15,75 +17,75 @@ class UserSeeder extends Seeder
      */
     public function run(): void
     {
-        $faculties = \App\Models\Faculty::all();
+        $fixedUsers = [
+            [
+                'email' => 'narakorn.th@ku.th',
+                'student_id' => '6610405905',
+                'firstName' => 'นรากร',
+                'lastName' => 'ธนภรภักดี',
+                'username' => 'narakorn',
+                'role' => UserRole::NISIT,
+            ],
+            [
+                'email' => 'dept.head@example.com',
+                'student_id' => null,
+                'firstName' => 'สมชาย',
+                'lastName' => 'สายวิชาการ',
+                'username' => 'dept_head_01',
+                'role' => UserRole::DEPT_HEAD,
+            ],
+            [
+                'email' => 'asso.dean@example.com',
+                'student_id' => null,
+                'firstName' => 'จิราพร',
+                'lastName' => 'รักษ์การศึกษา',
+                'username' => 'asso_dean_01',
+                'role' => UserRole::ASSO_DEAN,
+            ],
+            [
+                'email' => 'dean@example.com',
+                'student_id' => null,
+                'firstName' => 'วิชา',
+                'lastName' => 'ปัญญาเลิศ',
+                'username' => 'dean_01',
+                'role' => UserRole::DEAN,
+            ],
+            [
+                'email' => 'admin@example.com',
+                'student_id' => null,
+                'firstName' => 'พัฒนพงศ์',
+                'lastName' => 'วงค์นิสิต',
+                'username' => 'admin_dev',
+                'role' => UserRole::NISIT_DEV,
+            ],
+            [
+                'email' => 'board@example.com',
+                'student_id' => null,
+                'firstName' => 'อำนาจ',
+                'lastName' => 'ตัดสินใจ',
+                'username' => 'board_01',
+                'role' => UserRole::BOARD,
+            ],
+        ];
 
-        foreach (UserRole::cases() as $role) {
-            $faculty = $faculties->random();
-            $department = \App\Models\Department::where('faculty_id', $faculty->id)->get()->random();
-            //
-
-            User::query()->createOrFirst(
-                ['email' => 'narakorn.th@ku.th',],
-                [
-                    'student_id' => 6610405905,
-                    'firstName' => "Narakorn",
-                    'lastName' => 'Thanapornpakdee',
-                    'username' => 'narakorn',
+        foreach ($fixedUsers as $userData) {
+            User::query()->updateOrCreate(
+                ['email' => $userData['email']],
+                array_merge($userData, [
                     'password' => 'password',
-                    'role' => UserRole::NISIT,
                     'faculty_id' => 1,
                     'department_id' => 1,
                     'campus' => CampusType::BANGKHEN,
-                ]
+                ])
             );
-
-            User::query()->firstOrCreate(
-                ['email' => 'user01@example.com'],
-                [
-                    'student_id' => 6610400000,
-                    'firstName' => "user",
-                    'lastName' => 'user',
-                    'username' => 'user01',
-                    'password' => 'password',
-                    'role' => UserRole::NISIT,
-                    'faculty_id' => $faculty->id,
-                    'department_id' => $department->id,
-                    'campus' => CampusType::BANGKHEN,
-                ]
-            );
-
-            User::query()->firstOrCreate(
-                ['email' => 'admin@example.com'],
-                [
-                    'firstName' => "Adminstrator",
-                    'lastName' => 'S',
-                    'username' => 'admin',
-                    'password' => 'password',
-                    'role' => UserRole::NISIT_DEV,
-                    'campus' => CampusType::BANGKHEN,
-                ]
-            );
-
-            foreach (CampusType::cases() as $campus) {
-                User::factory()->create([
-                    'student_id' => $role === UserRole::NISIT ? fake()->numerify("##########") : null,
-                    'firstName' => $role->value,
-                    'lastName' => 'Account',
-                    'username' => fake()->userName(),
-                    'email' => fake()->userName() . '@example.com',
-                    'password' => 'password',
-                    'role' => $role,
-                    'faculty_id' => $faculty->id,
-                    'department_id' => $department->id,
-                    'campus' => $campus
-                ]);
-            }
         }
 
-        // สำหรับนิสิต 10 คน
+        $faculties = Faculty::all();
+        if ($faculties->isEmpty()) return;
+
         for ($i = 0; $i < 10; $i++) {
             $faculty = $faculties->random();
-            $department = \App\Models\Department::where('faculty_id', $faculty->id)->get()->random();
+            $department = Department::where('faculty_id', $faculty->id)->get()->random();
 
             User::factory()->create([
                 'role' => UserRole::NISIT,
