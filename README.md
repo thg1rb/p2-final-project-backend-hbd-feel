@@ -96,8 +96,14 @@ Load the style (in this project using `bun` as a package manager)
 ```shell
 sail bun dev
 ```
-## 🎓 Student Activity Management System
 
+Open another terminal window to run the queue and background jobs
+
+```shell
+sail artisan queue:work
+```
+
+## 🎓 Student Activity Management System
 
 | Role | Full Name | Username | Email | Password |
 | :--- | :--- | :--- | :--- | :--- |
