@@ -84,3 +84,10 @@ Load the style (in this project using `bun` as a package manager)
 ```shell
 sail bun dev
 ```
+## 🎓 Student Activity Management System
+
+
+| Role | Full Name | Username | Email | Password |
+| :--- | :--- | :--- | :--- | :--- |
+| **กองพัฒนานิสิต (NISIT_DEV)** | พัฒนพงศ์ วงค์นิสิต | `admin_dev` | `admin@example.com` | `password` |
+
